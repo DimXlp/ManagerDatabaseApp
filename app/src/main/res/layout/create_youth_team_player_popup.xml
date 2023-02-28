@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/edit_manager_popup"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="8dp">
+
+        <RelativeLayout
+            android:padding="32dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white" >
+
+            <TextView
+                android:id="@+id/create_yt_player"
+                android:text="New Player"
+                android:fontFamily="@font/chivo"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/first_name_til_ytp_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/create_yt_player">
+
+                <EditText
+                    android:id="@+id/first_name_ytp_create"
+                    android:layout_width="match_parent"
+                    android:hint="@string/first_name_text"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="textPersonName"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:textColorLink="@color/colorPrimary"/>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/last_name_til_ytp_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/first_name_til_ytp_create" >
+
+                <EditText
+                    android:id="@+id/last_name_ytp_create"
+                    android:layout_width="match_parent"
+                    android:hint="@string/last_name_text"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="textPersonName"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:textColorLink="@color/colorPrimary"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Spinner
+                android:id="@+id/position_spinner_ytp_create"
+                android:layout_below="@+id/last_name_til_ytp_create"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="16dp"
+                android:entries="@array/position_array"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/number_til_ytp_create"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/last_name_til_ytp_create"
+                android:layout_alignParentEnd="true">
+
+                <EditText
+                    android:id="@+id/number_ytp_create"
+                    android:layout_width="112dp"
+                    android:hint="@string/number"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="number"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:textColorLink="@color/colorPrimary"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/nationality_til_ytp_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/number_til_ytp_create" >
+
+                <EditText
+                    android:id="@+id/nationality_ytp_create"
+                    android:layout_width="match_parent"
+                    android:hint="@string/nationality_text"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="textPersonName"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:textColorLink="@color/colorPrimary"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/overall_til_ytp_create"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/nationality_til_ytp_create" >
+
+                <EditText
+                    android:id="@+id/overall_ytp_create"
+                    android:layout_width="80dp"
+                    android:hint="@string/overall"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="number"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:textColorLink="@color/colorPrimary"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/potential_low_ytp_ytp_create"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/nationality_til_ytp_create"
+                android:layout_toStartOf="@+id/potential_high_til_ytp_create">
+
+                <EditText
+                    android:id="@+id/potential_low_ytp_create"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:hint="Pot. Low"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="number"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:textColorLink="@color/colorPrimary"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/potential_high_til_ytp_create"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/nationality_til_ytp_create"
+                android:layout_alignParentEnd="true" >
+
+                <EditText
+                    android:id="@+id/potential_high__ytp_create"
+                    android:layout_below="@+id/nationality_ytp_create"
+                    android:layout_toEndOf="@+id/potential_low_ytp_create"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:hint="Pot. High"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="number"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:textColorLink="@color/colorPrimary"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/year_scouted_text_ytp_create"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Year Scouted: "
+                android:fontFamily="@font/chivo"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/overall_til_ytp_create"/>
+
+            <Spinner
+                android:id="@+id/year_scouted_spinner_ytp_create"
+                android:layout_below="@+id/overall_til_ytp_create"
+                android:layout_toEndOf="@id/year_scouted_text_ytp_create"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:entries="@array/years_array"/>
+
+            <Button
+                android:id="@+id/create_yt_player_button"
+                android:layout_width="358dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/year_scouted_text_ytp_create"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/round_button"
+                android:fontFamily="@font/chivo"
+                android:text="@string/create_player"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

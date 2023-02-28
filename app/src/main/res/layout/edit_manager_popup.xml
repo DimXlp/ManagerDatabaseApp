@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/edit_manager_popup"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="8dp">
+
+        <RelativeLayout
+            android:padding="32dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white" >
+
+            <TextView
+                android:id="@+id/title"
+                android:text="@string/edit_manager"
+                android:fontFamily="@font/chivo"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/first_name_til_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/title" >
+
+                <EditText
+                    android:id="@+id/first_name_edit"
+                    android:layout_width="match_parent"
+                    android:hint="@string/first_name_text"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="textPersonName"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:textColorLink="@color/colorPrimary"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/last_name_til_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/first_name_til_edit" >
+
+                <EditText
+                    android:id="@+id/last_name_edit"
+                    android:layout_width="match_parent"
+                    android:hint="@string/last_name_text"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="textPersonName"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:textColorLink="@color/colorPrimary"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/team_til_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/last_name_til_edit" >
+
+                <EditText
+                    android:id="@+id/team_edit"
+                    android:layout_width="match_parent"
+                    android:hint="@string/team_text"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="textPersonName"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:textColorLink="@color/colorPrimary"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/nationality_til_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/team_til_edit" >
+
+                <EditText
+                    android:id="@+id/nationality_edit"
+                    android:layout_width="match_parent"
+                    android:hint="@string/nationality_text"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="textPersonName"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:textColorLink="@color/colorPrimary"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/team_badge_image_edit"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@android:drawable/ic_menu_upload"
+                android:layout_marginTop="16dp"
+                android:layout_below="@+id/nationality_til_edit"/>
+
+            <Button
+                android:id="@+id/upload_button_edit"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/outline_round_button"
+                android:backgroundTint="@android:color/white"
+                android:fontFamily="@font/chivo"
+                android:text="Upload Badge"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold"
+                android:layout_marginStart="16dp"
+                android:layout_above="@+id/currency_spinner_edit"
+                android:layout_toEndOf="@id/team_badge_image_edit"/>
+
+            <TextView
+                android:id="@+id/currency_title_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="Currency: "
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/team_badge_image_edit"/>
+
+            <Spinner
+                android:id="@+id/currency_spinner_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_below="@+id/team_badge_image_edit"
+                android:layout_toEndOf="@id/currency_title_edit"/>
+
+            <Button
+                android:id="@+id/save_manager_button"
+                android:layout_width="358dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/currency_title_edit"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/round_button"
+                android:fontFamily="@font/chivo"
+                android:text="@string/save_manager"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

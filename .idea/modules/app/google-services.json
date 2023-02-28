@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1006833243530",
+    "project_id": "managerdb-b732d",
+    "storage_bucket": "managerdb-b732d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006833243530:android:132363fe79546b9d1aa473",
+        "android_client_info": {
+          "package_name": "com.dimxlp.managerdb"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1006833243530-mvotr4ai5d75pk12okq50eigcb70cvap.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dimxlp.managerdb",
+            "certificate_hash": "c761b3e9ece720a58e8c5416245d65bf0a3bdd78"
+          }
+        },
+        {
+          "client_id": "1006833243530-urn5bcv5j0er5bjajnkttkp8eem2ngka.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZb7UPkj-5xoVyMKyAJ2XseKDDPttKCMg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1006833243530-urn5bcv5j0er5bjajnkttkp8eem2ngka.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

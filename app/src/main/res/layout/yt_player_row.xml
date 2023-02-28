@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="5dp"
+    android:layout_marginBottom="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:animateLayoutChanges="true" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimaryDark"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/number_ytp"
+                android:layout_width="27dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="99"
+                android:textAlignment="viewEnd"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/line_ytp_1"
+                android:layout_width="1dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="43dp"
+                android:background="@drawable/line"/>
+
+            <TextView
+                android:id="@+id/full_name_ytp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="First Last"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_toEndOf="@+id/line_ytp_1"/>
+
+            <ImageView
+                android:id="@+id/position_oval_ytp"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/position_oval"
+                android:layout_toStartOf="@+id/position_ytp"/>
+
+            <TextView
+                android:id="@+id/position_ytp"
+                android:layout_width="46dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="POS"
+                android:textAlignment="viewStart"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/details_ytp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/lighterGray"
+            android:paddingHorizontal="8dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/overall_text_ytp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="OVR"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/overall_ytp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="99"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/overall_text_ytp"/>
+
+            <ImageView
+                android:id="@+id/line_ytp_2"
+                android:layout_width="1dp"
+                android:layout_height="37dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/line"
+                android:layout_toEndOf="@+id/overall_text_ytp"/>
+
+            <TextView
+                android:id="@+id/potential_text_ytp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="POT"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_toEndOf="@id/line_ytp_2"/>
+
+            <TextView
+                android:id="@+id/potential_ytp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="99-99"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/potential_text_ytp"
+                android:layout_toEndOf="@+id/line_ytp_2"/>
+
+            <ImageView
+                android:id="@+id/line_ytp_3"
+                android:layout_width="1dp"
+                android:layout_height="37dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/line"
+                android:layout_toEndOf="@+id/potential_ytp"/>
+
+            <TextView
+                android:id="@+id/nationality_text_ytp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="NATL"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_toEndOf="@id/line_ytp_3"/>
+
+            <TextView
+                android:id="@+id/nationality_ytp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="Country"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/nationality_text_ytp"
+                android:layout_toEndOf="@+id/line_ytp_3"/>
+
+            <TextView
+                android:id="@+id/year_scouted_text_ytp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="YR SCT"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_below="@+id/overall_ytp" />
+
+            <TextView
+                android:id="@+id/year_scouted_ytp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="1993"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/year_scouted_text_ytp"/>
+
+            <Button
+                android:id="@+id/edit_button_ytp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/ic_edit"
+                android:layout_below="@+id/year_scouted_ytp"/>
+
+            <Button
+                android:id="@+id/depart_button_ytp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/ic_goodbye_outline"
+                android:layout_below="@+id/year_scouted_ytp"
+                android:layout_toEndOf="@+id/edit_button_ytp"/>
+
+            <Button
+                android:id="@+id/promote_button_ytp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/ic_promote"
+                android:layout_below="@+id/year_scouted_ytp"
+                android:layout_toEndOf="@+id/depart_button_ytp"/>
+
+            <Button
+                android:id="@+id/delete_button_ytp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@android:drawable/ic_delete"
+                android:layout_below="@+id/year_scouted_ytp"
+                android:layout_toEndOf="@+id/promote_button_ytp"/>
+
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+
+</androidx.cardview.widget.CardView>

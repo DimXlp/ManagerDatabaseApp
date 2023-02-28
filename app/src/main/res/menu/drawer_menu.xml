@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/dr_home"
+            android:icon="@drawable/ic_home"
+            android:title="@string/home" />
+
+        <item android:id="@+id/dr_profile"
+            android:icon="@drawable/ic_profile"
+            android:title="@string/profile" />
+
+        <item android:id="@+id/dr_first_team"
+            android:icon="@drawable/ic_first_team"
+            android:title="@string/first_team" />
+
+        <item android:id="@+id/dr_youth_team"
+            android:icon="@drawable/ic_youth_team_1"
+            android:title="@string/youth_team" />
+
+        <item android:id="@+id/dr_former_players"
+            android:icon="@drawable/ic_goodbye_filled"
+            android:title="@string/former_players" />
+
+        <item android:id="@+id/dr_shortlist"
+            android:icon="@drawable/ic_shortlist"
+            android:title="@string/shortlist" />
+
+        <item android:id="@+id/dr_loaned_out_players"
+            android:icon="@drawable/ic_loaned_out_players"
+            android:title="@string/loaned_out_players" />
+
+        <item android:id="@+id/dr_transfer_deals"
+            android:icon="@drawable/ic_transfer_deals"
+            android:title="@string/transfer_deals" />
+
+        <item android:id="@+id/dr_logout"
+            android:icon="@drawable/ic_logout"
+            android:title="Logout" />
+    </group>
+
+</menu>

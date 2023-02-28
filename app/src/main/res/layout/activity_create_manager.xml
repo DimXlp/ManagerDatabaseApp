@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:padding="16dp"
+    tools:context=".CreateManagerActivity">
+
+    <ProgressBar
+        android:id="@+id/create_progress_bar"
+        style="?android:progressBarStyleLarge"
+        android:layout_width="121dp"
+        android:layout_height="164dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/create_manager_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/chivo"
+        android:text="@string/create_manager_text"
+        android:textAlignment="center"
+        android:textColor="@android:color/black"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/first_name_til_create"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/create_manager_title" >
+
+        <EditText
+            android:id="@+id/first_name_create"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/chivo"
+            android:hint="@string/first_name_text"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:textColorHint="@color/colorPrimaryDark"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/last_name_til_create"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/first_name_til_create" >
+
+        <EditText
+            android:id="@+id/last_name_create"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/chivo"
+            android:hint="@string/last_name_text"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:textColorHint="@color/colorPrimaryDark"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/nationality_til_create"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/last_name_til_create" >
+
+        <EditText
+            android:id="@+id/nationality_create"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/chivo"
+            android:hint="@string/nationality_text"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:textColorHint="@color/colorPrimaryDark"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/team_til_create"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/nationality_til_create" >
+
+        <EditText
+            android:id="@+id/team_create"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/chivo"
+            android:hint="@string/team_text"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:textColorHint="@color/colorPrimaryDark"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <ImageView
+        android:id="@+id/team_badge_image_create"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@android:drawable/ic_menu_upload"
+        android:layout_marginTop="16dp"
+        android:layout_below="@+id/team_til_create"/>
+
+    <Button
+        android:id="@+id/upload_button_create"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:background="@drawable/outline_round_button"
+        android:backgroundTint="@android:color/white"
+        android:fontFamily="@font/chivo"
+        android:text="Upload Badge"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        android:layout_above="@+id/currency_spinner_create"
+        android:layout_toEndOf="@+id/team_badge_image_create"/>
+
+    <TextView
+        android:id="@+id/currency_title_create"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/chivo"
+        android:text="Currency: "
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="25sp"
+        android:layout_below="@+id/team_badge_image_create"/>
+
+    <Spinner
+        android:id="@+id/currency_spinner_create"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_below="@+id/team_badge_image_create"
+        android:layout_toEndOf="@+id/currency_title_create"/>
+
+    <Button
+        android:id="@+id/manager_create_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/round_button"
+        android:text="@string/create_text"
+        android:textColor="@color/colorPrimary"
+        android:layout_alignParentBottom="true"/>
+
+
+</RelativeLayout>
