@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preloaded_fonts" translatable="false">
+        <item>@font/alice</item>
+        <item>@font/allerta</item>
+        <item>@font/amiko</item>
+        <item>@font/antic</item>
+        <item>@font/arimo</item>
+        <item>@font/armata</item>
+        <item>@font/asap</item>
+        <item>@font/average_sans</item>
+        <item>@font/basic</item>
+        <item>@font/biryani_semibold</item>
+        <item>@font/cabin</item>
+        <item>@font/cantarell</item>
+        <item>@font/chivo</item>
+        <item>@font/days_one</item>
+        <item>@font/droid_sans_bold</item>
+        <item>@font/electrolize</item>
+        <item>@font/federo</item>
+        <item>@font/fira_sans</item>
+        <item>@font/francois_one</item>
+    </array>
+</resources>

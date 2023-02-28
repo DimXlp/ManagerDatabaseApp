@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/edit_manager_popup"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="8dp">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/team_left_til"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <EditText
+                    android:id="@+id/team_left"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:hint="Team"
+                    android:inputType="textPersonName"
+                    android:maxLines="1"
+                    android:textColor="@android:color/black"
+                    android:textColorLink="@color/colorPrimary" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/year_left_text_depart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Year Left: "
+                android:fontFamily="@font/chivo"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/team_left_til"/>
+
+            <Spinner
+                android:id="@+id/year_left_spinner_depart"
+                android:layout_below="@+id/team_left_til"
+                android:layout_toEndOf="@id/year_left_text_depart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:entries="@array/years_array"/>
+
+            <TextView
+                android:id="@+id/type_of_transfer_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Type of Transfer: "
+                android:fontFamily="@font/chivo"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/year_left_text_depart" />
+
+            <Spinner
+                android:id="@+id/type_of_transfer_spinner_depart"
+                android:layout_below="@+id/year_left_text_depart"
+                android:layout_toEndOf="@+id/type_of_transfer_title"
+                android:layout_marginTop="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/transfer_fee_til_depart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/type_of_transfer_title" >
+
+                <EditText
+                    android:id="@+id/transfer_fee_depart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:inputType="number"
+                    android:maxLines="1"
+                    android:textColor="@android:color/black"
+                    android:textColorLink="@color/colorPrimary" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/comments_til_depart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/transfer_fee_til_depart" >
+
+                <EditText
+                    android:id="@+id/comments_depart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:hint="@string/comments"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textColor="@android:color/black"
+                    android:textColorLink="@color/colorPrimary" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/transfer_player_button"
+                android:layout_width="358dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/comments_til_depart"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="26dp"
+                android:layout_marginEnd="26dp"
+                android:background="@drawable/round_button"
+                android:fontFamily="@font/chivo"
+                android:text="Transfer"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

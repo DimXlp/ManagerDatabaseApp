@@ -1,0 +1,130 @@
+<resources>
+    <string name="app_name">ManagerDB</string>
+    <string name="manager_database">Manager Database</string>
+    <string name="description">Manage Your Team. Build Your Database.</string>
+    <string name="get_started_text">Get Started</string>
+    <string name="email_login_text">Email</string>
+    <string name="email_login_hint">Email</string>
+    <string name="password_login_hint">Password</string>
+    <string name="login_text">Login</string>
+    <string name="create_account_text">Create Account</string>
+    <string name="username_text">Username</string>
+    <string name="first_name_text">First Name</string>
+    <string name="last_name_text">Last Name/Nickname</string>
+    <string name="nationality_text">Nationality</string>
+    <string name="add_photo_text">Add Photo</string>
+    <string name="team_text">Team</string>
+    <string name="league_text">League</string>
+    <string name="next">Next</string>
+    <string name="manager_photo_text">Add Photo</string>
+    <string name="add_logo_text">Add Logo</string>
+    <string name="create_manager_text">Create Your Manager</string>
+    <string name="create_text">Create Manager</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+    <string name="profile">Profile</string>
+    <string name="first_team">First Team</string>
+    <string name="youth_team">Youth Team</string>
+    <string name="team_formation">Team Formation</string>
+    <string name="training">Training</string>
+    <string name="objectives">Objectives</string>
+    <string name="edit_manager">Edit Manager</string>
+    <string name="save_manager">Save Manager</string>
+    <string name="overall">Overall</string>
+    <string name="year_signed_to_first_team">Year Signed to the First Team</string>
+    <string name="create_player">Create Player</string>
+    <string name="add_player">Add Player</string>
+    <string name="year_scouted">Year Scouted</string>
+    <string name="number">Number</string>
+    <string name="last_name_nickname">Last Name/Nickname</string>
+    <string name="edit_player">Edit Player</string>
+    <string name="edit_player_title">Edit Player</string>
+    <string name="save_player">Save Player</string>
+    <string name="home">Home</string>
+    <string name="year_left">Year Left</string>
+    <string name="year_signed">Year Signed</string>
+    <string name="former_players">Former Players</string>
+    <string name="shortlist">Shortlist</string>
+    <string name="value">Value</string>
+    <string name="wage">Wage</string>
+    <string name="comments">Comments</string>
+    <string name="loaned_out_players">Loaned Out Players</string>
+    <string name="year_loaned">Year Loaned</string>
+    <string name="transfer_fee">Transfer Fee</string>
+    <string name="number_of_years">Number of Years</string>
+    <string name="current_team">Current Team</string>
+    <string name="set_team">Set Team</string>
+    <string name="transfer_deals">Transfer Deals</string>
+    <string name="edit_transfer">Edit Transfer</string>
+
+    <string-array name="position_array">
+        <item>GK</item>
+        <item>CB</item>
+        <item>RB</item>
+        <item>RWB</item>
+        <item>LB</item>
+        <item>LWB</item>
+        <item>CDM</item>
+        <item>CM</item>
+        <item>CAM</item>
+        <item>RM</item>
+        <item>RW</item>
+        <item>LM</item>
+        <item>LW</item>
+        <item>CF</item>
+        <item>RF</item>
+        <item>LF</item>
+        <item>ST</item>
+    </string-array>
+
+    <string-array name="years_array">
+        <item>0</item>
+        <item>2015/16</item>
+        <item>2016/17</item>
+        <item>2017/18</item>
+        <item>2018/19</item>
+        <item>2019/20</item>
+        <item>2020/21</item>
+        <item>2021/22</item>
+        <item>2022/23</item>
+        <item>2023/24</item>
+        <item>2024/25</item>
+        <item>2025/26</item>
+        <item>2026/27</item>
+        <item>2027/28</item>
+        <item>2028/29</item>
+        <item>2029/30</item>
+        <item>2030/31</item>
+        <item>2031/32</item>
+        <item>2032/33</item>
+        <item>2033/34</item>
+        <item>2034/35</item>
+        <item>2035/36</item>
+        <item>2036/37</item>
+        <item>2037/38</item>
+        <item>2038/39</item>
+        <item>2039/40</item>
+        <item>2040/41</item>
+        <item>2041/42</item>
+        <item>2042/43</item>
+        <item>2043/44</item>
+        <item>2044/45</item>
+        <item>2045/46</item>
+        <item>2046/47</item>
+        <item>2047/48</item>
+        <item>2048/49</item>
+        <item>2049/50</item>
+        <item>2050/51</item>
+        <item>2051/52</item>
+    </string-array>
+
+</resources>
