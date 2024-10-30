@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="10dp"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:animateLayoutChanges="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/full_name_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/chivo"
+                android:text="First Last"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_centerVertical="true"/>
+
+            <ImageView
+                android:id="@+id/position_oval_trf"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/position_oval"
+                android:layout_toStartOf="@+id/position_trf"/>
+
+            <TextView
+                android:id="@+id/position_trf"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="POS"
+                android:textAlignment="viewStart"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/details_trf"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/lighterGray"
+            android:paddingHorizontal="8dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/overall_text_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="OVR"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/overall_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="99"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/overall_text_trf"/>
+
+            <ImageView
+                android:id="@+id/line_trf_2"
+                android:layout_width="1dp"
+                android:layout_height="37dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
+                android:layout_toEndOf="@+id/overall_text_trf"/>
+
+            <TextView
+                android:id="@+id/potential_text_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="POT"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_toEndOf="@+id/line_trf_2"/>
+
+            <TextView
+                android:id="@+id/potential_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="99-99"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/potential_text_trf"
+                android:layout_toEndOf="@+id/line_trf_2"/>
+
+            <ImageView
+                android:id="@+id/line_trf_3"
+                android:layout_width="1dp"
+                android:layout_height="37dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
+                android:layout_toEndOf="@+id/potential_trf"/>
+
+            <TextView
+                android:id="@+id/nationality_text_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="NATL"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_toEndOf="@id/line_trf_3"/>
+
+            <TextView
+                android:id="@+id/nationality_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="Country"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/nationality_text_trf"
+                android:layout_toEndOf="@id/line_trf_3"/>
+
+            <TextView
+                android:id="@+id/transfer_text_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="TRANSFER"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_below="@+id/overall_trf"/>
+
+            <TextView
+                android:id="@+id/old_team_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="Old Team"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:maxLines="3"
+                android:layout_below="@+id/transfer_text_trf"/>
+
+            <ImageView
+                android:id="@+id/down_arrow_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/ic_baseline_keyboard_arrow_down_24"
+                android:layout_below="@+id/old_team_trf"/>
+
+            <TextView
+                android:id="@+id/new_team_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="New Team"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:maxLines="3"
+                android:layout_below="@+id/down_arrow_trf"/>
+
+            <TextView
+                android:id="@+id/transfer_fee_text_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="FEE"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_below="@+id/new_team_trf" />
+
+            <TextView
+                android:id="@+id/transfer_fee_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="$150000000"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/transfer_fee_text_trf"/>
+
+            <ImageView
+                android:id="@+id/plus_trf"
+                android:layout_width="13dp"
+                android:layout_height="14dp"
+                android:layout_below="@+id/transfer_fee_trf"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/ic_baseline_add_24" />
+
+            <TextView
+                android:id="@+id/plus_player_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/chivo"
+                android:text="Full Name"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/transfer_fee_trf"
+                android:layout_toEndOf="@+id/plus_trf"/>
+
+            <ImageView
+                android:id="@+id/line_trf_4"
+                android:layout_width="1dp"
+                android:layout_height="37dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
+                android:layout_below="@+id/new_team_trf"
+                android:layout_toEndOf="@+id/transfer_fee_trf"/>
+
+            <TextView
+                android:id="@+id/wage_text_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="WAGE"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_below="@+id/new_team_trf"
+                android:layout_toEndOf="@+id/line_trf_4"/>
+
+            <TextView
+                android:id="@+id/wage_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="$350000"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/wage_text_trf"
+                android:layout_toEndOf="@+id/line_trf_4"/>
+
+            <TextView
+                android:id="@+id/contract_years_text_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="CONTRACT YEARS"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_below="@+id/plus_player_trf" />
+
+            <TextView
+                android:id="@+id/contract_years_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="5"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/contract_years_text_trf"/>
+
+            <ImageView
+                android:id="@+id/line_trf_5"
+                android:layout_width="1dp"
+                android:layout_height="37dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
+                android:layout_below="@+id/plus_player_trf"
+                android:layout_toEndOf="@+id/contract_years_text_trf"/>
+
+            <TextView
+                android:id="@+id/year_text_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="YR SGN"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_below="@+id/plus_player_trf"
+                android:layout_toEndOf="@+id/line_trf_5"/>
+
+            <TextView
+                android:id="@+id/year_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/chivo"
+                android:text="2020/21"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/year_text_trf"
+                android:layout_toEndOf="@+id/line_trf_5"/>
+
+            <TextView
+                android:id="@+id/comments_trf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/chivo"
+                android:text="Potential to be special"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/year_trf"/>
+
+            <Button
+                android:id="@+id/delete_button_trf"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@android:drawable/ic_delete"
+                android:backgroundTint="@color/colorAccent"
+                android:layout_below="@+id/comments_trf"/>
+
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+
+</androidx.cardview.widget.CardView>
