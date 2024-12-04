@@ -154,8 +154,8 @@ public class CreateAccountActivity extends AppCompatActivity {
                                                                     progressBar.setVisibility(View.INVISIBLE);
                                                                 }
 
-                                                            }
-                                                        });
+                                                        }
+                                                    });
 
                                             }
                                         })
@@ -168,11 +168,11 @@ public class CreateAccountActivity extends AppCompatActivity {
                             }
 
 
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
 
                         }
                     });
