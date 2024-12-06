@@ -9,45 +9,46 @@
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp">
+        android:layout_gravity="center"
+        app:cardBackgroundColor="#F7F8FA">
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
 
             <RelativeLayout
-                android:padding="16dp"
+                android:padding="24dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/white" >
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:id="@+id/edit_transfer_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
                     android:text="Edit Transfer"
                     android:fontFamily="@font/chivo"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"/>
+                    android:textColor="#1F1F20"/>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/first_name_til_trf_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/edit_transfer_title" >
+                    android:layout_below="@id/edit_transfer_title"
+                    android:hint="@string/first_name_text"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/first_name_trf_edit"
                         android:layout_width="match_parent"
-                        android:hint="@string/first_name_text"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/chivo"
                         android:inputType="textPersonName"
                         android:textColor="@android:color/black"
-                        android:maxLines="1"
-                        android:textColorLink="@color/colorPrimary"/>
+                        android:maxLines="1"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -55,18 +56,19 @@
                     android:id="@+id/last_name_til_trf_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/first_name_til_trf_edit" >
+                    android:layout_below="@+id/first_name_til_trf_edit"
+                    android:hint="@string/last_name_text"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/last_name_trf_edit"
                         android:layout_width="match_parent"
-                        android:hint="@string/last_name_text"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/chivo"
                         android:inputType="textPersonName"
                         android:textColor="@android:color/black"
-                        android:maxLines="1"
-                        android:textColorLink="@color/colorPrimary"/>
+                        android:maxLines="1"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -76,24 +78,26 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:entries="@array/position_array"/>
+                    android:entries="@array/position_array"
+                    android:backgroundTint="#616161"/>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/nationality_til_trf_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/position_spinner_trf_edit" >
+                    android:layout_below="@+id/position_spinner_trf_edit"
+                    android:hint="@string/nationality_text"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/nationality_trf_edit"
                         android:layout_width="match_parent"
-                        android:hint="@string/nationality_text"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/chivo"
                         android:inputType="textPersonName"
                         android:textColor="@android:color/black"
-                        android:maxLines="1"
-                        android:textColorLink="@color/colorPrimary"/>
+                        android:maxLines="1"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -101,18 +105,19 @@
                     android:id="@+id/overall_til_trf_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/nationality_til_trf_edit" >
+                    android:layout_below="@+id/nationality_til_trf_edit"
+                    android:hint="@string/overall"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/overall_trf_edit"
                         android:layout_width="80dp"
-                        android:hint="@string/overall"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/chivo"
                         android:inputType="number"
                         android:textColor="@android:color/black"
-                        android:maxLines="1"
-                        android:textColorLink="@color/colorPrimary"/>
+                        android:maxLines="1"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -121,18 +126,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/nationality_til_trf_edit"
-                    android:layout_toStartOf="@+id/potential_high_til_trf_edit" >
+                    android:layout_toStartOf="@+id/potential_high_til_trf_edit"
+                    android:hint="Pot. Low"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/potential_low_trf_edit"
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:hint="Pot. Low"
                         android:fontFamily="@font/chivo"
                         android:inputType="number"
                         android:textColor="@android:color/black"
-                        android:maxLines="1"
-                        android:textColorLink="@color/colorPrimary"/>
+                        android:maxLines="1"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -141,18 +147,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/nationality_til_trf_edit"
-                    android:layout_alignParentEnd="true" >
+                    android:layout_alignParentEnd="true"
+                    android:hint="Pot. High"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/potential_high_trf_edit"
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:hint="Pot. High"
                         android:fontFamily="@font/chivo"
                         android:inputType="number"
                         android:textColor="@android:color/black"
-                        android:maxLines="1"
-                        android:textColorLink="@color/colorPrimary"/>
+                        android:maxLines="1"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -164,22 +171,36 @@
                     android:layout_marginTop="16dp"
                     android:layout_below="@+id/overall_til_trf_edit"/>
 
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/player_exchange_switch_trf_edit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="16dp"
+                    android:text="Player Exchange"
+                    android:fontFamily="@font/chivo"
+                    android:textSize="16sp"
+                    android:textColor="#616161"
+                    android:textOn="Yes"
+                    android:textOff="No"
+                    android:layout_below="@+id/type_of_transfer_spinner_trf_edit" />
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/old_team_til_trf_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/type_of_transfer_spinner_trf_edit" >
+                    android:layout_below="@+id/player_exchange_switch_trf_edit"
+                    android:hint="Old Team"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/old_team_trf_edit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Old Team"
                         android:fontFamily="@font/chivo"
                         android:inputType="textPersonName"
                         android:textColor="@android:color/black"
-                        android:maxLines="1"
-                        android:textColorLink="@color/colorPrimary"/>
+                        android:maxLines="1"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -187,18 +208,19 @@
                     android:id="@+id/new_team_til_trf_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/old_team_til_trf_edit" >
+                    android:layout_below="@+id/old_team_til_trf_edit"
+                    android:hint="New Team"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/new_team_trf_edit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="New Team"
                         android:fontFamily="@font/chivo"
                         android:inputType="textPersonName"
                         android:textColor="@android:color/black"
-                        android:maxLines="1"
-                        android:textColorLink="@color/colorPrimary"/>
+                        android:maxLines="1"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -206,17 +228,18 @@
                     android:id="@+id/fee_til_trf_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/new_team_til_trf_edit" >
+                    android:layout_below="@id/new_team_til_trf_edit"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/fee_trf_edit"
                         android:layout_width="144dp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/chivo"
                         android:inputType="number"
                         android:textColor="@android:color/black"
-                        android:maxLines="1"
-                        android:textColorLink="@color/colorPrimary"/>
+                        android:maxLines="1"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -227,8 +250,8 @@
                     android:layout_marginTop="16dp"
                     android:text="+ Player: "
                     android:fontFamily="@font/chivo"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#616161"
                     android:layout_below="@+id/fee_til_trf_edit"/>
 
                 <Spinner
@@ -243,17 +266,18 @@
                     android:id="@+id/wage_til_trf_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/plus_player_text_trf_edit" >
+                    android:layout_below="@+id/plus_player_text_trf_edit"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/wage_trf_edit"
                         android:layout_width="128dp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/chivo"
                         android:inputType="number"
                         android:maxLines="1"
-                        android:textColor="@android:color/black"
-                        android:textColorLink="@color/colorPrimary" />
+                        android:textColor="@android:color/black" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -261,18 +285,19 @@
                     android:id="@+id/contract_years_til_trf_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/wage_til_trf_edit" >
+                    android:layout_below="@+id/wage_til_trf_edit"
+                    android:hint="Contract Years"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/contract_years_trf_edit"
                         android:layout_width="104dp"
-                        android:hint="Contract Years"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/chivo"
                         android:inputType="number"
                         android:textColor="@android:color/black"
-                        android:maxLines="1"
-                        android:textColorLink="@color/colorPrimary"/>
+                        android:maxLines="1"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -283,8 +308,8 @@
                     android:layout_marginTop="16dp"
                     android:text="YR SGN/LFT: "
                     android:fontFamily="@font/chivo"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#616161"
                     android:layout_below="@+id/contract_years_til_trf_edit"/>
 
                 <Spinner
@@ -300,31 +325,33 @@
                     android:id="@+id/comments_til_trf_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/year_text_trf_edit" >
+                    android:layout_below="@+id/year_text_trf_edit"
+                    android:hint="@string/comments"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/comments_trf_edit"
                         android:layout_width="match_parent"
-                        android:hint="@string/comments"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/chivo"
                         android:inputType="text"
                         android:textColor="@android:color/black"
-                        android:maxLines="1"
-                        android:textColorLink="@color/colorPrimary"/>
+                        android:maxLines="1"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <Button
                     android:id="@+id/edit_transfer_button"
-                    android:layout_width="358dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/comments_til_trf_edit"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="24dp"
                     android:background="@drawable/round_button"
+                    android:backgroundTint="#D4AF37"
                     android:fontFamily="@font/chivo"
                     android:text="@string/edit_transfer"
-                    android:textColor="@color/colorPrimary"
+                    android:textColor="@android:color/white"
                     android:textStyle="bold" />
 
             </RelativeLayout>

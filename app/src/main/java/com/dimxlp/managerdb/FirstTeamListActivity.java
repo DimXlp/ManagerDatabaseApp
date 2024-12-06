@@ -91,6 +91,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
     private SwitchMaterial loanSwitch;
     private Button createPlayerButton;
     private String currentYear;
+    private String firstYear;
     //private int minYear;
 
     //private int playerCount;
@@ -155,9 +156,12 @@ public class FirstTeamListActivity extends AppCompatActivity {
         slideLeft = AnimationUtils.loadAnimation(FirstTeamListActivity.this, R.anim.slide_left);
         slideRight = AnimationUtils.loadAnimation(FirstTeamListActivity.this, R.anim.slide_right);
 
-        prevYearButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener prevYearListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                animateYearButtons(v);
+                Log.d("RAFI", "curYear: " + currentYear);
+                Log.d("RAFI", "minYear: " + minYearText);
                 int cYear = Integer.parseInt(currentYear.substring(0, 4));
                 int minYear = Integer.parseInt(minYearText.substring(0, 4));
                 if (cYear > minYear) {
@@ -169,17 +173,21 @@ public class FirstTeamListActivity extends AppCompatActivity {
                             .show();
                 }
             }
-        });
+        };
 
-        nextYearButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener nextYearListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                animateYearButtons(v);
                 int cYear = Integer.parseInt(currentYear.substring(0, 4));
                 cYear++;
                 currentYear = cYear + "/" + ((cYear % 100) + 1);
                 listPlayers(2);
             }
-        });
+        };
+
+        prevYearButton.setOnClickListener(prevYearListener);
+        nextYearButton.setOnClickListener(nextYearListener);
 
         addPlayerFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -192,6 +200,19 @@ public class FirstTeamListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rec_view_ftp);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private static void animateYearButtons(View v) {
+        v.animate()
+                .scaleX(1.1f)
+                .scaleY(1.1f)
+                .setDuration(100)
+                .withEndAction(() -> {
+                    v.animate()
+                            .scaleX(1.0f)
+                            .scaleY(1.0f)
+                            .setDuration(100);
+                });
     }
 
     private void listPlayers(final int buttonInt) {
@@ -217,7 +238,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
                                 }
                             });
                             year.setText(currentYear);
-                            firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, currentYear, buttonInt);
+                            firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, currentYear, buttonInt, maxId);
                             recyclerView.setAdapter(firstTeamPlayerRecAdapter);
                             firstTeamPlayerRecAdapter.notifyDataSetChanged();
                         }
@@ -236,7 +257,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
         nationality = view.findViewById(R.id.nationality_ftp_create);
         overall = view.findViewById(R.id.overall_ftp_create);
         potentialLow = view.findViewById(R.id.potential_low_ftp_create);
-        potentialHigh = view.findViewById(R.id.potential_high__ftp_create);
+        potentialHigh = view.findViewById(R.id.potential_high_ftp_create);
         yearSigned = view.findViewById(R.id.year_signed_spinner_ftp_create);
         yearScouted = view.findViewById(R.id.year_scouted_spinner_ftp_create);
         loanSwitch = view.findViewById(R.id.loan_player_switch_ftp_create);
@@ -476,7 +497,13 @@ public class FirstTeamListActivity extends AppCompatActivity {
                             }
                             findMinYearSigned(ftplayers);
                             findMaxPlayerId(ftplayers);
-                            currentYear = minYearText;
+
+                            if (barYear != null) {
+                                currentYear = barYear;
+                            } else {
+                                currentYear = minYearText;
+                            }
+
                             //lastYear = minYear;
                             for (DocumentSnapshot ds: docs) {
                                 FirstTeamPlayer ftp = ds.toObject(FirstTeamPlayer.class);
@@ -500,7 +527,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
                         if (!queryDocumentSnapshots.isEmpty()) {
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 FirstTeamPlayer player = doc.toObject(FirstTeamPlayer.class);
-                                Log.d("RAFI", "onStart: currentYear = " + barYear);
+                                Log.d("RAFI", "onStart: currentYear = " + currentYear);
                                 if (barYear == null || barYear.equals(minYearText)) {
                                     if (player.getYearSigned().equals(minYearText)) {
                                         playerList.add(player);
@@ -519,12 +546,12 @@ public class FirstTeamListActivity extends AppCompatActivity {
                             });
                             if (barYear == null) {
                                 year.setText(minYearText);
-                                firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, minYearText, 0);
+                                firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, minYearText, 0, maxId);
                                 recyclerView.setAdapter(firstTeamPlayerRecAdapter);
                                 firstTeamPlayerRecAdapter.notifyDataSetChanged();
                             } else {
                                 year.setText(barYear);
-                                firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, barYear, 0);
+                                firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, barYear, 0, maxId);
                                 recyclerView.setAdapter(firstTeamPlayerRecAdapter);
                                 firstTeamPlayerRecAdapter.notifyDataSetChanged();
                             }

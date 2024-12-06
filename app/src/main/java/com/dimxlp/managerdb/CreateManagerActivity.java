@@ -41,10 +41,13 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import enumeration.CurrencyEnum;
 import model.FirstTeamPlayer;
 import model.Manager;
 import util.UserApi;
@@ -98,9 +101,11 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         currencySpinner = findViewById(R.id.currency_spinner_create);
         create_button = findViewById(R.id.manager_create_button);
 
-        String[] currencyArray = {"€", "£", "$"};
+        List<String> currencies = Arrays.stream(CurrencyEnum.values())
+                .map(CurrencyEnum::getSymbol)
+                .collect(Collectors.toList());
 
-        ArrayAdapter<String> currencyAdapter = new ArrayAdapter<>(CreateManagerActivity.this, android.R.layout.simple_spinner_item, currencyArray);
+        ArrayAdapter<String> currencyAdapter = new ArrayAdapter<>(CreateManagerActivity.this, android.R.layout.simple_spinner_item, currencies);
         currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         currencySpinner.setAdapter(currencyAdapter);
 

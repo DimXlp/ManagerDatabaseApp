@@ -352,6 +352,16 @@
                 android:layout_below="@+id/year_trf"/>
 
             <Button
+                android:id="@+id/edit_button_trf"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/ic_edit"
+                android:layout_below="@+id/comments_trf"/>
+
+            <Button
                 android:id="@+id/delete_button_trf"
                 android:layout_width="30dp"
                 android:layout_height="30dp"

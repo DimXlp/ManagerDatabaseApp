@@ -17,12 +17,17 @@ public class Transfer {
     private int potentialHigh;
     private String type;
     private long transferFee;
+    private boolean hasPlusPlayer;
     private String plusPlayerName;
+    private long plusPlayerId;
     private int wage;
     private int contractYears;
     private String year;
     private String comments;
     private boolean isFormerPlayer;
+    private boolean hasPlayerExchange;
+    private long exchangePlayerId;
+    private String exchangePlayerName;
     private long managerId;
     private String userId;
     private Timestamp timeAdded;
@@ -30,7 +35,7 @@ public class Transfer {
     public Transfer() {
     }
 
-    public Transfer(int id, String firstName, String lastName, String fullName, String position, String formerTeam, String currentTeam, String nationality, int overall, int potentialLow, int potentialHigh, String type, long transferFee, String plusPlayerName, int wage, int contractYears, String year, String comments, boolean isFormerPlayer, long managerId, String userId, Timestamp timeAdded) {
+    public Transfer(int id, String firstName, String lastName, String fullName, String position, String formerTeam, String currentTeam, String nationality, int overall, int potentialLow, int potentialHigh, String type, long transferFee, boolean hasPlusPlayer, String plusPlayerName, long plusPlayerId, int wage, int contractYears, String year, String comments, boolean isFormerPlayer, boolean hasPlayerExchange, long exchangePlayerId, String exchangePlayerName, long managerId, String userId, Timestamp timeAdded) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -44,12 +49,17 @@ public class Transfer {
         this.potentialHigh = potentialHigh;
         this.type = type;
         this.transferFee = transferFee;
+        this.hasPlusPlayer = hasPlusPlayer;
         this.plusPlayerName = plusPlayerName;
+        this.plusPlayerId = plusPlayerId;
         this.wage = wage;
         this.contractYears = contractYears;
         this.year = year;
         this.comments = comments;
         this.isFormerPlayer = isFormerPlayer;
+        this.hasPlayerExchange = hasPlayerExchange;
+        this.exchangePlayerId = exchangePlayerId;
+        this.exchangePlayerName = exchangePlayerName;
         this.managerId = managerId;
         this.userId = userId;
         this.timeAdded = timeAdded;
@@ -159,12 +169,28 @@ public class Transfer {
         this.transferFee = transferFee;
     }
 
+    public boolean doesHavePlusPlayer() {
+        return hasPlusPlayer;
+    }
+
+    public void setHasPlusPlayer(boolean hasPlusPlayer) {
+        this.hasPlusPlayer = hasPlusPlayer;
+    }
+
     public String getPlusPlayerName() {
         return plusPlayerName;
     }
 
     public void setPlusPlayerName(String plusPlayerName) {
         this.plusPlayerName = plusPlayerName;
+    }
+
+    public long getPlusPlayerId() {
+        return plusPlayerId;
+    }
+
+    public void setPlusPlayerId(long plusPlayerId) {
+        this.plusPlayerId = plusPlayerId;
     }
 
     public int getWage() {
@@ -201,6 +227,30 @@ public class Transfer {
 
     public boolean isFormerPlayer() {
         return isFormerPlayer;
+    }
+
+    public boolean doesHavePlayerExchange() {
+        return hasPlayerExchange;
+    }
+
+    public void setHasPlayerExchange(boolean hasPlayerExchange) {
+        this.hasPlayerExchange = hasPlayerExchange;
+    }
+
+    public long getExchangePlayerId() {
+        return exchangePlayerId;
+    }
+
+    public void setExchangePlayerId(long exchangePlayerId) {
+        this.exchangePlayerId = exchangePlayerId;
+    }
+
+    public String getExchangePlayerName() {
+        return exchangePlayerName;
+    }
+
+    public void setExchangePlayerName(String exchangePlayerName) {
+        this.exchangePlayerName = exchangePlayerName;
     }
 
     public void setFormerPlayer(boolean formerPlayer) {

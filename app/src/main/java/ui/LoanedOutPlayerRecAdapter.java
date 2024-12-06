@@ -36,9 +36,12 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import enumeration.LoanEnum;
 import model.FirstTeamPlayer;
 import model.FormerPlayer;
 import model.LoanedOutPlayer;
@@ -382,11 +385,11 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
             yearScouted.setAdapter(yearAdapter);
             yearLoaned.setAdapter(yearAdapter);
 
-            String[] loanArray = {"SHORT TERM LOAN",
-                                    "ONE-YEAR LOAN",
-                                    "TWO-YEAR LOAN"};
+            List<String> loanTypes = Arrays.stream(LoanEnum.values())
+                    .map(LoanEnum::getDescription)
+                    .collect(Collectors.toList());
 
-            ArrayAdapter<String> loanAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, loanArray);
+            ArrayAdapter<String> loanAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, loanTypes);
             loanAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             typeOfLoanSpinner.setAdapter(loanAdapter);
 

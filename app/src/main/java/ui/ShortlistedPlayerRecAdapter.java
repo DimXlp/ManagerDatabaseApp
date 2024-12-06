@@ -42,9 +42,13 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import enumeration.LoanEnum;
+import enumeration.PurchaseTransferEnum;
 import model.FirstTeamPlayer;
 import model.FormerPlayer;
 import model.Manager;
@@ -210,6 +214,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
         private EditText comments;
         private Button transferButton;
         private long ftPlayerId;
+        private boolean hasPlusPlayer = false;
 
         public ViewHolder(@NonNull View itemView, Context ctx) {
             super(itemView);
@@ -255,6 +260,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                     typeOfTransferSpinner = view.findViewById(R.id.type_of_transfer_spinner);
                                     transferFeeTil = view.findViewById(R.id.transfer_fee_til_buy);
                                     transferFee = view.findViewById(R.id.transfer_fee_buy);
+                                    playerSpinnerText = view.findViewById(R.id.plus_player_text_buy);
                                     playerSpinner = view.findViewById(R.id.plus_player_spinner_buy);
                                     wageTil = view.findViewById(R.id.wage_til_buy);
                                     wage = view.findViewById(R.id.wage_buy);
@@ -266,9 +272,33 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                     String[] transferArray = {"BOUGHT FROM ANOTHER TEAM",
                                                                 "FREE TRANSFER"};
 
-                                    ArrayAdapter<String> transferAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, transferArray);
+                                    ArrayAdapter<String> transferAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, transferTypes);
                                     transferAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                     typeOfTransferSpinner.setAdapter(transferAdapter);
+
+                                    typeOfTransferSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                        @Override
+                                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                            String selectedTransferType = parent.getItemAtPosition(position).toString();
+
+                                            if (PurchaseTransferEnum.FREE_TRANSFER.getDescription().equals(selectedTransferType)) {
+                                                transferFeeTil.setVisibility(View.GONE);
+                                                transferFee.setEnabled(false);
+                                                playerSpinnerText.setVisibility(View.GONE);
+                                                playerSpinner.setVisibility(View.GONE);
+                                            } else {
+                                                transferFeeTil.setVisibility(View.VISIBLE);
+                                                transferFee.setEnabled(true);
+                                                playerSpinnerText.setVisibility(View.VISIBLE);
+                                                playerSpinner.setVisibility(View.VISIBLE);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onNothingSelected(AdapterView<?> parent) {
+
+                                        }
+                                    });
 
                                     ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(context, R.array.years_array, android.R.layout.simple_spinner_item);
                                     yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -282,11 +312,13 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                                                     if (!queryDocumentSnapshots.isEmpty()) {
                                                         List<FirstTeamPlayer> ftPlayerList = new ArrayList<>();
-                                                        ftPlayerList.add(new FirstTeamPlayer());
-                                                        for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
-                                                            FirstTeamPlayer ftPlayer = doc.toObject(FirstTeamPlayer.class);
-                                                            ftPlayerList.add(ftPlayer);
-                                                        }
+                                                        var firstPlayer = new FirstTeamPlayer();
+                                                        firstPlayer.setFullName("");
+                                                        ftPlayerList.add(firstPlayer);
+                                                        queryDocumentSnapshots.getDocuments().stream()
+                                                                .map(doc -> doc.toObject(FirstTeamPlayer.class))
+                                                                .forEach(ftPlayerList::add);
+
                                                         ArrayAdapter<FirstTeamPlayer> playerAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, ftPlayerList);
                                                         playerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                                         playerSpinner.setAdapter(playerAdapter);
@@ -294,10 +326,8 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                             @Override
                                                             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                                                                 FirstTeamPlayer player = (FirstTeamPlayer) parent.getSelectedItem();
-                                                                Log.d("RAFI", "name = " + player.getFullName());
-                                                                Log.d("RAFI", "id = " + player.getId());
                                                                 ftPlayerId = player.getId();
-
+                                                                hasPlusPlayer = ftPlayerId > 0;
                                                             }
 
                                                             @Override
@@ -389,11 +419,11 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                     playerSpinner.setVisibility(View.GONE);
                                     noOfContractYears.setVisibility(View.GONE);
 
-                                    String[] transferArray = {"SHORT TERM LOAN",
-                                                                "ONE-YEAR LOAN",
-                                                                "TWO-YEAR LOAN"};
+                                    List<String> loanTypes = Arrays.stream(LoanEnum.values())
+                                            .map(LoanEnum::getDescription)
+                                            .collect(Collectors.toList());
 
-                                    ArrayAdapter<String> transferAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, transferArray);
+                                    ArrayAdapter<String> transferAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, loanTypes);
                                     transferAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                     typeOfTransferSpinner.setAdapter(transferAdapter);
 
@@ -576,9 +606,18 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                 newTransfer.setNationality(player.getNationality());
                                                 String trFee = transferFee.getText().toString().trim();
                                                 newTransfer.setTransferFee((!trFee.isEmpty()) ? Integer.parseInt(trFee) : 0);
-                                                String plusPlayerName = playerSpinner.getSelectedItem().toString().trim();
-                                                newTransfer.setPlusPlayerName((!plusPlayerName.isEmpty()) ? plusPlayerName : "");
-                                                String wg = wage.getText().toString().trim();
+
+                                                if (isLoan) {
+                                                    newTransfer.setPlusPlayerName(null);
+                                                } else {
+                                                    Log.d("RAFI", "not loan");
+                                                    newTransfer.setHasPlusPlayer(hasPlusPlayer);
+                                                    String plusPlayerName = playerSpinner.getSelectedItem().toString().trim();
+                                                    newTransfer.setPlusPlayerName((!plusPlayerName.isEmpty()) ? plusPlayerName : "");
+                                                    newTransfer.setPlusPlayerId(ftPlayerId);
+                                                }
+
+                                                String wg = wage.getText().toString().trim().replaceAll(",", "");
                                                 newTransfer.setWage((!wg.isEmpty()) ? Integer.parseInt(wg) : 0);
                                                 String conYears = noOfContractYears.getText().toString().trim();
                                                 newTransfer.setContractYears((!conYears.isEmpty()) ? Integer.parseInt(conYears) : 0);
@@ -702,38 +741,23 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.create_shortlisted_player_popup, null);
 
-            TextView title;
-            final EditText firstName;
-            final EditText lastName;
-            final Spinner positionSpinner;
-            final EditText nationality;
-            final EditText overall;
-            final EditText potentialLow;
-            final EditText potentialHigh;
-            final EditText teamText;
-            final TextInputLayout valueTil;
-            final EditText value;
-            final TextInputLayout wageTil;
-            final EditText wage;
-            final EditText comments;
-            Button editPlayerButton;
+            TextView title = view.findViewById(R.id.create_sh_player);
+            final EditText firstName = view.findViewById(R.id.first_name_shp_create);
+            final EditText lastName = view.findViewById(R.id.last_name_shp_create);
+            final Spinner positionSpinner = view.findViewById(R.id.position_spinner_shp_create);
+            final EditText nationality = view.findViewById(R.id.nationality_shp_create);
+            final EditText overall = view.findViewById(R.id.overall_shp_create);
+            final EditText potentialLow = view.findViewById(R.id.potential_low_shp_create);
+            final EditText potentialHigh = view.findViewById(R.id.potential_high_shp_create);
+            final EditText teamText = view.findViewById(R.id.team_shp_create);
+            final TextInputLayout valueTil = view.findViewById(R.id.value_til_shp_create);
+            final EditText value = view.findViewById(R.id.value_shp_create);
+            final TextInputLayout wageTil = view.findViewById(R.id.wage_til_shp_create);
+            final EditText wage = view.findViewById(R.id.wage_shp_create);
+            final EditText comments = view.findViewById(R.id.comments_shp_create);
+            Button editPlayerButton = view.findViewById(R.id.create_sh_player_button);
 
-            title = view.findViewById(R.id.create_sh_player);
             title.setText("Edit Player");
-            firstName = view.findViewById(R.id.first_name_shp_create);
-            lastName = view.findViewById(R.id.last_name_shp_create);
-            positionSpinner = view.findViewById(R.id.position_spinner_shp_create);
-            teamText = view.findViewById(R.id.team_shp_create);
-            nationality = view.findViewById(R.id.nationality_shp_create);
-            overall = view.findViewById(R.id.overall_shp_create);
-            potentialLow = view.findViewById(R.id.potential_low_shp_create);
-            potentialHigh = view.findViewById(R.id.potential_high_shp_create);
-            valueTil = view.findViewById(R.id.value_til_shp_create);
-            value = view.findViewById(R.id.value_shp_create);
-            wageTil = view.findViewById(R.id.wage_til_shp_create);
-            wage = view.findViewById(R.id.wage_shp_create);
-            comments = view.findViewById(R.id.comments_shp_create);
-            editPlayerButton = view.findViewById(R.id.create_sh_player_button);
             editPlayerButton.setText("Edit Player");
 
             managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())

@@ -9,41 +9,42 @@
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp">
+        android:layout_gravity="center"
+        app:cardBackgroundColor="#F7F8FA">
 
         <RelativeLayout
-            android:padding="32dp"
+            android:padding="24dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white" >
+            android:layout_height="wrap_content" >
 
             <TextView
                 android:id="@+id/create_sh_player"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
                 android:text="New Player"
                 android:fontFamily="@font/chivo"
                 android:textSize="20sp"
+                android:textColor="#1F1F20"
                 android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"/>
+                android:layout_marginBottom="16dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/first_name_til_shp_create"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/create_sh_player" >
+                android:layout_below="@+id/create_sh_player"
+                android:hint="@string/first_name_text"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
-                <EditText
-                    android:id="@+id/first_name_shp_create"
+                <com.google.android.material.textfield.TextInputEditText                    android:id="@+id/first_name_shp_create"
                     android:layout_width="match_parent"
-                    android:hint="@string/first_name_text"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/chivo"
                     android:inputType="textPersonName"
                     android:textColor="@android:color/black"
-                    android:maxLines="1"
-                    android:textColorLink="@color/colorPrimary"/>
+                    android:maxLines="1"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -51,18 +52,20 @@
                 android:id="@+id/last_name_til_shp_create"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/first_name_til_shp_create" >
+                android:layout_below="@+id/first_name_til_shp_create"
+                android:layout_marginTop="8dp"
+                android:hint="@string/last_name_text"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/last_name_shp_create"
                     android:layout_width="match_parent"
-                    android:hint="@string/last_name_text"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/chivo"
                     android:inputType="textPersonName"
                     android:textColor="@android:color/black"
-                    android:maxLines="1"
-                    android:textColorLink="@color/colorPrimary"/>
+                    android:maxLines="1"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -71,26 +74,28 @@
                 android:layout_below="@+id/last_name_til_shp_create"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:entries="@array/position_array"/>
+                android:paddingVertical="8dp"
+                android:entries="@array/position_array"
+                android:backgroundTint="#616161"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/nationality_til_shp_create"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/position_spinner_shp_create" >
+                android:layout_below="@+id/position_spinner_shp_create"
+                android:layout_marginTop="8dp"
+                android:hint="@string/nationality_text"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp" >
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/nationality_shp_create"
-                    android:layout_below="@+id/potential_low_shp_create"
                     android:layout_width="match_parent"
-                    android:hint="@string/nationality_text"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/chivo"
                     android:inputType="textPersonName"
                     android:textColor="@android:color/black"
-                    android:maxLines="1"
-                    android:textColorLink="@color/colorPrimary"/>
+                    android:maxLines="1"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -98,18 +103,20 @@
                 android:id="@+id/overall_til_shp_create"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/nationality_til_shp_create">
+                android:layout_below="@+id/nationality_til_shp_create"
+                android:layout_marginTop="8dp"
+                android:hint="@string/overall"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp" >
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/overall_shp_create"
                     android:layout_width="80dp"
-                    android:hint="@string/overall"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/chivo"
                     android:inputType="number"
                     android:textColor="@android:color/black"
-                    android:maxLines="1"
-                    android:textColorLink="@color/colorPrimary"/>
+                    android:maxLines="1"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -118,18 +125,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/nationality_til_shp_create"
-                android:layout_toStartOf="@+id/potential_high_til_shp_create">
+                android:layout_toStartOf="@+id/potential_high_til_shp_create"
+                android:layout_marginTop="8dp"
+                android:hint="Pot. Low"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/potential_low_shp_create"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
-                    android:hint="Pot. Low"
                     android:fontFamily="@font/chivo"
                     android:inputType="number"
                     android:textColor="@android:color/black"
-                    android:maxLines="1"
-                    android:textColorLink="@color/colorPrimary"/>
+                    android:maxLines="1"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -138,19 +147,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/nationality_til_shp_create"
-                android:layout_alignParentEnd="true" >
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="8dp"
+                android:hint="Pot. High"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/potential_high_shp_create"
                     android:layout_marginStart="8dp"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
-                    android:hint="Pot. High"
                     android:fontFamily="@font/chivo"
                     android:inputType="number"
                     android:textColor="@android:color/black"
-                    android:maxLines="1"
-                    android:textColorLink="@color/colorPrimary"/>
+                    android:maxLines="1"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -158,18 +169,20 @@
                 android:id="@+id/team_til_shp_create"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/overall_til_shp_create" >
+                android:layout_below="@+id/overall_til_shp_create"
+                android:layout_marginTop="8dp"
+                android:hint="@string/team_text"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/team_shp_create"
                     android:layout_width="match_parent"
-                    android:hint="@string/team_text"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/chivo"
                     android:inputType="textPersonName"
                     android:textColor="@android:color/black"
-                    android:maxLines="1"
-                    android:textColorLink="@color/colorPrimary"/>
+                    android:maxLines="1"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -177,18 +190,20 @@
                 android:id="@+id/value_til_shp_create"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/team_til_shp_create" >
+                android:layout_below="@+id/team_til_shp_create"
+                android:layout_marginTop="8dp"
+                android:hint="@string/value"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/value_shp_create"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/value"
                     android:fontFamily="@font/chivo"
                     android:inputType="number"
                     android:textColor="@android:color/black"
-                    android:maxLines="1"
-                    android:textColorLink="@color/colorPrimary"/>
+                    android:maxLines="1"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -196,18 +211,20 @@
                 android:id="@+id/wage_til_shp_create"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/value_til_shp_create" >
+                android:layout_below="@+id/value_til_shp_create"
+                android:layout_marginTop="8dp"
+                android:hint="@string/wage"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/wage_shp_create"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/chivo"
-                    android:hint="@string/wage"
                     android:inputType="number"
                     android:maxLines="1"
-                    android:textColor="@android:color/black"
-                    android:textColorLink="@color/colorPrimary" />
+                    android:textColor="@android:color/black" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -215,31 +232,34 @@
                 android:id="@+id/comments_til_shp_create"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/wage_til_shp_create" >
+                android:layout_below="@+id/wage_til_shp_create"
+                android:layout_marginTop="8dp"
+                android:hint="@string/comments"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
                 <EditText
                     android:id="@+id/comments_shp_create"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/comments"
                     android:fontFamily="@font/chivo"
                     android:inputType="text"
                     android:textColor="@android:color/black"
-                    android:maxLines="1"
-                    android:textColorLink="@color/colorPrimary"/>
+                    android:maxLines="1"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/create_sh_player_button"
-                android:layout_width="358dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/comments_til_shp_create"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/round_button"
+                android:backgroundTint="#D4AF37"
                 android:fontFamily="@font/chivo"
                 android:text="@string/create_player"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@android:color/white"
                 android:textStyle="bold" />
 
         </RelativeLayout>
