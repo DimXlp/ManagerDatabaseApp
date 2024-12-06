@@ -1,47 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardCornerRadius="5dp"
-    android:layout_marginBottom="16dp">
+    android:layout_marginBottom="12dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="10dp"
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:animateLayoutChanges="true" >
+        android:animateLayoutChanges="true">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@color/colorPrimaryDark"
-            android:padding="8dp">
+            android:padding="12dp">
 
             <TextView
                 android:id="@+id/full_name_trf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:fontFamily="@font/chivo"
                 android:text="First Last"
                 android:textColor="@android:color/white"
                 android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:layout_centerVertical="true"/>
 
             <ImageView
                 android:id="@+id/position_oval_trf"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginEnd="8dp"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/position_oval"
                 android:layout_toStartOf="@+id/position_trf"/>
 
             <TextView
                 android:id="@+id/position_trf"
-                android:layout_width="46dp"
+                android:layout_width="55dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_marginEnd="8dp"
@@ -91,6 +94,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
                 android:layout_toEndOf="@+id/overall_text_trf"/>
 
             <TextView
@@ -125,6 +129,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
                 android:layout_toEndOf="@+id/potential_trf"/>
 
             <TextView
@@ -249,6 +254,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
                 android:layout_below="@+id/new_team_trf"
                 android:layout_toEndOf="@+id/transfer_fee_trf"/>
 
@@ -309,6 +315,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
                 android:layout_below="@+id/plus_player_trf"
                 android:layout_toEndOf="@+id/contract_years_text_trf"/>
 
@@ -369,7 +376,9 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
                 android:background="@android:drawable/ic_delete"
-                android:layout_below="@+id/comments_trf"/>
+                android:backgroundTint="@color/colorAccent"
+                android:layout_below="@+id/comments_trf"
+                android:layout_toRightOf="@+id/edit_button_trf"/>
 
 
         </RelativeLayout>
