@@ -147,7 +147,7 @@ public class FirstTeamActivity extends AppCompatActivity {
         nationality = view.findViewById(R.id.nationality_ftp_create);
         overall = view.findViewById(R.id.overall_ftp_create);
         potentialLow = view.findViewById(R.id.potential_low_ftp_create);
-        potentialHigh = view.findViewById(R.id.potential_high__ftp_create);
+        potentialHigh = view.findViewById(R.id.potential_high_ftp_create);
         yearSigned = view.findViewById(R.id.year_signed_spinner_ftp_create);
         yearScouted = view.findViewById(R.id.year_scouted_spinner_ftp_create);
         loanSwitch = view.findViewById(R.id.loan_player_switch_ftp_create);
