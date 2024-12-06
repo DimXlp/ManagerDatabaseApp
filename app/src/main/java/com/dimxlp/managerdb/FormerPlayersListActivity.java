@@ -115,19 +115,24 @@ public class FormerPlayersListActivity extends AppCompatActivity {
         managerNameHeader = headerLayout.findViewById(R.id.manager_name_header);
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
 
-        prevButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener prevYearListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                animateYearButtons(v);
                 checkTeam(1);
             }
-        });
+        };
 
-        nextButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener nextYearListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                animateYearButtons(v);
                 checkTeam(2);
             }
-        });
+        };
+
+        prevButton.setOnClickListener(prevYearListener);
+        nextButton.setOnClickListener(nextYearListener);
 
         formerPlayerList = new ArrayList<>();
         ftPlayerList = new ArrayList<>();
@@ -135,6 +140,19 @@ public class FormerPlayersListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rec_view_fpl);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private static void animateYearButtons(View v) {
+        v.animate()
+                .scaleX(1.1f)
+                .scaleY(1.1f)
+                .setDuration(100)
+                .withEndAction(() -> {
+                    v.animate()
+                            .scaleX(1.0f)
+                            .scaleY(1.0f)
+                            .setDuration(100);
+                });
     }
 
     private void checkTeam(int buttonInt) {

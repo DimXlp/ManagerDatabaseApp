@@ -114,9 +114,10 @@ public class TransferDealsActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        prevButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener prevButtonListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                animateTransferButtons(v);
                 String type = typeOfTransfer.getText().toString().trim();
                 if (type.equals("Arrived")) {
                     typeOfTransfer.setText("Left");
@@ -126,11 +127,12 @@ public class TransferDealsActivity extends AppCompatActivity {
                     listPlayersArrived(1);
                 }
             }
-        });
+        };
 
-        nextButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener nextButtonListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                animateTransferButtons(v);
                 String type = typeOfTransfer.getText().toString().trim();
                 if (type.equals("Arrived")) {
                     typeOfTransfer.setText("Left");
@@ -140,7 +142,23 @@ public class TransferDealsActivity extends AppCompatActivity {
                     listPlayersArrived(2);
                 }
             }
-        });
+        };
+
+        prevButton.setOnClickListener(prevButtonListener);
+        nextButton.setOnClickListener(nextButtonListener);
+    }
+
+    private void animateTransferButtons(View v) {
+        v.animate()
+                .scaleX(1.1f)
+                .scaleY(1.1f)
+                .setDuration(100)
+                .withEndAction(() -> {
+                    v.animate()
+                            .scaleX(1.0f)
+                            .scaleY(1.0f)
+                            .setDuration(100);
+                });
     }
 
     private void listPlayersLeft(final int buttonInt) {

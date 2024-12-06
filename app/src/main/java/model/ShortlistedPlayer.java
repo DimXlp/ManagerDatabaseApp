@@ -2,16 +2,8 @@ package model;
 
 import com.google.firebase.Timestamp;
 
-public class ShortlistedPlayer {
-    private long id;
-    private String firstName;
-    private String lastName;
-    private String fullName;
-    private String position;
-    private String nationality;
-    private int overall;
-    private int potentialLow;
-    private int potentialHigh;
+public class ShortlistedPlayer extends Player {
+
     private String team;
     private int value;
     private int wage;
@@ -24,15 +16,7 @@ public class ShortlistedPlayer {
     }
 
     public ShortlistedPlayer(long id, String firstName, String lastName, String fullName, String position, String nationality, int overall, int potentialLow, int potentialHigh, String team, int value, int wage, String comments, long managerId, String userId, Timestamp timeAdded) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.fullName = fullName;
-        this.position = position;
-        this.nationality = nationality;
-        this.overall = overall;
-        this.potentialLow = potentialLow;
-        this.potentialHigh = potentialHigh;
+        super(id, firstName, lastName, fullName, position, nationality, overall, potentialLow, potentialHigh, managerId, userId, timeAdded);
         this.team = team;
         this.value = value;
         this.wage = wage;
@@ -40,78 +24,6 @@ public class ShortlistedPlayer {
         this.managerId = managerId;
         this.userId = userId;
         this.timeAdded = timeAdded;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getPosition() {
-        return position;
-    }
-
-    public void setPosition(String position) {
-        this.position = position;
-    }
-
-    public String getNationality() {
-        return nationality;
-    }
-
-    public void setNationality(String nationality) {
-        this.nationality = nationality;
-    }
-
-    public int getOverall() {
-        return overall;
-    }
-
-    public void setOverall(int overall) {
-        this.overall = overall;
-    }
-
-    public int getPotentialLow() {
-        return potentialLow;
-    }
-
-    public void setPotentialLow(int potentialLow) {
-        this.potentialLow = potentialLow;
-    }
-
-    public int getPotentialHigh() {
-        return potentialHigh;
-    }
-
-    public void setPotentialHigh(int potentialHigh) {
-        this.potentialHigh = potentialHigh;
     }
 
     public String getTeam() {
