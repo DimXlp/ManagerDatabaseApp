@@ -65,6 +65,11 @@
     <string name="set_team">Set Team</string>
     <string name="transfer_deals">Transfer Deals</string>
     <string name="edit_transfer">Edit Transfer</string>
+    <string name="select_manager_title">Select Manager</string>
+    <string name="team_logo">Team Logo</string>
+    <string name="full_manager_name">Full Name</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="icon">Icon</string>
 
     <string-array name="position_array">
         <item>GK</item>

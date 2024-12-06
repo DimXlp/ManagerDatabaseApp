@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardCornerRadius="5dp"
-    android:layout_marginBottom="16dp">
+    android:layout_marginBottom="12dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="10dp"
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,61 +18,66 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@color/colorPrimaryDark"
-            android:padding="8dp">
+            android:padding="12dp">
 
+            <!-- Player Number -->
             <TextView
                 android:id="@+id/number_fpl"
-                android:layout_width="27dp"
+                android:layout_width="30dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:fontFamily="@font/chivo"
                 android:text="99"
                 android:textAlignment="viewEnd"
                 android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_alignParentStart="true"
+                android:gravity="center"
+                tools:ignore="RtlCompat" />
 
             <ImageView
                 android:id="@+id/line_fpl_1"
                 android:layout_width="1dp"
                 android:layout_height="20dp"
-                android:layout_marginStart="8dp"
-                android:layout_toEndOf="@+id/number_fpl"
-                android:background="@drawable/line"/>
+                android:layout_marginStart="43dp"
+                android:background="@drawable/line"
+                android:backgroundTint="@color/colorPrimaryDark"/>
 
+            <!-- Player Name -->
             <TextView
                 android:id="@+id/full_name_fpl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:fontFamily="@font/chivo"
                 android:text="First Last"
                 android:textColor="@android:color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_toEndOf="@+id/line_fpl_1"/>
+                android:layout_toEndOf="@id/line_fpl_1"
+                android:layout_centerVertical="true"/>
 
             <ImageView
                 android:id="@+id/position_oval_fpl"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginEnd="8dp"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/position_oval"
                 android:layout_toStartOf="@+id/position_fpl"/>
 
             <TextView
                 android:id="@+id/position_fpl"
-                android:layout_width="46dp"
+                android:layout_width="55dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="8dp"
                 android:fontFamily="@font/chivo"
                 android:text="POS"
+                android:textAlignment="viewStart"
                 android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:layout_alignParentEnd="true"/>
+                android:textSize="20sp" />
 
         </RelativeLayout>
 
@@ -111,6 +119,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
                 android:layout_toEndOf="@+id/overall_text_fpl"/>
 
             <TextView
@@ -145,6 +154,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
                 android:layout_toEndOf="@+id/potential_fpl"/>
 
             <TextView
@@ -203,6 +213,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
                 android:layout_below="@+id/nationality_fpl"
                 android:layout_toEndOf="@+id/year_signed_fpl"/>
 
@@ -239,6 +250,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/line"
+                android:backgroundTint="@color/lighterGray"
                 android:layout_below="@+id/nationality_fpl"
                 android:layout_toEndOf="@+id/year_scouted_fpl"/>
 
@@ -297,6 +309,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
                 android:background="@android:drawable/ic_delete"
+                android:backgroundTint="@color/colorAccent"
                 android:layout_below="@+id/year_scouted_fpl"
                 android:layout_toEndOf="@+id/list_add_button_fpl"/>
 
