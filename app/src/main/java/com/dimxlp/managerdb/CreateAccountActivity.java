@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -26,6 +27,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -46,6 +48,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private CollectionReference collectionReference = db.collection("Users");
+    private boolean isBiometricsSupported = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,17 +85,39 @@ public class CreateAccountActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                if (!TextUtils.isEmpty(usernameText.getText().toString())
-                    && !TextUtils.isEmpty(emailText.getText().toString())
-                    && !TextUtils.isEmpty(passwordText.getText().toString())) {
+                String usernameValue = usernameText.getText().toString();
+                String emailValue = emailText.getText().toString();
+                String passwordValue = passwordText.getText().toString();
 
-                   // Log.d("CreateAccount", "onComplete: 111111111" );
+                if (!isValidEmailDomain(emailValue)) {
+                    emailText.setError("Please use a valid email domain.");
+                    return;
+                }
 
-                    String username = usernameText.getText().toString().trim();
-                    String email = emailText.getText().toString().trim();
-                    String password = passwordText.getText().toString().trim();
+                if (!TextUtils.isEmpty(usernameValue) &&
+                    !TextUtils.isEmpty(emailValue) &&
+                    !TextUtils.isEmpty(passwordValue)) {
+
+                    Log.d("RAFI", "Inside if");
+
+                    String username = usernameValue.trim();
+                    String email = emailValue.trim();
+                    String password = passwordValue.trim();
 
                     createUserEmailAccount(username, email, password);
+
+                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                    if (user != null) {
+                        String userId = user.getUid();
+
+                        if (isBiometricsSupported) {
+                            SharedPreferences sharedPreferences = getSharedPreferences("com.dimxlp.managerdb", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean("hasAccount", true);
+                            editor.putString("userId", userId);
+                            editor.apply();
+                        }
+                    }
 
                 } else {
                     Toast.makeText(CreateAccountActivity.this, "Empty Fields Not Allowed", Toast.LENGTH_LONG).show();
@@ -104,68 +129,63 @@ public class CreateAccountActivity extends AppCompatActivity {
 
     private void createUserEmailAccount(final String username, String email, String password) {
 
-        if (!TextUtils.isEmpty(username) &&
-            !TextUtils.isEmpty(email) &&
-            !TextUtils.isEmpty(password)) {
+        progressBar.setVisibility(View.VISIBLE);
 
-            progressBar.setVisibility(View.VISIBLE);
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
 
+                        if (task.isSuccessful()) {
 
-            firebaseAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            currentUser = firebaseAuth.getCurrentUser();
 
-                            if (task.isSuccessful()) {
+                            assert currentUser != null;
+                            final String currentUserId = currentUser.getUid();
 
-                                currentUser = firebaseAuth.getCurrentUser();
+                            Map<String, String> userObj = new HashMap<>();
+                            userObj.put("userId", currentUserId);
+                            userObj.put("username", username);
 
-                                assert currentUser != null;
-                                final String currentUserId = currentUser.getUid();
-
-                                Map<String, String> userObj = new HashMap<>();
-                                userObj.put("userId", currentUserId);
-                                userObj.put("username", username);
-
-                                collectionReference.add(userObj)
-                                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                            @Override
-                                            public void onSuccess(DocumentReference documentReference) {
-                                                documentReference.get()
-                                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                                if (Objects.requireNonNull(task.getResult()).exists()) {
+                            collectionReference.add(userObj)
+                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                        @Override
+                                        public void onSuccess(DocumentReference documentReference) {
+                                            documentReference.get()
+                                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                            if (Objects.requireNonNull(task.getResult()).exists()) {
 
 
-                                                                    progressBar.setVisibility(View.INVISIBLE);
-                                                                    String name = task.getResult().getString("username");
+                                                                progressBar.setVisibility(View.INVISIBLE);
+                                                                String name = task.getResult().getString("username");
 
-                                                                    UserApi userApi = UserApi.getInstance();
-                                                                    userApi.setUserId(currentUserId);
-                                                                    userApi.setUsername(name);
+                                                                UserApi userApi = UserApi.getInstance();
+                                                                userApi.setUserId(currentUserId);
+                                                                userApi.setUsername(name);
 
-                                                                    Intent intent = new Intent(CreateAccountActivity.this, CreateManagerActivity.class);
-                                                                    intent.putExtra("username", name);
-                                                                    intent.putExtra("userId", currentUserId);
-                                                                    startActivity(intent);
+                                                                Intent intent = new Intent(CreateAccountActivity.this, CreateManagerActivity.class);
+                                                                intent.putExtra("username", name);
+                                                                intent.putExtra("userId", currentUserId);
+                                                                startActivity(intent);
 
-                                                                } else {
-                                                                    progressBar.setVisibility(View.INVISIBLE);
-                                                                }
+                                                            } else {
+                                                                progressBar.setVisibility(View.INVISIBLE);
+                                                            }
 
                                                         }
                                                     });
 
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
 
-                                            }
-                                        });
-                            }
+                                        }
+                                    });
+                        }
 
 
                     }
@@ -174,10 +194,16 @@ public class CreateAccountActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
 
-                        }
-                    });
-        }
+                    }
+                });
 
+    }
+
+    private boolean isValidEmailDomain(String email) {
+        String[] validDomains = {"gmail.com", "yahoo.com", "outlook.com", "hotmail.com"};
+        String domain = email.substring(email.indexOf("@") + 1);
+        return Arrays.stream(validDomains)
+                .anyMatch(domain::equalsIgnoreCase);
     }
 
     @Override

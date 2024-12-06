@@ -218,51 +218,54 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
                     .child("team_badges")
                     .child(team + "_" + Timestamp.now().getSeconds());
 
-            filepath.putFile(teamBadgeUri)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            final Manager manager = new Manager();
+
+            if (teamBadgeUri != null) {
+                filepath.putFile(teamBadgeUri)
+                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        String imageUrl = uri.toString();
+                                        Log.d("RAFI", "onSuccess: " + imageUrl);
+
+                                        manager.setTeamBadgeUrl(imageUrl);
+                                    }
+                                });
+                            }
+                        });
+            }
+
+            manager.setId(maxId+1);
+            manager.setFirstName(firstName);
+            manager.setLastName(lastName);
+            manager.setFullName(firstName + " " + lastName);
+            manager.setNationality(nationality);
+            manager.setTeam(team);
+            manager.setCurrency(currency);
+            manager.setTimeAdded(new Timestamp(new Date()));
+            Log.d("currentUserId", "saveManager: " + currentUserId);
+            manager.setUserId(currentUserId);
+
+            collectionReference.add(manager)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                         @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    String imageUrl = uri.toString();
-                                    Log.d("RAFI", "onSuccess: " + imageUrl);
+                        public void onSuccess(DocumentReference documentReference) {
+                            progressBar.setVisibility(View.INVISIBLE);
 
-                                    final Manager manager = new Manager();
+                            Intent intent = new Intent(CreateManagerActivity.this, ManageTeamActivity.class);
+                            intent.putExtra("team", team);
+                            intent.putExtra("managerId", manager.getId());
+                            startActivity(intent);
+                            finish();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
 
-                                    manager.setId(maxId+1);
-                                    manager.setFirstName(firstName);
-                                    manager.setLastName(lastName);
-                                    manager.setFullName(firstName + " " + lastName);
-                                    manager.setNationality(nationality);
-                                    manager.setTeam(team);
-                                    manager.setCurrency(currency);
-                                    manager.setTeamBadgeUrl(imageUrl);
-                                    manager.setTimeAdded(new Timestamp(new Date()));
-                                    Log.d("currentUserId", "saveManager: " + currentUserId);
-                                    manager.setUserId(currentUserId);
-
-                                    collectionReference.add(manager)
-                                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                                @Override
-                                                public void onSuccess(DocumentReference documentReference) {
-                                                    progressBar.setVisibility(View.INVISIBLE);
-
-                                                    Intent intent = new Intent(CreateManagerActivity.this, ManageTeamActivity.class);
-                                                    intent.putExtra("team", team);
-                                                    intent.putExtra("managerId", manager.getId());
-                                                    startActivity(intent);
-                                                    finish();
-                                                }
-                                            })
-                                            .addOnFailureListener(new OnFailureListener() {
-                                                @Override
-                                                public void onFailure(@NonNull Exception e) {
-
-                                                }
-                                            });
-                                }
-                            });
                         }
                     });
 

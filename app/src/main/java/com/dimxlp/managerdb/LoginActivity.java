@@ -3,8 +3,12 @@ package com.dimxlp.managerdb;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -13,6 +17,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -28,6 +33,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 import util.UserApi;
 
@@ -46,7 +52,9 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference userColReference = db.collection("Users");
     private CollectionReference managersColReference = db.collection("Managers");
-    private boolean managersExist;
+    private BiometricPrompt biometricPrompt;
+    private BiometricPrompt.PromptInfo promptInfo;
+    private boolean isBiometricsSupported = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +77,16 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(LoginActivity.this, CreateAccountActivity.class));
             }
         });
+
+        if (isBiometricsSupported) {
+            setupBiometricPrompt();
+
+            // Check if biometric login is available and prompt if it is
+            BiometricManager biometricManager = BiometricManager.from(this);
+            if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS) {
+                showBiometricPrompt();
+            }
+        }
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -153,25 +171,38 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
-                            assert user != null;
-                            String userId = user.getUid();
 
-                            userColReference.whereEqualTo("userId", userId)
-                                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                                            if (error != null) {
-                                                return;
-                                            }
-                                            assert value != null;
-                                            if (!value.isEmpty()) {
-                                                progressBar.setVisibility(View.INVISIBLE);
+                            if (task.isSuccessful()) {
+                                // Sign in success, update UI with the signed-in user's information
+                                Log.d("LoginActivity", "signInWithEmail:success");
+                                FirebaseUser user = firebaseAuth.getCurrentUser();
+                                assert user != null;
+                                String userId = user.getUid();
 
-                                                for (QueryDocumentSnapshot snapshot: value) {
-                                                    UserApi userApi = UserApi.getInstance();
-                                                    userApi.setUsername(snapshot.getString("username"));
-                                                    userApi.setUserId(snapshot.getString("userId"));
+                                if (isBiometricsSupported) {
+                                    SharedPreferences sharedPreferences = getSharedPreferences("com.dimxlp.managerdb", MODE_PRIVATE);
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putBoolean("hasAccount", true);
+                                    editor.putString("userId", userId);
+                                    editor.apply();
+                                }
+
+                                userColReference.whereEqualTo("userId", userId)
+                                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                                                if (error != null) {
+                                                    Log.w("LoginActivity", "Error fetching user data", error);
+                                                    return;
+                                                }
+                                                assert value != null;
+                                                if (!value.isEmpty()) {
+                                                    progressBar.setVisibility(View.INVISIBLE);
+
+                                                    for (QueryDocumentSnapshot snapshot: value) {
+                                                        UserApi userApi = UserApi.getInstance();
+                                                        userApi.setUsername(snapshot.getString("username"));
+                                                        userApi.setUserId(snapshot.getString("userId"));
 
                                                         managersColReference.whereEqualTo("userId", userApi.getUserId())
                                                                 .get()
@@ -210,6 +241,9 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     });
 
+        } else {
+            progressBar.setVisibility(View.INVISIBLE);
+            Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
         }
     }
 

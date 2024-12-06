@@ -252,38 +252,42 @@ public class ProfileActivity extends AppCompatActivity {
                                     .child("team_badges")
                                     .child(team + "_" + Timestamp.now().getSeconds());
 
-                            filepath.putFile(teamBadgeUriEdit)
-                                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                        @Override
-                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                            filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                                @Override
-                                                public void onSuccess(Uri uri) {
-                                                    String imageUrl = uri.toString();
+                            List<DocumentSnapshot> doc =  Objects.requireNonNull(task.getResult()).getDocuments();
+                            DocumentReference documentReference = collectionReference.document(doc.get(0).getId());
 
-                                                    List<DocumentSnapshot> doc =  task.getResult().getDocuments();
-                                                    DocumentReference documentReference = collectionReference.document(doc.get(0).getId());
-                                                    documentReference.update("firstName", firstNameEdit.getText().toString().trim(),
-                                                            "lastName", lastNameEdit.getText().toString().trim(),
-                                                            "fullName", firstNameEdit.getText().toString().trim() + " " + lastNameEdit.getText().toString().trim(),
-                                                            "team", teamEdit.getText().toString().trim(),
-                                                            "nationality", nationalityEdit.getText().toString().trim(),
-                                                            "teamBadgeUrl", imageUrl,
-                                                            "currency", currencySpinnerEdit.getSelectedItem().toString().trim())
-                                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                                @Override
-                                                                public void onSuccess(Void aVoid) {
-                                                                    Intent intent = new Intent(ProfileActivity.this, ProfileActivity.class);
-                                                                    intent.putExtra("managerId", managerId);
-                                                                    intent.putExtra("team", team);
-                                                                    startActivity(intent);
-                                                                    finish();
-                                                                    Toast.makeText(ProfileActivity.this, "Manager updated!", Toast.LENGTH_LONG)
-                                                                            .show();
-                                                                }
-                                                            });
-                                                }
-                                            });
+                            if (teamBadgeUriEdit != null) {
+                                filepath.putFile(teamBadgeUriEdit)
+                                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                    @Override
+                                                    public void onSuccess(Uri uri) {
+                                                        String imageUrl = uri.toString();
+
+                                                        documentReference.update("teamBadgeUrl", imageUrl);
+                                                    }
+                                                });
+                                            }
+                                        });
+                            }
+
+                            documentReference.update("firstName", firstNameEdit.getText().toString().trim(),
+                                            "lastName", lastNameEdit.getText().toString().trim(),
+                                            "fullName", firstNameEdit.getText().toString().trim() + " " + lastNameEdit.getText().toString().trim(),
+                                            "team", teamEdit.getText().toString().trim(),
+                                            "nationality", nationalityEdit.getText().toString().trim(),
+                                            "currency", currencySpinnerEdit.getSelectedItem().toString().trim())
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Intent intent = new Intent(ProfileActivity.this, ProfileActivity.class);
+                                            intent.putExtra("managerId", managerId);
+                                            intent.putExtra("team", team);
+                                            startActivity(intent);
+                                            finish();
+                                            Toast.makeText(ProfileActivity.this, "Manager updated!", Toast.LENGTH_LONG)
+                                                    .show();
                                         }
                                     });
 
