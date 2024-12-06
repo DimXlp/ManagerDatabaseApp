@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.dimxlp.managerdb.ComparisonActivity;
 import com.dimxlp.managerdb.FirstTeamActivity;
 import com.dimxlp.managerdb.FirstTeamListActivity;
 import com.dimxlp.managerdb.FormerPlayersListActivity;
@@ -98,6 +99,11 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
                 buttonList.get(position).setTitle("Transfer Deals");
                 holder.buttonTitle.setText("Transfer Deals");
                 holder.buttonImage.setBackgroundResource(R.drawable.ic_transfer_deals);
+                break;
+            case 7:
+                buttonList.get(position).setTitle("Compare Players");
+                holder.buttonTitle.setText("Compare Players");
+                holder.buttonImage.setBackgroundResource(R.drawable.ic_compare);
                 break;
         }
 
@@ -189,6 +195,12 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
                             transferIntent.putExtra("team", team);
                             ctx.startActivity(transferIntent);
                             break;
+//                        case 7:
+//                            Intent compareIntent = new Intent(ctx, ComparisonActivity.class);
+//                            compareIntent.putExtra("managerId", managerId);
+//                            compareIntent.putExtra("team", team);
+//                            ctx.startActivity(compareIntent);
+//                            break;
                     }
                 }
             });
