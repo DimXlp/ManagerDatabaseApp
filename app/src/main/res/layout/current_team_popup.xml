@@ -9,60 +9,60 @@
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp">
+        android:layout_gravity="center"
+        app:cardBackgroundColor="#F7F8FA">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:padding="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/current_team_title_add_list"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
                 android:text="Set Current Team"
                 android:fontFamily="@font/chivo"
-                android:textColor="@android:color/black"
-                android:textSize="25sp"
+                android:textSize="20sp"
+                android:textColor="#1F1F20"
                 android:textStyle="bold"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentEnd="true"
-                android:gravity="center"/>
+                android:layout_marginBottom="16dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/current_team_til_add_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/current_team_title_add_list" >
+                android:layout_below="@id/current_team_title_add_list"
+                android:hint="@string/current_team"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/current_team_add_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentEnd="true"
                     android:fontFamily="@font/chivo"
-                    android:hint="@string/current_team"
                     android:inputType="textPersonName"
                     android:maxLines="1"
-                    android:textColor="@android:color/black"
-                    android:textColorLink="@color/colorPrimary" />
+                    android:textColor="@android:color/black" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/set_team_button_add_list"
-                android:layout_width="358dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/current_team_til_add_list"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="26dp"
-                android:layout_marginEnd="26dp"
+                android:layout_marginTop="24dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
                 android:background="@drawable/round_button"
+                android:backgroundTint="#D4AF37"
                 android:fontFamily="@font/chivo"
                 android:text="@string/set_team"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@android:color/white"
                 android:textStyle="bold" />
 
         </RelativeLayout>

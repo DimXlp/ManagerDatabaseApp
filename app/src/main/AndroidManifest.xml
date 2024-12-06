@@ -15,22 +15,59 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".TransferDealsActivity"></activity>
-        <activity android:name=".SelectManagerActivity" />
-        <activity android:name=".LoanedOutPlayersActivity" />
-        <activity android:name=".ShortlistPlayersActivity" />
-        <activity android:name=".ShortlistActivity" />
-        <activity android:name=".FormerPlayersListActivity" />
-        <activity android:name=".YouthTeamListActivity" />
-        <activity android:name=".YouthTeamActivity" />
-        <activity android:name=".FirstTeamListActivity" />
-        <activity android:name=".FirstTeamActivity" />
+        <activity
+            android:name=".TransferDealsActivity"
+            android:label="Transfer Deals"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".SelectManagerActivity"
+            android:label="Select Manager"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".LoanedOutPlayersActivity"
+            android:label="Loaned Out Players"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ShortlistPlayersActivity"
+            android:label="Shortlist"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ShortlistActivity"
+            android:label="Shortlist"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".FormerPlayersListActivity"
+            android:label="Former Players"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".YouthTeamListActivity"
+            android:label="Youth Team"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".YouthTeamActivity"
+            android:label="Youth Team"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".FirstTeamListActivity"
+            android:label="First Team"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".FirstTeamActivity"
+            android:label="First Team"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ComparisonActivity"
+            android:label="Compare Players"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ProfileActivity"
             android:label="@string/title_activity_profile"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ManageTeamActivity" />
-        <activity android:name=".CreateManagerActivity" />
+        <activity
+            android:name=".CreateManagerActivity"
+            android:label="Create Manager"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".CreateAccountActivity" />
         <activity android:name=".LoginActivity" />
         <activity android:name=".MainActivity">

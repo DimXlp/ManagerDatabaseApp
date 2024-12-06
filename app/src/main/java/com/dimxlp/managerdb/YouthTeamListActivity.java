@@ -466,7 +466,12 @@ public class YouthTeamListActivity extends AppCompatActivity {
                             }
                             findMinYearScouted(ytplayers);
                             findMaxPlayerId(ytplayers);
-                            currentYear = minYearText;
+
+                            if (barYear != null) {
+                                currentYear = barYear;
+                            } else {
+                                currentYear = minYearText;
+                            }
                         }
                     }
                 });

@@ -7,13 +7,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -41,15 +44,20 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import enumeration.LoanEnum;
+import enumeration.SaleTransferEnum;
 import model.FirstTeamPlayer;
 import model.FormerPlayer;
 import model.LoanedOutPlayer;
 import model.Manager;
 import model.Transfer;
 import util.UserApi;
+import util.ValueFormatter;
 
 public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPlayerRecAdapter.ViewHolder> {
 
@@ -72,14 +80,16 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
 
     private Animation slideLeft;
     private Animation slideRight;
+    private long maxId;
 
-    public FirstTeamPlayerRecAdapter(Context context, List<FirstTeamPlayer> playerList, long managerId, String team, String barYear, int buttonInt) {
+    public FirstTeamPlayerRecAdapter(Context context, List<FirstTeamPlayer> playerList, long managerId, String team, String barYear, int buttonInt, long maxId) {
         this.context = context;
         this.playerList = playerList;
         this.managerId = managerId;
         this.team = team;
         this.barYear = barYear;
         this.buttonInt = buttonInt;
+        this.maxId = maxId;
     }
 
     @NonNull
@@ -187,6 +197,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         private Spinner yearLeft;
         private Spinner typeOfTransfer;
         private EditText transferFee;
+        private SwitchMaterial playerExchangeSwitch;
         private EditText comments;
         private Button transferButton;
         private EditText teamLoan;
@@ -194,6 +205,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         private Spinner loanSpinner;
         private Button loanPlayerButton;
         private TextInputLayout transferFeeTil;
+        private boolean hasExchangePlayer = false;
 
         public ViewHolder(@NonNull View itemView, final Context ctx) {
             super(itemView);
@@ -252,12 +264,15 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     typeOfTransfer = view.findViewById(R.id.type_of_transfer_spinner_depart);
                                     transferFeeTil = view.findViewById(R.id.transfer_fee_til_depart);
                                     transferFee = view.findViewById(R.id.transfer_fee_depart);
+                                    playerExchangeSwitch = view.findViewById(R.id.player_exchange_switch_depart);
                                     comments = view.findViewById(R.id.comments_depart);
                                     transferButton = view.findViewById(R.id.transfer_player_button);
 
                                     ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(context, R.array.years_array, android.R.layout.simple_spinner_item);
                                     yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                     yearLeft.setAdapter(yearAdapter);
+
+                                    ValueFormatter.formatValue(transferFee);
 
                                     managersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                             .whereEqualTo("id", managerId)
@@ -278,21 +293,69 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 }
                                             });
 
-                                    String[] transferArray = {"TRANSFER TO ANOTHER TEAM", "FREE TRANSFER"};
+                                    List<String> transferTypes = Arrays.stream(SaleTransferEnum.values())
+                                            .map(SaleTransferEnum::getDescription)
+                                            .collect(Collectors.toList());
 
-                                    ArrayAdapter<String> transferAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, transferArray);
+                                    ArrayAdapter<String> transferAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, transferTypes);
                                     transferAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                     typeOfTransfer.setAdapter(transferAdapter);
+
+                                    typeOfTransfer.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                        @Override
+                                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                            String selectedTransferType = parent.getItemAtPosition(position).toString();
+
+                                            if (SaleTransferEnum.RELEASE.getDescription().equals(selectedTransferType)) {
+                                                transferFeeTil.setVisibility(View.GONE);
+                                                transferFee.setEnabled(false);
+                                                teamLeft.setVisibility(View.GONE);
+                                                playerExchangeSwitch.setVisibility(View.GONE);
+                                            } else {
+                                                transferFeeTil.setVisibility(View.VISIBLE);
+                                                transferFee.setEnabled(true);
+                                                teamLeft.setVisibility(View.VISIBLE);
+                                                playerExchangeSwitch.setVisibility(View.VISIBLE);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onNothingSelected(AdapterView<?> parent) {
+
+                                        }
+                                    });
+
+                                    playerExchangeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                        @Override
+                                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                            if (isChecked) {
+                                                hasExchangePlayer = true;
+                                            }
+                                        }
+                                    });
 
                                     transferButton.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
-                                            if (!yearLeft.getSelectedItem().toString().equals("0") &&
-                                                !teamLeft.getText().toString().isEmpty() &&
-                                                !typeOfTransfer.getSelectedItem().toString().isEmpty()) {
-                                                letPlayerLeave(playerList.get(getAdapterPosition()));
-                                            } else {
-                                                Toast.makeText(context, "Fields required", Toast.LENGTH_LONG).show();
+                                            String selectedTransferType = typeOfTransfer.getSelectedItem().toString();
+                                            String selectedYearLeft = yearLeft.getSelectedItem().toString();
+                                            String teamLeftText = teamLeft.getText().toString();
+                                            boolean isWithTransferFeeType = SaleTransferEnum.WITH_TRANSFER_FEE.getDescription().equals(selectedTransferType);
+                                            boolean isReleaseType = SaleTransferEnum.RELEASE.getDescription().equals(selectedTransferType);
+                                            boolean isYearLeftZero = "0".equals(selectedYearLeft);
+
+                                            if (isReleaseType) {
+                                                if (isYearLeftZero) {
+                                                    Toast.makeText(context, "Year Left required!", Toast.LENGTH_LONG).show();
+                                                } else {
+                                                    letPlayerLeave(playerList.get(getAdapterPosition()));
+                                                }
+                                            } else if (isWithTransferFeeType) {
+                                                if (teamLeftText.isEmpty() && isYearLeftZero) {
+                                                    Toast.makeText(context, "Team and Year Left fields required!", Toast.LENGTH_LONG).show();
+                                                } else {
+                                                    letPlayerLeave(playerList.get(getAdapterPosition()));
+                                                }
                                             }
                                         }
                                     });
@@ -337,9 +400,11 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                     yearLoaned.setAdapter(yearAdapter);
 
-                                    String[] loanArray = {"SHORT TERM LOAN", "ONE-YEAR LOAN", "TWO-YEAR LOAN"};
+                                    List<String> loanTypes = Arrays.stream(LoanEnum.values())
+                                            .map(LoanEnum::getDescription)
+                                            .collect(Collectors.toList());
 
-                                    ArrayAdapter<String> loanAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, loanArray);
+                                    ArrayAdapter<String> loanAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, loanTypes);
                                     loanAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                     loanSpinner.setAdapter(loanAdapter);
 
@@ -692,6 +757,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                 DocumentReference documentReference = null;
                                 for (DocumentSnapshot ds : doc) {
                                     FirstTeamPlayer ftPlayer = ds.toObject(FirstTeamPlayer.class);
+                                    assert ftPlayer != null;
                                     if (ftPlayer.getId() == player.getId()) {
                                         documentReference = ftPlayersReference.document(ds.getId());
                                     }
@@ -708,18 +774,21 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 newTransfer.setFullName(player.getFullName());
                                                 newTransfer.setPosition(player.getPosition());
                                                 newTransfer.setFormerTeam(player.getTeam());
-                                                newTransfer.setCurrentTeam(teamLeft.getText().toString().trim());
+                                                newTransfer.setCurrentTeam(!teamLeft.getText().toString().trim().isEmpty()
+                                                                            ? teamLeft.getText().toString().trim()
+                                                                            : "Free Agent");
                                                 newTransfer.setNationality(player.getNationality());
                                                 newTransfer.setOverall(player.getOverall());
                                                 newTransfer.setPotentialLow(player.getPotentialLow());
                                                 newTransfer.setPotentialHigh(player.getPotentialHigh());
                                                 newTransfer.setType(typeOfTransfer.getSelectedItem().toString());
-                                                String trFee = transferFee.getText().toString().trim();
+                                                String trFee = transferFee.getText().toString().trim().replaceAll(",", "");
                                                 newTransfer.setTransferFee((!trFee.isEmpty()) ? Integer.parseInt(trFee) : 0);
                                                 newTransfer.setYear(yearLeft.getSelectedItem().toString().trim());
                                                 String coms = comments.getText().toString().trim();
                                                 newTransfer.setComments((!coms.isEmpty()) ? coms : "");
                                                 newTransfer.setFormerPlayer(true);
+                                                newTransfer.setHasPlayerExchange(hasExchangePlayer);
                                                 newTransfer.setManagerId(managerId);
                                                 newTransfer.setUserId(UserApi.getInstance().getUserId());
                                                 newTransfer.setTimeAdded(new Timestamp(new Date()));
@@ -742,8 +811,6 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 fmPlayer.setUserId(UserApi.getInstance().getUserId());
                                                 fmPlayer.setTimeAdded(new Timestamp(new Date()));
 
-                                                transfersReference.add(newTransfer);
-
                                                 fmPlayersReference.add(fmPlayer)
                                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                             @Override
@@ -752,30 +819,36 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                         .show();
                                                             }
                                                         });
-                                                ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
-                                                        .whereEqualTo("managerId", managerId)
-                                                        .get()
-                                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                                if (task.isSuccessful()) {
-                                                                    if (task.getResult().size() > 0) {
-                                                                        Intent intent = new Intent(context, FirstTeamListActivity.class);
-                                                                        intent.putExtra("managerId", managerId);
-                                                                        intent.putExtra("team", team);
-                                                                        intent.putExtra("barYear", barYear);
-                                                                        context.startActivity(intent);
-                                                                        ((Activity)context).finish();
-                                                                    } else {
-                                                                        Intent intent = new Intent(context, FirstTeamActivity.class);
-                                                                        intent.putExtra("managerId", managerId);
-                                                                        intent.putExtra("team", team);
-                                                                        context.startActivity(intent);
-                                                                        ((Activity)context).finish();
+                                                if (hasExchangePlayer) {
+                                                    addExchangePlayer(newTransfer);
+                                                } else {
+                                                    transfersReference.add(newTransfer);
+                                                    ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                                                            .whereEqualTo("managerId", managerId)
+                                                            .get()
+                                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                                    if (task.isSuccessful()) {
+                                                                        if (!task.getResult().isEmpty()) {
+                                                                            Intent intent = new Intent(context, FirstTeamListActivity.class);
+                                                                            intent.putExtra("managerId", managerId);
+                                                                            intent.putExtra("team", team);
+                                                                            intent.putExtra("barYear", barYear);
+                                                                            context.startActivity(intent);
+                                                                            ((Activity) context).finish();
+                                                                        } else {
+                                                                            Intent intent = new Intent(context, FirstTeamActivity.class);
+                                                                            intent.putExtra("managerId", managerId);
+                                                                            intent.putExtra("team", team);
+                                                                            context.startActivity(intent);
+                                                                            ((Activity) context).finish();
+                                                                        }
                                                                     }
                                                                 }
-                                                            }
-                                                        });
+                                                            });
+                                                }
+
                                             }
                                         });
                             }
@@ -783,39 +856,161 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                     });
         }
 
+        private void addExchangePlayer(Transfer transfer) {
+            builder = new AlertDialog.Builder(context);
+            View view = LayoutInflater.from(context)
+                    .inflate(R.layout.create_first_team_player_popup, null);
+
+            builder.setView(view);
+            builder.setCancelable(false);
+
+            Log.d("RAFI", "EXCHANGE");
+
+            TextView title = view.findViewById(R.id.create_ft_player);
+            final EditText firstName = view.findViewById(R.id.first_name_ftp_create);
+            final EditText lastName = view.findViewById(R.id.last_name_ftp_create);
+            final Spinner positionSpinner = view.findViewById(R.id.position_spinner_ftp_create);
+            final EditText number = view.findViewById(R.id.number_ftp_create);
+            final EditText nationality = view.findViewById(R.id.nationality_ftp_create);
+            final EditText overall = view.findViewById(R.id.overall_ftp_create);
+            final EditText potentialLow = view.findViewById(R.id.potential_low_ftp_create);
+            final EditText potentialHigh = view.findViewById(R.id.potential_high_ftp_create);
+            final Spinner yearSigned = view.findViewById(R.id.year_signed_spinner_ftp_create);
+            final TextView yearScoutedText = view.findViewById(R.id.year_scouted_text_ftp_create);
+            final Spinner yearScouted = view.findViewById(R.id.year_scouted_spinner_ftp_create);
+            final SwitchMaterial loanSwitch = view.findViewById(R.id.loan_player_switch_ftp_create);
+            Button savePlayerButton = view.findViewById(R.id.create_ft_player_button);
+
+            title.setText("Add Exchange Player");
+            savePlayerButton.setText(R.string.save_player);
+            loanSwitch.setVisibility(View.GONE);
+            yearScoutedText.setVisibility(View.GONE);
+            yearScouted.setVisibility(View.GONE);
+
+            ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(context, R.array.years_array, android.R.layout.simple_spinner_item);
+            yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            yearSigned.setAdapter(yearAdapter);
+
+            savePlayerButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!lastName.getText().toString().isEmpty() &&
+                            !nationality.getText().toString().isEmpty() &&
+                            !positionSpinner.getSelectedItem().toString().isEmpty() &&
+                            !overall.getText().toString().isEmpty() &&
+                            !yearSigned.getSelectedItem().toString().equals("0")) {
+                        createPlayer(transfer);
+                    } else {
+                        Toast.makeText(context, "Last Name/Nickname, Nationality, Position, Overall and Year Signed are required", Toast.LENGTH_LONG)
+                                .show();
+                    }
+                }
+
+                private void createPlayer(Transfer newTransfer) {
+                    String firstNamePlayer = firstName.getText().toString().trim();
+                    String lastNamePlayer = lastName.getText().toString().trim();
+                    String fullNamePlayer;
+                    if (!firstNamePlayer.isEmpty()) {
+                        fullNamePlayer = firstNamePlayer + " " + lastNamePlayer;
+                    } else {
+                        fullNamePlayer = lastNamePlayer;
+                    }
+                    String positionPlayer = positionSpinner.getSelectedItem().toString().trim();
+                    String numberPlayer = number.getText().toString().trim();
+                    String nationalityPlayer = nationality.getText().toString().trim();
+                    String overallPlayer = overall.getText().toString().trim();
+                    String potentialLowPlayer = potentialLow.getText().toString().trim();
+                    String potentialHiPlayer = potentialHigh.getText().toString().trim();
+                    final String ySignedPlayer = yearSigned.getSelectedItem().toString().trim();
+
+                    FirstTeamPlayer player = new FirstTeamPlayer();
+
+                    player.setId(maxId+1);
+                    newTransfer.setExchangePlayerId(maxId+1);
+                    player.setFirstName(firstNamePlayer);
+                    player.setLastName(lastNamePlayer);
+                    player.setFullName(fullNamePlayer);
+                    newTransfer.setExchangePlayerName(fullNamePlayer);
+                    player.setPosition(positionPlayer);
+                    if (!numberPlayer.isEmpty()) {
+                        player.setNumber(Integer.parseInt(numberPlayer));
+                    } else {
+                        player.setNumber(99);
+                    }
+                    player.setTeam(team);
+                    player.setNationality(nationalityPlayer);
+                    player.setOverall(Integer.parseInt(overallPlayer));
+                    if (!potentialLowPlayer.isEmpty()) {
+                        player.setPotentialLow(Integer.parseInt(potentialLowPlayer));
+                    }
+                    if (!potentialHiPlayer.isEmpty()) {
+                        player.setPotentialHigh(Integer.parseInt(potentialHiPlayer));
+                    }
+                    player.setYearSigned(ySignedPlayer);
+                    player.setYearScouted("0");
+                    player.setUserId(UserApi.getInstance().getUserId());
+                    player.setTimeAdded(new Timestamp(new Date()));
+                    player.setManagerId(managerId);
+                    player.setLoanPlayer(loanSwitch.isChecked());
+
+                    newTransfer.setExchangePlayerId(player.getId());
+                    newTransfer.setExchangePlayerName(player.getFullName());
+
+                    transfersReference.add(newTransfer);
+                    ftPlayersReference.add(player);
+
+                    ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                            .whereEqualTo("managerId", managerId)
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        if (!task.getResult().isEmpty()) {
+                                            Intent intent = new Intent(context, FirstTeamListActivity.class);
+                                            intent.putExtra("managerId", managerId);
+                                            intent.putExtra("team", team);
+                                            intent.putExtra("barYear", ySignedPlayer);
+                                            context.startActivity(intent);
+                                            ((Activity) context).finish();
+                                        } else {
+                                            Intent intent = new Intent(context, FirstTeamActivity.class);
+                                            intent.putExtra("managerId", managerId);
+                                            intent.putExtra("team", team);
+                                            context.startActivity(intent);
+                                            ((Activity) context).finish();
+                                        }
+                                    }
+                                }
+                            });
+                }
+            });
+
+            dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+        }
+
         private void editPlayer(final FirstTeamPlayer player) {
             builder = new AlertDialog.Builder(context);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.create_first_team_player_popup, null);
 
-            TextView title;
-            final EditText firstName;
-            final EditText lastName;
-            final Spinner positionSpinner;
-            final EditText number;
-            final EditText nationality;
-            final EditText overall;
-            final EditText potentialLow;
-            final EditText potentialHigh;
-            final Spinner yearSigned;
-            final Spinner yearScouted;
-            final SwitchMaterial loanSwitch;
-            Button savePlayerButton;
+            TextView title = view.findViewById(R.id.create_ft_player);
+            final EditText firstName = view.findViewById(R.id.first_name_ftp_create);
+            final EditText lastName = view.findViewById(R.id.last_name_ftp_create);
+            final Spinner positionSpinner = view.findViewById(R.id.position_spinner_ftp_create);
+            final EditText number = view.findViewById(R.id.number_ftp_create);
+            final EditText nationality = view.findViewById(R.id.nationality_ftp_create);
+            final EditText overall = view.findViewById(R.id.overall_ftp_create);
+            final EditText potentialLow = view.findViewById(R.id.potential_low_ftp_create);
+            final EditText potentialHigh = view.findViewById(R.id.potential_high_ftp_create);
+            final Spinner yearSigned = view.findViewById(R.id.year_signed_spinner_ftp_create);
+            final Spinner yearScouted = view.findViewById(R.id.year_scouted_spinner_ftp_create);
+            final SwitchMaterial loanSwitch = view.findViewById(R.id.loan_player_switch_ftp_create);
+            Button savePlayerButton = view.findViewById(R.id.create_ft_player_button);
 
-            title = view.findViewById(R.id.create_ft_player);
             title.setText(R.string.edit_player_title);
-            firstName = view.findViewById(R.id.first_name_ftp_create);
-            lastName = view.findViewById(R.id.last_name_ftp_create);
-            positionSpinner = view.findViewById(R.id.position_spinner_ftp_create);
-            number = view.findViewById(R.id.number_ftp_create);
-            nationality = view.findViewById(R.id.nationality_ftp_create);
-            overall = view.findViewById(R.id.overall_ftp_create);
-            potentialLow = view.findViewById(R.id.potential_low_ftp_create);
-            potentialHigh = view.findViewById(R.id.potential_high__ftp_create);
-            yearSigned = view.findViewById(R.id.year_signed_spinner_ftp_create);
-            yearScouted = view.findViewById(R.id.year_scouted_spinner_ftp_create);
-            loanSwitch = view.findViewById(R.id.loan_player_switch_ftp_create);
-            savePlayerButton = view.findViewById(R.id.create_ft_player_button);
             savePlayerButton.setText(R.string.save_player);
 
             ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(context, R.array.position_array, android.R.layout.simple_spinner_item);

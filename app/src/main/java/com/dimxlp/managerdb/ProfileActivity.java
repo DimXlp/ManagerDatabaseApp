@@ -44,9 +44,12 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import enumeration.CurrencyEnum;
 import model.Manager;
 import ui.ManagerRecyclerAdapter;
 import util.UserApi;
@@ -158,9 +161,11 @@ public class ProfileActivity extends AppCompatActivity {
         currencySpinnerEdit = view.findViewById(R.id.currency_spinner_edit);
         saveManagerButton = view.findViewById(R.id.save_manager_button);
 
-        String[] currencyArray = {"€", "£", "$"};
+        List<String> currencies = Arrays.stream(CurrencyEnum.values())
+                .map(CurrencyEnum::getSymbol)
+                .collect(Collectors.toList());
 
-        final ArrayAdapter<String> currencyAdapter = new ArrayAdapter<>(ProfileActivity.this, android.R.layout.simple_spinner_item, currencyArray);
+        final ArrayAdapter<String> currencyAdapter = new ArrayAdapter<>(ProfileActivity.this, android.R.layout.simple_spinner_item, currencies);
         currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         currencySpinnerEdit.setAdapter(currencyAdapter);
 

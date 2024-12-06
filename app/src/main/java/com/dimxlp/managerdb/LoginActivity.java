@@ -79,6 +79,70 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    private void setupBiometricPrompt() {
+        Executor executor = ContextCompat.getMainExecutor(this);
+        biometricPrompt = new BiometricPrompt(LoginActivity.this, executor, new BiometricPrompt.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                super.onAuthenticationError(errorCode, errString);
+                Toast.makeText(LoginActivity.this, "Authentication error: " + errString, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                super.onAuthenticationSucceeded(result);
+                // Biometric authentication succeeded, proceed with login
+                checkAccountStatusAndLogin();
+                finish();
+            }
+
+            @Override
+            public void onAuthenticationFailed() {
+                super.onAuthenticationFailed();
+                Toast.makeText(LoginActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Biometric Login")
+                .setSubtitle("Use your fingerprint to login")
+                .setNegativeButtonText("Cancel")
+                .build();
+    }
+
+    private void checkAccountStatusAndLogin() {
+        SharedPreferences sharedPreferences = getSharedPreferences("com.dimxlp.managerdb", MODE_PRIVATE);
+        boolean hasAccount = sharedPreferences.getBoolean("hasAccount", false);
+        String userId = sharedPreferences.getString("userId", null);
+
+        if (hasAccount && userId != null) {
+            // User has an account, proceed to SelectManagerActivity
+            managersColReference.whereEqualTo("userId", userId)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                if (!Objects.requireNonNull(task.getResult()).isEmpty()) {
+                                    startActivity(new Intent(LoginActivity.this, SelectManagerActivity.class));
+                                } else {
+                                    startActivity(new Intent(LoginActivity.this, CreateManagerActivity.class));
+                                }
+                            }
+                        }
+                    });
+
+        } else {
+            // No account exists, redirect to CreateAccountActivity
+            Toast.makeText(LoginActivity.this, "No account found. Please create an account first.", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(LoginActivity.this, CreateAccountActivity.class));
+        }
+    }
+
+    private void showBiometricPrompt() {
+        biometricPrompt.authenticate(promptInfo);
+    }
+
     private void loginUser(String emailText, String pwdText) {
 
         progressBar.setVisibility(View.VISIBLE);
@@ -109,25 +173,34 @@ public class LoginActivity extends AppCompatActivity {
                                                     userApi.setUsername(snapshot.getString("username"));
                                                     userApi.setUserId(snapshot.getString("userId"));
 
-                                                    managersColReference.whereEqualTo("userId", userApi.getUserId())
-                                                            .get()
-                                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                                    if (task.isSuccessful()) {
-                                                                        Log.d("RAFI", "onComplete: size = " + task.getResult().size());
-                                                                        if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                                                            startActivity(new Intent(LoginActivity.this, SelectManagerActivity.class));
-                                                                        } else {
-                                                                            startActivity(new Intent(LoginActivity.this, CreateManagerActivity.class));
+                                                        managersColReference.whereEqualTo("userId", userApi.getUserId())
+                                                                .get()
+                                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                                        if (task.isSuccessful()) {
+                                                                            Log.d("RAFI", "onComplete: size = " + task.getResult().size());
+                                                                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
+                                                                                startActivity(new Intent(LoginActivity.this, SelectManagerActivity.class));
+                                                                            } else {
+                                                                                startActivity(new Intent(LoginActivity.this, CreateManagerActivity.class));
+                                                                            }
                                                                         }
                                                                     }
-                                                                }
-                                                            });
+                                                                });
+                                                    }
                                                 }
                                             }
-                                        }
-                                    });
+                                        });
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                Log.w("LoginActivity", "signInWithEmail:failure", task.getException());
+                                Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
+//                                updateUI(null);
+                            }
+
+
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {

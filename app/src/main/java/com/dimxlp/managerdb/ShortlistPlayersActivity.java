@@ -9,8 +9,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -43,10 +46,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import enumeration.PositionEnum;
 import model.Manager;
 import model.ShortlistedPlayer;
 import ui.ShortlistedPlayerRecAdapter;
 import util.UserApi;
+import util.ValueFormatter;
 
 public class ShortlistPlayersActivity extends AppCompatActivity {
 
@@ -147,7 +152,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         nextPositionButton = findViewById(R.id.next_position_button_shp);
         positionText = findViewById(R.id.position_text_shp);
         addPlayerFab = findViewById(R.id.add_new_sh_player_button);
-        positionText.setText("Goalkeepers");
+        positionText.setText(PositionEnum.GK.getCategory());
 
         addPlayerFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,87 +161,113 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
             }
         });
 
-        prevPositionButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener prevPositionListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String pos = positionText.getText().toString();
-                switch (pos) {
-                    case "Goalkeepers":
-                        positionText.setText("Strikers");
-                        break;
-                    case "Center Backs":
-                        positionText.setText("Goalkeepers");
-                        break;
-                    case "Right Backs":
-                        positionText.setText("Center Backs");
-                        break;
-                    case "Left Backs":
-                        positionText.setText("Right Backs");
-                        break;
-                    case "Center Defensive Mids":
-                        positionText.setText("Left Backs");
-                        break;
-                    case "Center Midfielders":
-                        positionText.setText("Center Defensive Mids");
-                        break;
-                    case "Center Attacking Mids":
-                        positionText.setText("Center Midfielders");
-                        break;
-                    case "Right Wingers":
-                        positionText.setText("Center Attacking Mids");
-                        break;
-                    case "Left Wingers":
-                        positionText.setText("Right Wingers");
-                        break;
-                    case "Strikers":
-                        positionText.setText("Left Wingers");
-                        break;
-                }
-                pos = positionText.getText().toString();
-                listPlayers(pos, 1);
+                animatePositionButtons(v);
+                changePositionForPreviousButton();
             }
-        });
+        };
 
-        nextPositionButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener nextPositionListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String pos = positionText.getText().toString();
-                switch (pos) {
-                    case "Goalkeepers":
-                        positionText.setText("Center Backs");
-                        break;
-                    case "Center Backs":
-                        positionText.setText("Right Backs");
-                        break;
-                    case "Right Backs":
-                        positionText.setText("Left Backs");
-                        break;
-                    case "Left Backs":
-                        positionText.setText("Center Defensive Mids");
-                        break;
-                    case "Center Defensive Mids":
-                        positionText.setText("Center Midfielders");
-                        break;
-                    case "Center Midfielders":
-                        positionText.setText("Center Attacking Mids");
-                        break;
-                    case "Center Attacking Mids":
-                        positionText.setText("Right Wingers");
-                        break;
-                    case "Right Wingers":
-                        positionText.setText("Left Wingers");
-                        break;
-                    case "Left Wingers":
-                        positionText.setText("Strikers");
-                        break;
-                    case "Strikers":
-                        positionText.setText("Goalkeepers");
-                        break;
-                }
-                pos = positionText.getText().toString();
-                listPlayers(pos, 2);
+                animatePositionButtons(v);
+                changePositionForNextButton();
             }
-        });
+        };
+
+        prevPositionButton.setOnClickListener(prevPositionListener);
+        nextPositionButton.setOnClickListener(nextPositionListener);
+    }
+
+    private void changePositionForNextButton() {
+        String pos = positionText.getText().toString();
+        switch (pos) {
+            case "Goalkeepers":
+                positionText.setText(PositionEnum.CB.getCategory());
+                break;
+            case "Center Backs":
+                positionText.setText(PositionEnum.RB.getCategory());
+                break;
+            case "Right Backs":
+                positionText.setText(PositionEnum.LB.getCategory());
+                break;
+            case "Left Backs":
+                positionText.setText(PositionEnum.CDM.getCategory());
+                break;
+            case "Center Defensive Mids":
+                positionText.setText(PositionEnum.CM.getCategory());
+                break;
+            case "Center Midfielders":
+                positionText.setText(PositionEnum.CAM.getCategory());
+                break;
+            case "Center Attacking Mids":
+                positionText.setText(PositionEnum.RW.getCategory());
+                break;
+            case "Right Wingers":
+                positionText.setText(PositionEnum.LW.getCategory());
+                break;
+            case "Left Wingers":
+                positionText.setText(PositionEnum.ST.getCategory());
+                break;
+            case "Strikers":
+                positionText.setText(PositionEnum.GK.getCategory());
+                break;
+        }
+        pos = positionText.getText().toString();
+        listPlayers(pos, 2);
+    }
+
+    private void changePositionForPreviousButton() {
+        String pos = positionText.getText().toString();
+        switch (pos) {
+            case "Goalkeepers":
+                positionText.setText(PositionEnum.ST.getCategory());
+                break;
+            case "Center Backs":
+                positionText.setText(PositionEnum.GK.getCategory());
+                break;
+            case "Right Backs":
+                positionText.setText(PositionEnum.CB.getCategory());
+                break;
+            case "Left Backs":
+                positionText.setText(PositionEnum.RB.getCategory());
+                break;
+            case "Center Defensive Mids":
+                positionText.setText(PositionEnum.LB.getCategory());
+                break;
+            case "Center Midfielders":
+                positionText.setText(PositionEnum.CDM.getCategory());
+                break;
+            case "Center Attacking Mids":
+                positionText.setText(PositionEnum.CM.getCategory());
+                break;
+            case "Right Wingers":
+                positionText.setText(PositionEnum.CAM.getCategory());
+                break;
+            case "Left Wingers":
+                positionText.setText(PositionEnum.RW.getCategory());
+                break;
+            case "Strikers":
+                positionText.setText(PositionEnum.LW.getCategory());
+                break;
+        }
+        pos = positionText.getText().toString();
+        listPlayers(pos, 1);
+    }
+
+    private void animatePositionButtons(View v) {
+        v.animate()
+                .scaleX(1.1f)
+                .scaleY(1.1f)
+                .setDuration(100)
+                .withEndAction(() -> {
+                    v.animate()
+                            .scaleX(1.0f)
+                            .scaleY(1.0f)
+                            .setDuration(100);
+                });
     }
 
     private void createPopupDialog() {
@@ -257,6 +288,9 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         wage = view.findViewById(R.id.wage_shp_create);
         comments = view.findViewById(R.id.comments_shp_create);
         createButton = view.findViewById(R.id.create_sh_player_button);
+
+        ValueFormatter.formatValue(value);
+        ValueFormatter.formatValue(wage);
 
         managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("id", managerId)
@@ -317,8 +351,8 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         String potLowPlayer = potLow.getText().toString().trim();
         String potHighPlayer = potHigh.getText().toString().trim();
         String teamPlayer = team.getText().toString().trim();
-        String valuePlayer = value.getText().toString().trim();
-        String wagePlayer = wage.getText().toString().trim();
+        String valuePlayer = value.getText().toString().trim().replaceAll(",", "");
+        String wagePlayer = wage.getText().toString().trim().replaceAll(",", "");
         String commentsPlayer = comments.getText().toString().trim();
 
         final ShortlistedPlayer player = new ShortlistedPlayer();
@@ -357,41 +391,34 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                         intent.putExtra("team", myTeam);
                         switch (positionPlayer) {
                             case "GK":
-                                barPosition = "Goalkeepers";
+                                barPosition = PositionEnum.GK.getCategory();
                                 break;
                             case "CB":
-                                barPosition = "Center Backs";
+                                barPosition = PositionEnum.CB.getCategory();
                                 break;
-                            case "RB":
-                            case "RWB":
-                                barPosition = "Right Backs";
+                            case "RB", "RWB":
+                                barPosition = PositionEnum.RB.getCategory();
                                 break;
-                            case "LB":
-                            case "LWB":
-                                barPosition = "Left Backs";
+                            case "LB", "LWB":
+                                barPosition = PositionEnum.LB.getCategory();
                                 break;
                             case "CDM":
-                                barPosition = "Center Defensive Mids";
+                                barPosition = PositionEnum.CDM.getCategory();
                                 break;
                             case "CM":
-                                barPosition = "Center Midfielders";
+                                barPosition = PositionEnum.CM.getCategory();
                                 break;
                             case "CAM":
-                                barPosition = "Center Attacking Mids";
+                                barPosition = PositionEnum.CAM.getCategory();
                                 break;
-                            case "RM":
-                            case "RW":
-                                barPosition = "Right Wingers";
+                            case "RM", "RW":
+                                barPosition = PositionEnum.RW.getCategory();
                                 break;
-                            case "LM":
-                            case "LW":
-                                barPosition = "Left Wingers";
+                            case "LM", "LW":
+                                barPosition = PositionEnum.LW.getCategory();
                                 break;
-                            case "ST":
-                            case "CF":
-                            case "RF":
-                            case "LF":
-                                barPosition = "Strikers";
+                            case "ST", "CF", "RF", "LF":
+                                barPosition = PositionEnum.ST.getCategory();
                                 break;
 
                         }
@@ -411,29 +438,45 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
-                            List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 ShortlistedPlayer player = doc.toObject(ShortlistedPlayer.class);
                                 String playerPosition = player.getPosition();
-                                if (position.equals("Goalkeepers") && playerPosition.equals("GK")) {
+                                if (position.equals(PositionEnum.GK.getCategory())
+                                        && playerPosition.equals(PositionEnum.GK.getInitials())) {
                                     playerList.add(player);
-                                } else if (position.equals("Center Backs") && playerPosition.equals("CB")) {
+                                } else if (position.equals(PositionEnum.CB.getCategory())
+                                        && playerPosition.equals(PositionEnum.CB.getInitials())) {
                                     playerList.add(player);
-                                } else if (position.equals("Right Backs") && (playerPosition.equals("RB") || playerPosition.equals("RWB"))) {
+                                } else if (position.equals(PositionEnum.RB.getCategory())
+                                        && (playerPosition.equals(PositionEnum.RB.getInitials())
+                                            || playerPosition.equals(PositionEnum.RWB.getInitials()))) {
                                     playerList.add(player);
-                                } else if (position.equals("Left Backs") && (playerPosition.equals("LB") || playerPosition.equals("LWB"))) {
+                                } else if (position.equals(PositionEnum.LB.getCategory())
+                                        && (playerPosition.equals(PositionEnum.LB.getInitials())
+                                            || playerPosition.equals(PositionEnum.LWB.getInitials()))) {
                                     playerList.add(player);
-                                } else if (position.equals("Center Defensive Mids") && playerPosition.equals("CDM")) {
+                                } else if (position.equals(PositionEnum.CDM.getCategory())
+                                        && playerPosition.equals(PositionEnum.CDM.getInitials())) {
                                     playerList.add(player);
-                                } else if (position.equals("Center Midfielders") && playerPosition.equals("CM")) {
+                                } else if (position.equals(PositionEnum.CM.getCategory())
+                                        && playerPosition.equals(PositionEnum.CM.getInitials())) {
                                     playerList.add(player);
-                                } else if (position.equals("Center Attacking Mids") && playerPosition.equals("CAM")) {
+                                } else if (position.equals(PositionEnum.CAM.getCategory())
+                                        && playerPosition.equals(PositionEnum.CAM.getInitials())) {
                                     playerList.add(player);
-                                } else if (position.equals("Right Wingers") && (playerPosition.equals("RM") || playerPosition.equals("RW"))) {
+                                } else if (position.equals(PositionEnum.RM.getCategory())
+                                        && (playerPosition.equals(PositionEnum.RM.getInitials())
+                                            || playerPosition.equals(PositionEnum.RW.getInitials()))) {
                                     playerList.add(player);
-                                } else if (position.equals("Left Wingers") && (playerPosition.equals("LM") || playerPosition.equals("LW"))) {
+                                } else if (position.equals(PositionEnum.LW.getCategory())
+                                        && (playerPosition.equals(PositionEnum.LM.getInitials())
+                                            || playerPosition.equals(PositionEnum.LW.getInitials()))) {
                                     playerList.add(player);
-                                } else if (position.equals("Strikers") && (playerPosition.equals("ST") || playerPosition.equals("CF") || playerPosition.equals("RF") || playerPosition.equals("LF"))) {
+                                } else if (position.equals(PositionEnum.ST.getCategory())
+                                        && (playerPosition.equals(PositionEnum.ST.getInitials())
+                                            || playerPosition.equals(PositionEnum.CF.getInitials())
+                                            || playerPosition.equals(PositionEnum.RF.getInitials())
+                                            || playerPosition.equals(PositionEnum.LF.getInitials()))) {
                                     playerList.add(player);
                                 }
                             }
@@ -566,11 +609,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                ytPlayersExist = true;
-                            } else {
-                                ytPlayersExist = false;
-                            }
+                            ytPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
                         }
                     }
                 });
@@ -582,11 +621,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                ftPlayersExist = true;
-                            } else {
-                                ftPlayersExist = false;
-                            }
+                            ftPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
                         }
                     }
                 });
@@ -601,48 +636,63 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 ShortlistedPlayer player = doc.toObject(ShortlistedPlayer.class);
                                 if (barPosition == null) {
-                                    if (player.getPosition().equals("GK")) {
+                                    if (player.getPosition().equals(PositionEnum.GK.getInitials())) {
                                         playerList.add(player);
                                     }
-                                } else if (barPosition.equals("Goalkeepers") && player.getPosition().equals("GK")) {
+                                } else if (barPosition.equals(PositionEnum.GK.getCategory())
+                                        && player.getPosition().equals(PositionEnum.GK.getInitials())) {
                                     playerList.add(player);
-                                } else if (barPosition.equals("Center Backs") && player.getPosition().equals("CB")) {
+                                } else if (barPosition.equals(PositionEnum.CB.getCategory())
+                                        && player.getPosition().equals(PositionEnum.CB.getInitials())) {
                                     playerList.add(player);
-                                } else if (barPosition.equals("Right Backs") && (player.getPosition().equals("RB") || player.getPosition().equals("RWB"))) {
+                                } else if (barPosition.equals(PositionEnum.RB.getCategory())
+                                        && (player.getPosition().equals(PositionEnum.RB.getInitials())
+                                        || player.getPosition().equals(PositionEnum.RWB.getInitials()))) {
                                     playerList.add(player);
-                                } else if (barPosition.equals("Left Backs") && (player.getPosition().equals("LB") || player.getPosition().equals("LWB"))) {
+                                } else if (barPosition.equals(PositionEnum.LB.getCategory())
+                                        && (player.getPosition().equals(PositionEnum.LB.getInitials())
+                                        || player.getPosition().equals(PositionEnum.LWB.getInitials()))) {
                                     playerList.add(player);
-                                } else if (barPosition.equals("Center Defensive Mids") && player.getPosition().equals("CDM")) {
+                                } else if (barPosition.equals(PositionEnum.CDM.getCategory())
+                                        && player.getPosition().equals(PositionEnum.CDM.getInitials())) {
                                     playerList.add(player);
-                                } else if (barPosition.equals("Center Midfielders") && player.getPosition().equals("CM")) {
+                                } else if (barPosition.equals(PositionEnum.CM.getCategory())
+                                        && player.getPosition().equals(PositionEnum.CM.getInitials())) {
                                     playerList.add(player);
-                                } else if (barPosition.equals("Center Attacking Mids") && player.getPosition().equals("CAM")) {
+                                } else if (barPosition.equals(PositionEnum.CAM.getCategory())
+                                        && player.getPosition().equals(PositionEnum.CAM.getInitials())) {
                                     playerList.add(player);
-                                } else if (barPosition.equals("Right Wingers") && (player.getPosition().equals("RM") || player.getPosition().equals("RW"))) {
+                                } else if (barPosition.equals(PositionEnum.RM.getCategory())
+                                        && (player.getPosition().equals(PositionEnum.RM.getInitials())
+                                        || player.getPosition().equals(PositionEnum.RW.getInitials()))) {
                                     playerList.add(player);
-                                } else if (barPosition.equals("Left Wingers") && (player.getPosition().equals("LM") || player.getPosition().equals("LW"))) {
+                                } else if (barPosition.equals(PositionEnum.LW.getCategory())
+                                        && (player.getPosition().equals(PositionEnum.LM.getInitials())
+                                        || player.getPosition().equals(PositionEnum.LW.getInitials()))) {
                                     playerList.add(player);
-                                } else if (barPosition.equals("Strikers") && (player.getPosition().equals("ST") || player.getPosition().equals("CF") || player.getPosition().equals("RF") || player.getPosition().equals("LF"))) {
+                                } else if (barPosition.equals(PositionEnum.ST.getCategory())
+                                        && (player.getPosition().equals(PositionEnum.ST.getInitials())
+                                        || player.getPosition().equals(PositionEnum.CF.getInitials())
+                                        || player.getPosition().equals(PositionEnum.RF.getInitials())
+                                        || player.getPosition().equals(PositionEnum.LF.getInitials()))) {
                                     playerList.add(player);
                                 }
                             }
-                            Collections.sort(playerList, new Comparator<ShortlistedPlayer>() {
+                            playerList.sort(new Comparator<ShortlistedPlayer>() {
                                 @Override
-                                public int compare(ShortlistedPlayer o1, ShortlistedPlayer o2) {
-                                    return o1.getTimeAdded().compareTo(o2.getTimeAdded());
+                                public int compare(ShortlistedPlayer player1, ShortlistedPlayer player2) {
+                                    return player1.getTimeAdded().compareTo(player2.getTimeAdded());
                                 }
                             });
-                            if (barPosition == null || barPosition.equals("Goalkeepers")) {
-                                positionText.setText("Goalkeepers");
-                                shortlistedPlayerRecAdapter = new ShortlistedPlayerRecAdapter(ShortlistPlayersActivity.this, playerList, managerId, myTeam, "Goalkeepers", 0);
-                                recyclerView.setAdapter(shortlistedPlayerRecAdapter);
-                                shortlistedPlayerRecAdapter.notifyDataSetChanged();
+                            if (barPosition == null) {
+                                positionText.setText(PositionEnum.GK.getCategory());
+                                shortlistedPlayerRecAdapter = new ShortlistedPlayerRecAdapter(ShortlistPlayersActivity.this, playerList, managerId, myTeam, PositionEnum.GK.getCategory(), 0);
                             } else {
                                 positionText.setText(barPosition);
                                 shortlistedPlayerRecAdapter = new ShortlistedPlayerRecAdapter(ShortlistPlayersActivity.this, playerList, managerId, myTeam, barPosition, 0);
-                                recyclerView.setAdapter(shortlistedPlayerRecAdapter);
-                                shortlistedPlayerRecAdapter.notifyDataSetChanged();
                             }
+                            recyclerView.setAdapter(shortlistedPlayerRecAdapter);
+                            shortlistedPlayerRecAdapter.notifyDataSetChanged();
 
                         }
                     }

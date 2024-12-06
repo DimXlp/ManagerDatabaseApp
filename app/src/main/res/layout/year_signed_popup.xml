@@ -9,12 +9,13 @@
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp">
+        android:layout_gravity="center"
+        app:cardBackgroundColor="#F7F8FA">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:padding="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/year_signed_text_ytp_promote"
@@ -23,8 +24,8 @@
                 android:layout_marginTop="16dp"
                 android:text="Year Signed: "
                 android:fontFamily="@font/chivo"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
+                android:textSize="16sp"
+                android:textColor="#616161"/>
 
             <Spinner
                 android:id="@+id/year_signed_spinner_ytp_promote"
@@ -36,16 +37,15 @@
 
             <Button
                 android:id="@+id/promote_button_year_signed"
-                android:layout_width="358dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/year_signed_text_ytp_promote"
-                android:layout_marginTop="16dp"
-                android:layout_marginStart="26dp"
-                android:layout_marginEnd="26dp"
+                android:layout_marginTop="24dp"
                 android:background="@drawable/round_button"
+                android:backgroundTint="#D4AF37"
                 android:fontFamily="@font/chivo"
                 android:text="Promote Player"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@android:color/white"
                 android:textStyle="bold" />
 
         </RelativeLayout>
