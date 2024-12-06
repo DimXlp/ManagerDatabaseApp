@@ -124,7 +124,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_baseline_menu);
 
         drawerLayout = findViewById(R.id.drawer_layout);
-        navView = findViewById(R.id.nvView_ytl);
+        navView = findViewById(R.id.nvView_ytp);
         setUpDrawerContent(navView);
 
         View headerLayout = null;
@@ -137,11 +137,12 @@ public class YouthTeamListActivity extends AppCompatActivity {
         prevYearButton = findViewById(R.id.prev_year_button_ytp);
         nextYearButton = findViewById(R.id.next_year_button_ytp);
         year = findViewById(R.id.year_text_ytp);
-        addPlayerFab = findViewById(R.id.add_new_player_button_yt);
+        addPlayerFab = findViewById(R.id.add_new_player_button_ytp);
 
-        prevYearButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener prevYearListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                animateYearButtons(v);
                 int cYear = Integer.parseInt(currentYear.substring(0, 4));
                 int minYear = Integer.parseInt(minYearText.substring(0, 4));
                 if (cYear > minYear) {
@@ -153,17 +154,21 @@ public class YouthTeamListActivity extends AppCompatActivity {
                             .show();
                 }
             }
-        });
+        };
 
-        nextYearButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener nextYearListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                animateYearButtons(v);
                 int cYear = Integer.parseInt(currentYear.substring(0, 4));
                 cYear++;
                 currentYear = cYear + "/" + ((cYear % 100) + 1);
                 listPlayers(2);
             }
-        });
+        };
+
+        prevYearButton.setOnClickListener(prevYearListener);
+        nextYearButton.setOnClickListener(nextYearListener);
 
         addPlayerFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -176,6 +181,19 @@ public class YouthTeamListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rec_view_ytp);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private static void animateYearButtons(View v) {
+        v.animate()
+                .scaleX(1.1f)
+                .scaleY(1.1f)
+                .setDuration(100)
+                .withEndAction(() -> {
+                    v.animate()
+                            .scaleX(1.0f)
+                            .scaleY(1.0f)
+                            .setDuration(100);
+                });
     }
 
     private void listPlayers(final int buttonInt) {
