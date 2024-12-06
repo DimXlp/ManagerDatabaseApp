@@ -41,6 +41,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -55,6 +56,7 @@ import model.Manager;
 import model.ShortlistedPlayer;
 import model.Transfer;
 import util.UserApi;
+import util.ValueFormatter;
 
 public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<ShortlistedPlayerRecAdapter.ViewHolder> {
 
@@ -129,12 +131,12 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                             String currency = manager.getCurrency();
                             Log.d("RAFI", "onSuccess: Currency: " + currency);
                             if (player.getValue() != 0) {
-                                holder.valueNoText.setText(String.format("%s %s", currency, player.getValue()));
+                                holder.valueNoText.setText(String.format("%s %s", currency, NumberFormat.getInstance().format(player.getValue())));
                             } else {
                                 holder.valueNoText.setText(String.format("%s ???", currency));
                             }
                             if (player.getWage() != 0) {
-                                holder.wageNoText.setText(String.format("%s %s", currency, player.getWage()));
+                                holder.wageNoText.setText(String.format("%s %s", currency, NumberFormat.getInstance().format(player.getWage())));
                             } else {
                                 holder.wageNoText.setText(String.format("%s ???", currency));
                             }
@@ -206,6 +208,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
         private Spinner typeOfTransferSpinner;
         private TextInputLayout transferFeeTil;
         private EditText transferFee;
+        private TextView playerSpinnerText;
         private Spinner playerSpinner;
         private TextInputLayout wageTil;
         private EditText wage;
@@ -269,8 +272,12 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                     comments = view.findViewById(R.id.comments_buy);
                                     transferButton = view.findViewById(R.id.transfer_button);
 
-                                    String[] transferArray = {"BOUGHT FROM ANOTHER TEAM",
-                                                                "FREE TRANSFER"};
+                                    ValueFormatter.formatValue(transferFee);
+                                    ValueFormatter.formatValue(wage);
+
+                                    List<String> transferTypes = Arrays.stream(PurchaseTransferEnum.values())
+                                            .map(PurchaseTransferEnum::getDescription)
+                                            .collect(Collectors.toList());
 
                                     ArrayAdapter<String> transferAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, transferTypes);
                                     transferAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -365,7 +372,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                             if (!yearSigned.getSelectedItem().toString().equals("0") &&
                                                 !typeOfTransferSpinner.getSelectedItem().toString().isEmpty()) {
                                                 Log.d("ID", "Id = " + ftPlayerId);
-                                                transferPlayer(playerList.get(getAdapterPosition()));
+                                                transferPlayer(playerList.get(getAdapterPosition()), false);
                                             } else {
                                                 Toast.makeText(context, "Transfer Type & Year Signed are required!", Toast.LENGTH_LONG).show();
                                             }
@@ -405,6 +412,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                     typeOfTransferSpinner = view.findViewById(R.id.type_of_transfer_spinner);
                                     transferFeeTil = view.findViewById(R.id.transfer_fee_til_buy);
                                     transferFee = view.findViewById(R.id.transfer_fee_buy);
+                                    playerSpinnerText = view.findViewById(R.id.plus_player_text_buy);
                                     playerSpinner = view.findViewById(R.id.plus_player_spinner_buy);
                                     wageTil = view.findViewById(R.id.wage_til_buy);
                                     wage = view.findViewById(R.id.wage_buy);
@@ -414,8 +422,11 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                     transferButton = view.findViewById(R.id.transfer_button);
                                     transferButton.setText("Loan Player");
 
+                                    ValueFormatter.formatValue(wage);
+
                                     transferFeeTil.setVisibility(View.GONE);
                                     transferFee.setVisibility(View.GONE);
+                                    playerSpinnerText.setVisibility(View.GONE);
                                     playerSpinner.setVisibility(View.GONE);
                                     noOfContractYears.setVisibility(View.GONE);
 
@@ -455,7 +466,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                         public void onClick(View v) {
                                             if (!yearSigned.getSelectedItem().toString().equals("0") &&
                                                     !typeOfTransferSpinner.getSelectedItem().toString().isEmpty()) {
-                                                transferPlayer(playerList.get(getAdapterPosition()));
+                                                transferPlayer(playerList.get(getAdapterPosition()), true);
                                             } else {
                                                 Toast.makeText(context, "Transfer Type & Year Signed are required!", Toast.LENGTH_LONG).show();
                                             }
@@ -567,8 +578,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                     });
         }
 
-        private void transferPlayer(final ShortlistedPlayer player) {
-
+        private void transferPlayer(final ShortlistedPlayer player, boolean isLoan) {
 
             shPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
@@ -604,7 +614,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                 newTransfer.setType(typeOfTransferSpinner.getSelectedItem().toString().trim());
                                                 newTransfer.setManagerId(managerId);
                                                 newTransfer.setNationality(player.getNationality());
-                                                String trFee = transferFee.getText().toString().trim();
+                                                String trFee = transferFee.getText().toString().trim().replaceAll(",", "");
                                                 newTransfer.setTransferFee((!trFee.isEmpty()) ? Integer.parseInt(trFee) : 0);
 
                                                 if (isLoan) {
@@ -792,8 +802,13 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
             overall.setText(String.valueOf(player.getOverall()));
             potentialLow.setText(String.valueOf(player.getPotentialLow()));
             potentialHigh.setText(String.valueOf(player.getPotentialHigh()));
-            value.setText(String.valueOf(player.getValue()));
-            wage.setText(String.valueOf(player.getWage()));
+
+            String formattedValue = NumberFormat.getInstance().format(player.getValue());
+            value.setText(formattedValue);
+
+            String formattedWage = NumberFormat.getInstance().format(player.getWage());
+            wage.setText(formattedWage);
+
             comments.setText(player.getComments());
 
             builder.setView(view);
@@ -825,8 +840,8 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                             }
                                             String ptlLow = potentialLow.getText().toString().trim();
                                             String ptlHi = potentialHigh.getText().toString().trim();
-                                            String v = value.getText().toString().trim();
-                                            String w = wage.getText().toString().trim();
+                                            String v = value.getText().toString().trim().replaceAll(",", "");
+                                            String w = wage.getText().toString().trim().replaceAll(",", "");
                                             assert documentReference != null;
                                             documentReference.update("firstName", firstName.getText().toString().trim(),
                                                     "lastName", lastName.getText().toString().trim(),
