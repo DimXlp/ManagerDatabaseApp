@@ -6,10 +6,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.dynamicanimation.animation.SpringAnimation;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,10 +41,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import model.FirstTeamPlayer;
 import model.Manager;
 import model.ShortlistedPlayer;
 import util.UserApi;
+import util.ValueFormatter;
 
 public class ShortlistActivity extends AppCompatActivity {
 
@@ -152,6 +153,9 @@ public class ShortlistActivity extends AppCompatActivity {
         comments = view.findViewById(R.id.comments_shp_create);
         createButton = view.findViewById(R.id.create_sh_player_button);
 
+        ValueFormatter.formatValue(value);
+        ValueFormatter.formatValue(wage);
+
         managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("id", managerId)
                 .get()
@@ -211,8 +215,8 @@ public class ShortlistActivity extends AppCompatActivity {
         String potLowPlayer = potLow.getText().toString().trim();
         String potHighPlayer = potHigh.getText().toString().trim();
         String teamPlayer = team.getText().toString().trim();
-        String valuePlayer = value.getText().toString().trim();
-        String wagePlayer = wage.getText().toString().trim();
+        String valuePlayer = value.getText().toString().trim().replaceAll(",", "");
+        String wagePlayer = wage.getText().toString().trim().replaceAll(",", "");
         String commentsPlayer = comments.getText().toString().trim();
 
         final ShortlistedPlayer player = new ShortlistedPlayer();
