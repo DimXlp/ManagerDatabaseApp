@@ -140,6 +140,10 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                 holder.plusImage.setVisibility(View.VISIBLE);
                                 holder.plusPlayerName.setVisibility(View.VISIBLE);
                                 holder.plusPlayerName.setText(transfer.getPlusPlayerName());
+                            } if (transfer.getExchangePlayerName() != null && !"".equals(transfer.getExchangePlayerName())) {
+                                holder.plusImage.setVisibility(View.VISIBLE);
+                                holder.plusPlayerName.setVisibility(View.VISIBLE);
+                                holder.plusPlayerName.setText(transfer.getExchangePlayerName());
                             } else {
                                 holder.plusImage.setVisibility(View.GONE);
                                 holder.plusPlayerName.setVisibility(View.GONE);
