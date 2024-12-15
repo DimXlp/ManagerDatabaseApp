@@ -1,6 +1,7 @@
 package uihelpers;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -194,7 +195,8 @@ public class TransferEditor {
         contractYearsEdit.setText(String.valueOf(transfer.getContractYears()));
         yearEdit.setSelection(yearAdapter.getPosition(transfer.getYear()));
         commentsEdit.setText(transfer.getComments());
-        playerExchangeSwitch.setChecked(transfer.doesHavePlayerExchange());
+        Log.d("RAFI", "transfer.getExchangePlayerName(): " + transfer.getExchangePlayerName());
+        playerExchangeSwitch.setChecked(transfer.getExchangePlayerName()!=null);
     }
 
     public void setAllFieldsVisible() {
