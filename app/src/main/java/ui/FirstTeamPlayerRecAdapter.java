@@ -330,6 +330,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                                             if (isChecked) {
                                                 hasExchangePlayer = true;
+                                                Log.d("RAFI", "hasExchangePlayer: " + hasExchangePlayer);
                                             }
                                         }
                                     });
@@ -789,6 +790,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 newTransfer.setComments((!coms.isEmpty()) ? coms : "");
                                                 newTransfer.setFormerPlayer(true);
                                                 newTransfer.setHasPlayerExchange(hasExchangePlayer);
+                                                Log.d("RAFI", "newTransfer.doesHavePlayerExchange: " + newTransfer.doesHavePlayerExchange());
                                                 newTransfer.setManagerId(managerId);
                                                 newTransfer.setUserId(UserApi.getInstance().getUserId());
                                                 newTransfer.setTimeAdded(new Timestamp(new Date()));
