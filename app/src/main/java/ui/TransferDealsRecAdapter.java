@@ -417,6 +417,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                         && !transferEditor.getOldTeamEdit().getText().toString().isEmpty()
                         && !transferEditor.getNewTeamEdit().getText().toString().isEmpty()
                         && !transferEditor.getYearEdit().getSelectedItem().toString().equals("0")) {
+
                         transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -454,6 +455,12 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                                                     }
                                                                 });
                                                             case DialogInterface.BUTTON_NEGATIVE -> {
+                                                                Intent intent = new Intent(context, TransferDealsActivity.class);
+                                                                intent.putExtra("managerId", managerId);
+                                                                intent.putExtra("team", team);
+                                                                context.startActivity(intent);
+                                                                ((Activity) context).finish();
+                                                                Toast.makeText(context, "Transfer updated!", Toast.LENGTH_LONG).show();
                                                             }
                                                         }
                                                     }
