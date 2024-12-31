@@ -1,1 +1,26 @@
-/build
+# Ignore macOS system files
+.DS_Store
+
+# Gradle files
+.gradle/
+build/
+gradle/
+
+# Local configuration file
+local.properties
+
+# IDE settings
+.idea/
+*.iml
+
+# Android Studio build folders
+app/build/
+*.apk
+*.keystore
+
+# Gradle wrapper binaries
+gradlew
+gradlew.bat
+
+# Other system files
+*.log
