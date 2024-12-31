@@ -397,7 +397,8 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     FirstTeamPlayer player = (FirstTeamPlayer) parent.getSelectedItem();
                     transferEditor.setPlayerSpinnerId(player.getId());
-                    transferEditor.setPlusPlayer(true);
+                    transferEditor.setPlusPlayer(position > 0);
+                    Log.d("RAFI", "transferEditor.isPlusPlayer() = " + transferEditor.isPlusPlayer());
                 }
 
                 @Override
@@ -437,11 +438,17 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                             assert documentReference != null;
                                             assignNewTransferValues(transferEditor, documentReference);
 
+                                            Log.d("RAFI", "PRINTING!!!!");
+
                                             if (transferEditor.isExchangePlayer()) {
+                                                Log.d("RAFI", "isExchangePlayer!!!!");
                                                 addExchangePlayer();
                                             } else if (transferEditor.isPlusPlayer()) {
+                                                Log.d("RAFI", "if transferEditor.isPlusPlayer() = " + transferEditor.isPlusPlayer());
+                                                Log.d("RAFI", "isPlusPlayer!!!!");
                                                 letPlayerLeave(transferEditor);
                                             } else if (wasExchangeTransfer) {
+                                                Log.d("RAFI", "wasExchangeTransfer!!!!");
                                                 DocumentReference finalDocumentReference = documentReference;
                                                 DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                                                     @Override
@@ -469,9 +476,10 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                                                 builder.setMessage("Do you want to change the player that was exchanged?").setPositiveButton("Yes", dialogClickListener)
                                                         .setNegativeButton("No", dialogClickListener).show();
-                                            } else if (wasPlusPlayerTransfer) {
+//                                            } else if (wasPlusPlayerTransfer) {
 
                                             } else {
+                                                Log.d("RAFI", "LAST ELSE");
                                                 Intent intent = new Intent(context, TransferDealsActivity.class);
                                                 intent.putExtra("managerId", managerId);
                                                 intent.putExtra("team", team);
