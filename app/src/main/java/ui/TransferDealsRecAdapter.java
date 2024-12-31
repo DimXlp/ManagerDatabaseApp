@@ -17,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -27,8 +26,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.dimxlp.managerdb.FirstTeamActivity;
-import com.dimxlp.managerdb.FirstTeamListActivity;
 import com.dimxlp.managerdb.R;
 import com.dimxlp.managerdb.TransferDealsActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -386,9 +383,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
             transferEditor.getPlayerExchangeSwitch().setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        transferEditor.setExchangePlayer(true);
-                    }
+                    transferEditor.setExchangePlayer(isChecked);
                 }
             });
 
@@ -442,7 +437,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
                                             if (transferEditor.isExchangePlayer()) {
                                                 Log.d("RAFI", "isExchangePlayer!!!!");
-                                                addExchangePlayer();
+                                                addExchangePlayer(documentReference);
                                             } else if (transferEditor.isPlusPlayer()) {
                                                 Log.d("RAFI", "if transferEditor.isPlusPlayer() = " + transferEditor.isPlusPlayer());
                                                 Log.d("RAFI", "isPlusPlayer!!!!");
@@ -680,7 +675,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                 });
     }
 
-    private void addExchangePlayer() {
+    private void addExchangePlayer(DocumentReference documentReference) {
         builder = new AlertDialog.Builder(context);
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.create_first_team_player_popup, null);
@@ -706,7 +701,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                     && !firstTeamPlayerCreator.getPositionSpinner().getSelectedItem().toString().isEmpty()
                     && !firstTeamPlayerCreator.getOverall().getText().toString().isEmpty()
                     && !firstTeamPlayerCreator.getYearSigned().getSelectedItem().toString().equals("0")) {
-                    createPlayer(firstTeamPlayerCreator);
+                    createPlayer(firstTeamPlayerCreator, documentReference);
                 } else {
                     Toast.makeText(context, "Last Name/Nickname, Nationality, Position, Overall and Year Signed are required", Toast.LENGTH_LONG)
                             .show();
@@ -720,7 +715,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
         dialog.show();
     }
 
-    private void createPlayer(FirstTeamPlayerCreator firstTeamPlayerCreator) {
+    private void createPlayer(FirstTeamPlayerCreator firstTeamPlayerCreator, DocumentReference documentReference) {
         String firstNamePlayer = firstTeamPlayerCreator.getFirstName().getText().toString().trim();
         String lastNamePlayer = firstTeamPlayerCreator.getLastName().getText().toString().trim();
         String fullNamePlayer;
@@ -782,6 +777,17 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                         }
                     }
                 });
+
+        documentReference.update("exchangePlayerId", player.getId(), "exchangePlayerName", fullNamePlayer, "hasPlayerExchange", true)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(context, "Transfer updated with new exchanged player!", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(context, TransferDealsActivity.class);
+                    intent.putExtra("managerId", managerId);
+                    intent.putExtra("team", team);
+                    context.startActivity(intent);
+                    ((Activity) context).finish();
+                })
+                .addOnFailureListener(e -> Log.e("TransferEdit", "Failed to add new exchanged player", e));
     }
 
     private long findMaxFTPlayerId() {
