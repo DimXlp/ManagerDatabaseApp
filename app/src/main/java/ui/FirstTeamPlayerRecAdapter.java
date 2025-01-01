@@ -81,6 +81,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
     private Animation slideLeft;
     private Animation slideRight;
     private long maxId;
+    private int maxTransferId;
 
     public FirstTeamPlayerRecAdapter(Context context, List<FirstTeamPlayer> playerList, long managerId, String team, String barYear, int buttonInt, long maxId) {
         this.context = context;
@@ -328,10 +329,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     playerExchangeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                                         @Override
                                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                            if (isChecked) {
-                                                hasExchangePlayer = true;
+                                                hasExchangePlayer = isChecked;
                                                 Log.d("RAFI", "hasExchangePlayer: " + hasExchangePlayer);
-                                            }
                                         }
                                     });
 
@@ -769,7 +768,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                             @Override
                                             public void onSuccess(Void aVoid) {
                                                 final Transfer newTransfer = new Transfer();
-                                                newTransfer.setId(0);
+                                                findMaxTransferId();
+                                                newTransfer.setId(maxTransferId);
                                                 newTransfer.setFirstName(player.getFirstName());
                                                 newTransfer.setLastName(player.getLastName());
                                                 newTransfer.setFullName(player.getFullName());
@@ -1107,5 +1107,25 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                 }
             });
         }
+    }
+
+    public void findMaxTransferId() {
+        db.collection("Transfers")
+                .whereEqualTo("userId", UserApi.getInstance().getUserId())
+                .whereEqualTo("managerId", managerId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        maxTransferId = queryDocumentSnapshots.toObjects(Transfer.class).get(0).getId();
+                        for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                            Transfer transfer = doc.toObject(Transfer.class);
+                            assert transfer != null;
+                            if (transfer.getId() > maxTransferId) {
+                                maxTransferId = transfer.getId();
+                                Log.d("RAFI", "maxTransferId = " + maxTransferId);
+                            }
+                        }
+                    }
+                });
     }
 }
