@@ -76,6 +76,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
     private Animation slideLeft;
     private Animation slideRight;
+    private long maxFTPlayerId;
 
     public TransferDealsRecAdapter(Context context, List<Transfer> transferList, long managerId, String team, int buttonInt) {
         this.context = context;
@@ -95,6 +96,8 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
     @Override
     public void onBindViewHolder(@NonNull final TransferDealsRecAdapter.ViewHolder holder, int position) {
+        findMaxFTPlayerId();
+
         final Transfer transfer = transferList.get(position);
 
         holder.fullName.setText(transfer.getFullName());
@@ -379,11 +382,16 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                     
                 }
             });
+            Log.d("RAFI", "transfer.doesHavePlayerExchange() = " + transfer.doesHavePlayerExchange());
 
             transferEditor.getPlayerExchangeSwitch().setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    transferEditor.setExchangePlayer(isChecked);
+                    Log.d("RAFI", "transfer.doesHavePlayerExchange() = " + transfer.doesHavePlayerExchange());
+                    transferEditor.setIsExchangePlayer(isChecked);
+                    transfer.setHasPlayerExchange(isChecked);
+                    Log.d("RAFI", "transfer.doesHavePlayerExchange() = " + transfer.doesHavePlayerExchange());
+
                 }
             });
 
@@ -392,7 +400,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     FirstTeamPlayer player = (FirstTeamPlayer) parent.getSelectedItem();
                     transferEditor.setPlayerSpinnerId(player.getId());
-                    transferEditor.setPlusPlayer(position > 0);
+                    transferEditor.setIsPlusPlayer(position > 0);
                     Log.d("RAFI", "transferEditor.isPlusPlayer() = " + transferEditor.isPlusPlayer());
                 }
 
@@ -445,32 +453,34 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                             } else if (wasExchangeTransfer) {
                                                 Log.d("RAFI", "wasExchangeTransfer!!!!");
                                                 DocumentReference finalDocumentReference = documentReference;
-                                                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        switch (which) {
-                                                            case DialogInterface.BUTTON_POSITIVE ->
-                                                                removeOldExchangePlayer(transfer, new OnSuccessListener<Void>() {
-                                                                    @Override
-                                                                    public void onSuccess(Void aVoid) {
-                                                                        addNewExchangePlayer(finalDocumentReference);
-                                                                    }
-                                                                });
-                                                            case DialogInterface.BUTTON_NEGATIVE -> {
-                                                                Intent intent = new Intent(context, TransferDealsActivity.class);
-                                                                intent.putExtra("managerId", managerId);
-                                                                intent.putExtra("team", team);
-                                                                context.startActivity(intent);
-                                                                ((Activity) context).finish();
-                                                                Toast.makeText(context, "Transfer updated!", Toast.LENGTH_LONG).show();
-                                                            }
-                                                        }
-                                                    }
-                                                };
+//                                                if (transferEditor.isExchangePlayer()) {
+                                                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                                    builder.setMessage("Do you want to change the player that was exchanged?")
+                                                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(DialogInterface dialog, int which) {
+                                                                    removeOldExchangePlayer(transfer, new OnSuccessListener<Void>() {
+                                                                        @Override
+                                                                        public void onSuccess(Void aVoid) {
+                                                                            addNewExchangePlayer(finalDocumentReference);
+                                                                        }
+                                                                    });
+                                                                }
+                                                            })
+                                                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(DialogInterface dialog, int which) {
+                                                                    dialog.dismiss();
+                                                                }
+                                                            })
+                                                            .show();
+//                                                } else {
 
-                                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                                                builder.setMessage("Do you want to change the player that was exchanged?").setPositiveButton("Yes", dialogClickListener)
-                                                        .setNegativeButton("No", dialogClickListener).show();
+//                                                }
+
+//                                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//                                                builder.setMessage("Do you want to change the player that was exchanged?").setPositiveButton("Yes", dialogClickListener)
+//                                                        .setNegativeButton("No", dialogClickListener).show();
 //                                            } else if (wasPlusPlayerTransfer) {
 
                                             } else {
@@ -536,6 +546,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
     }
 
     private void createNewExchangePlayer(FirstTeamPlayerCreator firstTeamPlayerCreator, DocumentReference transferDocRef) {
+
         String firstNamePlayer = firstTeamPlayerCreator.getFirstName().getText().toString().trim();
         String lastNamePlayer = firstTeamPlayerCreator.getLastName().getText().toString().trim();
         String fullNamePlayer;
@@ -554,7 +565,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
         FirstTeamPlayer player = new FirstTeamPlayer();
 
-        player.setId(findMaxFTPlayerId()+1);
+        player.setId(++maxFTPlayerId);
         player.setFirstName(firstNamePlayer);
         player.setLastName(lastNamePlayer);
         player.setFullName(fullNamePlayer);
@@ -608,13 +619,27 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
     }
 
     private void removeOldExchangePlayer(Transfer transfer, OnSuccessListener<Void> onSuccessListener) {
-        if (transfer.doesHavePlayerExchange()) {
-            DocumentReference oldPlayerRef = ftPlayersColRef.document(String.valueOf(transfer.getExchangePlayerId()));
-            oldPlayerRef.delete().addOnSuccessListener(onSuccessListener)
-                    .addOnFailureListener(e -> Log.e("TransferEdit", "Failed to remove old exchanged player", e));
-        } else {
-            onSuccessListener.onSuccess(null);
-        }
+        Log.d("RAFI", "transfer.getExchangePlayerName() = " + transfer.getExchangePlayerName());
+
+        long exchangePlayerId = transfer.getExchangePlayerId();
+
+        ftPlayersColRef.whereEqualTo("managerId", managerId)
+                .whereEqualTo("userId", UserApi.getInstance().getUserId())
+                .whereEqualTo("id", exchangePlayerId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        for (DocumentSnapshot document : queryDocumentSnapshots) {
+                            ftPlayersColRef.document(document.getId()).delete()
+                                    .addOnSuccessListener(onSuccessListener)
+                                    .addOnFailureListener(e -> onSuccessListener.onSuccess(null)); // Proceed even on failure
+                        }
+                    } else {
+                        onSuccessListener.onSuccess(null); // No player found, proceed
+                    }
+                })
+                .addOnFailureListener(e -> onSuccessListener.onSuccess(null)); // Query failed, proceed
+
     }
 
     private void letPlayerLeave(TransferEditor transferEditor) {
@@ -734,7 +759,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
         FirstTeamPlayer player = new FirstTeamPlayer();
 
-        player.setId(findMaxFTPlayerId()+1);
+        player.setId(++maxFTPlayerId);
         player.setFirstName(firstNamePlayer);
         player.setLastName(lastNamePlayer);
         player.setFullName(fullNamePlayer);
@@ -790,31 +815,23 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                 .addOnFailureListener(e -> Log.e("TransferEdit", "Failed to add new exchanged player", e));
     }
 
-    private long findMaxFTPlayerId() {
-        final long[] maxId = {0};
+    private void findMaxFTPlayerId() {
         ftPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
                 .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                .addOnSuccessListener(queryDocumentSnapshots -> {
                         if (!queryDocumentSnapshots.isEmpty()) {
-                            List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
-                            List<FirstTeamPlayer> ftplayers = new ArrayList<>();
-                            for (DocumentSnapshot doc : docs) {
+                            maxFTPlayerId = queryDocumentSnapshots.toObjects(Transfer.class).get(0).getId();
+                            for (DocumentSnapshot doc : queryDocumentSnapshots) {
                                 FirstTeamPlayer player = doc.toObject(FirstTeamPlayer.class);
-                                ftplayers.add(player);
-                            }
-                            maxId[0] = ftplayers.get(0).getId();
-                            for (FirstTeamPlayer player : ftplayers) {
-                                if (player.getId() > maxId[0]) {
-                                    maxId[0] = player.getId();
+                                assert player != null;
+                                if (player.getId() > maxFTPlayerId) {
+                                    maxFTPlayerId = player.getId();
+                                    Log.d("RAFI", "maxFTPlayerId = " + maxFTPlayerId);
                                 }
                             }
                         }
-                    }
                 });
-        return maxId[0];
     }
     
     private void assignNewTransferValues(TransferEditor transferEditor, DocumentReference documentReference) {
@@ -1044,4 +1061,5 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
         return new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, transferList);
     }
+
 }

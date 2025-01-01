@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -40,8 +39,8 @@ public class TransferEditor {
     private final Spinner yearEdit;
     private final EditText commentsEdit;
     private final Button editTransferButton;
-    private boolean plusPlayer = false;
-    private boolean exchangePlayer = false;
+    private boolean isPlusPlayer = false;
+    private boolean isExchangePlayer = false;
 
     public TransferEditor(View view) {
         this.firstNameEdit = view.findViewById(R.id.first_name_trf_edit);
@@ -163,20 +162,20 @@ public class TransferEditor {
         return editTransferButton;
     }
 
-    public void setPlusPlayer(boolean plusPlayer) {
-        this.plusPlayer = plusPlayer;
+    public void setIsPlusPlayer(boolean plusPlayer) {
+        this.isPlusPlayer = plusPlayer;
     }
 
     public boolean isPlusPlayer() {
-        return plusPlayer;
+        return isPlusPlayer;
     }
 
     public boolean isExchangePlayer() {
-        return exchangePlayer;
+        return isExchangePlayer;
     }
 
-    public void setExchangePlayer(boolean exchangePlayer) {
-        this.exchangePlayer = exchangePlayer;
+    public void setIsExchangePlayer(boolean exchangePlayer) {
+        this.isExchangePlayer = exchangePlayer;
     }
 
     public void setTransferEditorFields(Transfer transfer, ArrayAdapter<CharSequence> yearAdapter, ArrayAdapter<CharSequence> positionAdapter, ArrayAdapter<String> transferAdapter) {
