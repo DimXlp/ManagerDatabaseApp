@@ -452,37 +452,11 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                                 letPlayerLeave(transferEditor);
                                             } else if (wasExchangeTransfer) {
                                                 Log.d("RAFI", "wasExchangeTransfer!!!!");
-                                                DocumentReference finalDocumentReference = documentReference;
-//                                                if (transferEditor.isExchangePlayer()) {
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                                                    builder.setMessage("Do you want to change the player that was exchanged?")
-                                                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                                                @Override
-                                                                public void onClick(DialogInterface dialog, int which) {
-                                                                    removeOldExchangePlayer(transfer, new OnSuccessListener<Void>() {
-                                                                        @Override
-                                                                        public void onSuccess(Void aVoid) {
-                                                                            addNewExchangePlayer(finalDocumentReference);
-                                                                        }
-                                                                    });
-                                                                }
-                                                            })
-                                                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                                                @Override
-                                                                public void onClick(DialogInterface dialog, int which) {
-                                                                    dialog.dismiss();
-                                                                }
-                                                            })
-                                                            .show();
-//                                                } else {
-
-//                                                }
-
-//                                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//                                                builder.setMessage("Do you want to change the player that was exchanged?").setPositiveButton("Yes", dialogClickListener)
-//                                                        .setNegativeButton("No", dialogClickListener).show();
-//                                            } else if (wasPlusPlayerTransfer) {
-
+                                                if (transferEditor.isExchangePlayer()) {
+                                                    askToChangeExchangePlayer(documentReference, transfer);
+                                                } else {
+                                                    askToRemoveExchangePlayer(transfer, transferEditor);
+                                                }
                                             } else {
                                                 Log.d("RAFI", "LAST ELSE");
                                                 Intent intent = new Intent(context, TransferDealsActivity.class);
@@ -503,6 +477,86 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                 }
             });
         }
+    }
+
+    private void askToRemoveExchangePlayer(Transfer transfer, TransferEditor transferEditor) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("Unchecking the exchange player toggle will remove the exchange player. Do you want to continue?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        removeOldExchangePlayer(transfer, new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                transfer.setExchangePlayerName(null);
+                                transfer.setExchangePlayerId(0);
+                                transfer.setHasPlayerExchange(false);
+                                transferEditor.setIsExchangePlayer(false);
+
+                                transfersColRef.whereEqualTo("id", transfer.getId())
+                                        .whereEqualTo("managerId", managerId)
+                                        .whereEqualTo("userId", UserApi.getInstance().getUserId())
+                                        .get()
+                                        .addOnSuccessListener(queryDocumentSnapshots -> {
+                                            if (!queryDocumentSnapshots.isEmpty()) {
+                                                for (DocumentSnapshot document : queryDocumentSnapshots) {
+                                                    DocumentReference transferDocRef = transfersColRef.document(document.getId());
+                                                    transferDocRef.update(
+                                                            "exchangePlayerName", null,
+                                                            "exchangePlayerId", 0,
+                                                            "hasPlayerExchange", false
+                                                    ).addOnSuccessListener(aVoid1 -> {
+                                                        Toast.makeText(context, "Exchange player removed and transfer updated successfully!", Toast.LENGTH_LONG).show();
+
+                                                        Intent intent = new Intent(context, TransferDealsActivity.class);
+                                                        intent.putExtra("managerId", managerId);
+                                                        intent.putExtra("team", team);
+                                                        context.startActivity(intent);
+                                                        ((Activity) context).finish();
+                                                    }).addOnFailureListener(e -> {
+                                                        Toast.makeText(context, "Failed to update transfer document", Toast.LENGTH_LONG).show();
+                                                    });
+                                                }
+                                            } else {
+                                                Toast.makeText(context, "Transfer document not found", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+                            }
+                        });
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        // Reset the toggle back to checked if the user cancels
+//                                                                    buttonView.setChecked(true);
+                    }
+                })
+                .show();
+    }
+
+    private void askToChangeExchangePlayer(DocumentReference finalDocumentReference, Transfer transfer) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("Do you want to change the player that was exchanged?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        removeOldExchangePlayer(transfer, new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                addNewExchangePlayer(finalDocumentReference);
+                            }
+                        });
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 
     private void addNewExchangePlayer(DocumentReference transferDocRef) {
@@ -635,10 +689,10 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                     .addOnFailureListener(e -> onSuccessListener.onSuccess(null)); // Proceed even on failure
                         }
                     } else {
-                        onSuccessListener.onSuccess(null); // No player found, proceed
+                        onSuccessListener.onSuccess(null);
                     }
                 })
-                .addOnFailureListener(e -> onSuccessListener.onSuccess(null)); // Query failed, proceed
+                .addOnFailureListener(e -> onSuccessListener.onSuccess(null));
 
     }
 
