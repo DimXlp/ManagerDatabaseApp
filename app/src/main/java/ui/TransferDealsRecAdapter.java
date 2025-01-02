@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import enumeration.LoanEnum;
 import enumeration.PurchaseTransferEnum;
@@ -140,7 +141,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                 holder.plusImage.setVisibility(View.VISIBLE);
                                 holder.plusPlayerName.setVisibility(View.VISIBLE);
                                 holder.plusPlayerName.setText(transfer.getPlusPlayerName());
-                            } if (transfer.getExchangePlayerName() != null && !"".equals(transfer.getExchangePlayerName())) {
+                            } else if (transfer.getExchangePlayerName() != null && !"".equals(transfer.getExchangePlayerName())) {
                                 holder.plusImage.setVisibility(View.VISIBLE);
                                 holder.plusPlayerName.setVisibility(View.VISIBLE);
                                 holder.plusPlayerName.setText(transfer.getExchangePlayerName());
@@ -993,7 +994,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
             playerExchangeSwitch.setVisibility(View.GONE);
             newTeamEdit.setEnabled(false);
             newTeamEdit.setTextColor(Color.GRAY);
-            populatePlusPlayerSpinner(plusPlayerSpinnerEdit);
+            populatePlusPlayerSpinner(plusPlayerSpinnerEdit, transfer.getPlusPlayerName());
         } else if (PurchaseTransferEnum.FREE_TRANSFER.getDescription().equals(transferType)) {
             playerExchangeSwitch.setVisibility(View.GONE);
             plusPlayerText.setVisibility(View.GONE);
@@ -1056,7 +1057,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
         transferEditor.getNewTeamEdit().setText(transfer.getCurrentTeam());
     }
 
-    private void populatePlusPlayerSpinner(Spinner plusPlayerSpinnerEdit) {
+    private void populatePlusPlayerSpinner(Spinner plusPlayerSpinnerEdit, String plusPlayerName) {
 
         ftPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -1069,12 +1070,27 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                             var firstPlayer = new FirstTeamPlayer();
                             firstPlayer.setFullName("");
                             ftPlayerList.add(firstPlayer);
+
+                            // add the plus player as well
+                            FirstTeamPlayer plusPlayer = new FirstTeamPlayer();
+                            plusPlayer.setFullName(plusPlayerName);
+                            ftPlayerList.add(plusPlayer);
+
                             queryDocumentSnapshots.getDocuments().stream()
                                     .map(doc -> doc.toObject(FirstTeamPlayer.class))
                                     .forEach(ftPlayerList::add);
+
                             ArrayAdapter<FirstTeamPlayer> playerAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, ftPlayerList);
                             playerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             plusPlayerSpinnerEdit.setAdapter(playerAdapter);
+
+                            int selectedIndex = IntStream.range(0, ftPlayerList.size())
+                                    .filter(i -> ftPlayerList.get(i).getFullName().equals(plusPlayerName))
+                                    .findFirst()
+                                    .orElse(0);
+
+                            plusPlayerSpinnerEdit.setSelection(selectedIndex);
+
                         }
                     }
                 });
