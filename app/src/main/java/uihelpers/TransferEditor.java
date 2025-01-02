@@ -198,6 +198,8 @@ public class TransferEditor {
         plusPlayerSpinnerEdit.setSelection(transferAdapter.getPosition(transfer.getPlusPlayerName()));
         Log.d("RAFI", "transfer.getExchangePlayerName(): " + transfer.getExchangePlayerName());
         playerExchangeSwitch.setChecked(transfer.getExchangePlayerName()!=null);
+        isExchangePlayer = transfer.getExchangePlayerName() != null;
+        isPlusPlayer = transfer.getPlusPlayerName() != null;
     }
 
     public void setAllFieldsVisible() {
