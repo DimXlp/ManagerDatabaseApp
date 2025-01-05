@@ -703,9 +703,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                 ftPlayer.setManagerId(managerId);
                                                 ftPlayer.setUserId(UserApi.getInstance().getUserId());
                                                 ftPlayer.setTimeAdded(new Timestamp(new Date()));
-                                                ftPlayer.setLoanPlayer(typeOfTransferSpinner.getSelectedItem().toString().equals(LoanEnum.SHORT_TERM) ||
-                                                        typeOfTransferSpinner.getSelectedItem().toString().equals(LoanEnum.ONE_YEAR) ||
-                                                        typeOfTransferSpinner.getSelectedItem().toString().equals(LoanEnum.TWO_YEAR));
+                                                ftPlayer.setLoanPlayer(isLoan);
 
                                                 transfersColRef.add(newTransfer);
 
