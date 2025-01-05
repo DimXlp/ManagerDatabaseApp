@@ -354,8 +354,13 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
         }
 
         private void editTransfer(final Transfer transfer) {
-            if (transfer.getPlusPlayerName() != null || transfer.getExchangePlayerName() != null) {
-                Toast.makeText(context, "Editing transfers with plus players or exchange players is not yet supported.", Toast.LENGTH_LONG).show();
+            if (transfer.getPlusPlayerName() != null && !transfer.getPlusPlayerName().isEmpty()) {
+                Toast.makeText(context, "Editing transfers with former players involved is not yet supported.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if (transfer.getExchangePlayerName() != null && !transfer.getExchangePlayerName().isEmpty()) {
+                Toast.makeText(context, "Editing transfers with exchange players is not yet supported.", Toast.LENGTH_LONG).show();
                 return;
             }
 
