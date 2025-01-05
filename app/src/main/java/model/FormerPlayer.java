@@ -9,16 +9,18 @@ public class FormerPlayer extends Player {
     private String yearScouted;
     private String yearLeft;
     private String team;
+    private long firstTeamId;
 
     public FormerPlayer() {
     }
 
-    public FormerPlayer(long id, String firstName, String lastName, String fullName, String position, int number, String nationality, int overall, int potentialLow, int potentialHigh, String yearSigned, String yearScouted, String yearLeft, long managerId, String userId, Timestamp timeAdded) {
+    public FormerPlayer(long id, String firstName, String lastName, String fullName, String position, int number, String nationality, int overall, int potentialLow, int potentialHigh, String yearSigned, String yearScouted, String yearLeft, long managerId, String userId, Timestamp timeAdded, long firstTeamId) {
         super(id, firstName, lastName, fullName, position, nationality, overall, potentialLow, potentialHigh, managerId, userId, timeAdded);
         this.number = number;
         this.yearSigned = yearSigned;
         this.yearScouted = yearScouted;
         this.yearLeft = yearLeft;
+        this.firstTeamId = firstTeamId;
     }
 
     public int getNumber() {
@@ -59,5 +61,13 @@ public class FormerPlayer extends Player {
 
     public void setTeam(String team) {
         this.team = team;
+    }
+
+    public long getFirstTeamId() {
+        return firstTeamId;
+    }
+
+    public void setFirstTeamId(long firstTeamId) {
+        this.firstTeamId = firstTeamId;
     }
 }

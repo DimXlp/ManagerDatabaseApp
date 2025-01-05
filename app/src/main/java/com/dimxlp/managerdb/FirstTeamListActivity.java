@@ -127,7 +127,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
             managerId = extras.getLong("managerId");
             team = extras.getString("team");
             barYear = extras.getString("barYear");
-            Log.d("RAFI", "onCreate: currentYear = " + currentYear);
+//            Log.d("RAFI", "onCreate: currentYear = " + currentYear);
         }
 
         toolbar = findViewById(R.id.toolbar);
@@ -527,7 +527,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
                         if (!queryDocumentSnapshots.isEmpty()) {
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 FirstTeamPlayer player = doc.toObject(FirstTeamPlayer.class);
-                                Log.d("RAFI", "onStart: currentYear = " + currentYear);
+//                                Log.d("RAFI", "onStart: currentYear = " + currentYear);
                                 if (barYear == null || barYear.equals(minYearText)) {
                                     if (player.getYearSigned().equals(minYearText)) {
                                         playerList.add(player);

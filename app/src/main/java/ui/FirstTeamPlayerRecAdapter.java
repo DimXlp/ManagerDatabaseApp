@@ -548,6 +548,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 fmPlayer.setManagerId(managerId);
                                                 fmPlayer.setUserId(UserApi.getInstance().getUserId());
                                                 fmPlayer.setTimeAdded(new Timestamp(new Date()));
+                                                fmPlayer.setFirstTeamId(player.getId());
 
                                                 fmPlayersReference.add(fmPlayer)
                                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -812,6 +813,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 fmPlayer.setManagerId(managerId);
                                                 fmPlayer.setUserId(UserApi.getInstance().getUserId());
                                                 fmPlayer.setTimeAdded(new Timestamp(new Date()));
+                                                fmPlayer.setFirstTeamId(player.getId());
 
                                                 fmPlayersReference.add(fmPlayer)
                                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {

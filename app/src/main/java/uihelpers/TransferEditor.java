@@ -41,6 +41,7 @@ public class TransferEditor {
     private final Button editTransferButton;
     private boolean isPlusPlayer = false;
     private boolean isExchangePlayer = false;
+    private String plusPlayerName = null;
 
     public TransferEditor(View view) {
         this.firstNameEdit = view.findViewById(R.id.first_name_trf_edit);
@@ -178,6 +179,14 @@ public class TransferEditor {
         this.isExchangePlayer = exchangePlayer;
     }
 
+    public String getPlusPlayerName() {
+        return plusPlayerName;
+    }
+
+    public void setPlusPlayerName(String plusPlayerName) {
+        this.plusPlayerName = plusPlayerName;
+    }
+
     public void setTransferEditorFields(Transfer transfer, ArrayAdapter<CharSequence> yearAdapter, ArrayAdapter<CharSequence> positionAdapter, ArrayAdapter<String> transferAdapter) {
         firstNameEdit.setText(transfer.getFirstName());
         lastNameEdit.setText(transfer.getLastName());
@@ -200,6 +209,7 @@ public class TransferEditor {
         playerExchangeSwitch.setChecked(transfer.getExchangePlayerName()!=null);
         isExchangePlayer = transfer.getExchangePlayerName() != null;
         isPlusPlayer = transfer.getPlusPlayerName() != null;
+        plusPlayerName = transfer.getPlusPlayerName();
     }
 
     public void setAllFieldsVisible() {
