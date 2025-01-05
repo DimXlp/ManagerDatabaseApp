@@ -206,6 +206,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         private Spinner loanSpinner;
         private Button loanPlayerButton;
         private TextInputLayout transferFeeTil;
+        private Button setTerminationYearButton;
         private boolean hasExchangePlayer = false;
 
         public ViewHolder(@NonNull View itemView, final Context ctx) {
@@ -452,12 +453,13 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     View view = LayoutInflater.from(context).inflate(R.layout.year_left_popup, null);
 
                                     yearLeft = view.findViewById(R.id.year_left_spinner_left);
+                                    setTerminationYearButton = view.findViewById(R.id.set_year_left_button);
 
                                     ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(context, R.array.years_array, android.R.layout.simple_spinner_item);
                                     yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                     yearLeft.setAdapter(yearAdapter);
 
-                                    terminateLoanButton.setOnClickListener(new View.OnClickListener() {
+                                    setTerminationYearButton.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
                                             if (!yearLeft.getSelectedItem().toString().equals("0")) {
