@@ -427,6 +427,7 @@ public class TransferDealsActivity extends AppCompatActivity {
                                     maxId++;
                                 }
                             }
+                            refreshTransfers();
                         }
                     }
                 });
@@ -468,6 +469,23 @@ public class TransferDealsActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void refreshTransfers() {
+        transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                .whereEqualTo("managerId", managerId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    transferList.clear();
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        Transfer transfer = doc.toObject(Transfer.class);
+                        transferList.add(transfer);
+                    }
+                    Collections.sort(transferList, Comparator.comparing(Transfer::getTimeAdded));
+                    transferDealsRecAdapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e -> Log.e("RAFI", "Failed to refresh transfer list", e));
+    }
+
 
     @Override
     protected void onResume() {

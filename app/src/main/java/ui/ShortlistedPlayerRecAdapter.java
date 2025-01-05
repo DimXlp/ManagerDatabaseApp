@@ -679,6 +679,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                                         fmPlayer.setManagerId(managerId);
                                                                         fmPlayer.setUserId(UserApi.getInstance().getUserId());
                                                                         fmPlayer.setTimeAdded(new Timestamp(new Date()));
+                                                                        fmPlayer.setFirstTeamId(ftPlayerId);
                                                                         frmPlayersColRef.add(fmPlayer);
 
                                                                         ftPlayerDocRef.delete();

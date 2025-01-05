@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.dimxlp.managerdb.R;
 import com.dimxlp.managerdb.TransferDealsActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
@@ -36,6 +37,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -352,6 +354,11 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
         }
 
         private void editTransfer(final Transfer transfer) {
+            if (transfer.getPlusPlayerName() != null || transfer.getExchangePlayerName() != null) {
+                Toast.makeText(context, "Editing transfers with plus players or exchange players is not yet supported.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
             builder = new AlertDialog.Builder(context);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.edit_transfer_deal_popup, null);
@@ -370,6 +377,8 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
             boolean wasExchangeTransfer = transferEditor.getPlayerExchangeSwitch().isChecked();
             boolean wasPlusPlayerTransfer = !transferEditor.getPlusPlayerSpinnerEdit().toString().isEmpty();
+
+            Log.d("RAFI", "wasPlusPlayerTransfer = " + wasPlusPlayerTransfer);
 
             transferEditor.getTypeOfTransferSpinnerEdit().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -396,13 +405,19 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                 }
             });
 
+            String initialPlusPlayerName = transfer.getPlusPlayerName();
+//            Log.d("RAFI", "initialPlusPlayerName = " + initialPlusPlayerName);
+            long initialPlusPlayerId = transfer.getPlusPlayerId();
+
             transferEditor.getPlusPlayerSpinnerEdit().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     FirstTeamPlayer player = (FirstTeamPlayer) parent.getSelectedItem();
                     transferEditor.setPlayerSpinnerId(player.getId());
                     transferEditor.setIsPlusPlayer(position > 0);
+                    transferEditor.setPlusPlayerName(player.getFullName());
                     Log.d("RAFI", "transferEditor.isPlusPlayer() = " + transferEditor.isPlusPlayer());
+//                    Log.d("RAFI", "plus player name = " + transferEditor.getPlusPlayerName());
                 }
 
                 @Override
@@ -411,6 +426,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                 }
             });
 
+            Log.d("RAFI", "Before If");
             transferEditor.getEditTransferButton().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -423,40 +439,60 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                         && !transferEditor.getNewTeamEdit().getText().toString().isEmpty()
                         && !transferEditor.getYearEdit().getSelectedItem().toString().equals("0")) {
 
+                        Log.d("RAFI", "Before inside transferColRef");
                         transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
                                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        Log.d("RAFI", "Inside onComplete");
                                         if (task.isSuccessful()) {
-                                            List<DocumentSnapshot> doc =  task.getResult().getDocuments();
+                                            List<DocumentSnapshot> doc = task.getResult().getDocuments();
+                                            Log.d("RAFI", "Query returned " + doc.size() + " documents.");
                                             DocumentReference documentReference = null;
-                                            for (DocumentSnapshot ds: doc) {
+                                            for (DocumentSnapshot ds : doc) {
                                                 Transfer editedTransfer = ds.toObject(Transfer.class);
+                                                Log.d("RAFI", "Checking document: " + editedTransfer.getId());
+                                                Log.d("RAFI", "Transfer id: " + transfer.getId());
                                                 if (editedTransfer.getId() == transfer.getId()) {
                                                     documentReference = transfersColRef.document(ds.getId());
+                                                    break;
                                                 }
                                             }
-
-                                            assert documentReference != null;
+                                            if (documentReference == null) {
+                                                Log.e("RAFI", "No matching document found for transfer ID: " + transfer.getId());
+                                                Toast.makeText(context, "Failed to find the transfer document.", Toast.LENGTH_LONG).show();
+                                                return;
+                                            }
                                             assignNewTransferValues(transferEditor, documentReference);
+                                            Log.d("RAFI", "After assigning");
 
                                             Log.d("RAFI", "PRINTING!!!!");
 
                                             if (transferEditor.isExchangePlayer()) {
                                                 Log.d("RAFI", "isExchangePlayer!!!!");
                                                 addExchangePlayer(documentReference);
-                                            } else if (transferEditor.isPlusPlayer()) {
-                                                Log.d("RAFI", "if transferEditor.isPlusPlayer() = " + transferEditor.isPlusPlayer());
-                                                Log.d("RAFI", "isPlusPlayer!!!!");
-                                                letPlayerLeave(transferEditor);
                                             } else if (wasExchangeTransfer) {
                                                 Log.d("RAFI", "wasExchangeTransfer!!!!");
                                                 if (transferEditor.isExchangePlayer()) {
                                                     askToChangeExchangePlayer(documentReference, transfer);
                                                 } else {
                                                     askToRemoveExchangePlayer(transfer, transferEditor);
+                                                }
+                                            } else if (wasPlusPlayerTransfer) {
+                                                Log.d("RAFI", "wasPlusPlayerTransfer!!!!");
+                                                if (transferEditor.isPlusPlayer()) {
+                                                    Log.d("RAFI", "IsPlusPlayer");
+                                                    Log.d("RAFI", "initialPlusPlayerName = " + initialPlusPlayerName);
+                                                    Log.d("RAFI", "plus player name = " + transferEditor.getPlusPlayerName());
+                                                    if (!initialPlusPlayerName.equals(transferEditor.getPlusPlayerName())) {
+                                                        Log.d("RAFI", "not equal");
+                                                        askToChangePlusPlayer(transferEditor, initialPlusPlayerId, transfer);
+                                                    }
+                                                } else {
+                                                    Log.d("RAFI", "not a plus player anymore");
+                                                    askToRejoinPlusPlayer(initialPlusPlayerId, transfer, transferEditor);
                                                 }
                                             } else {
                                                 Log.d("RAFI", "LAST ELSE");
@@ -468,6 +504,13 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                                 Toast.makeText(context, "Transfer updated!", Toast.LENGTH_LONG).show();
                                             }
                                         }
+                                        Log.d("RAFI", "Not successful");
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.d("RAFI", "FAILURE!!!!");
                                     }
                                 });
                     } else {
@@ -478,6 +521,198 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                 }
             });
         }
+    }
+
+    private void askToRejoinPlusPlayer(long initialPlusPlayerId, Transfer transfer, TransferEditor transferEditor) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("This action will result in the former player who was part of this transfer rejoining the first team. Do you want to continue?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        rejoinFormerPlayer(initialPlusPlayerId, transfer, new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+
+                            }
+                        });
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+    private void askToChangePlusPlayer(TransferEditor transferEditor, long initialPlusPlayerId, Transfer transfer) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("Do you want to change the player that was part of this transfer?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    Log.d("RAFI", "Before leaving");
+
+                    // Move the current plus player to FormerPlayers
+                    letPlayerLeave(transferEditor, new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d("RAFI", "Player successfully moved to FormerPlayers.");
+
+                            // Rejoin the former plus player
+                            rejoinFormerPlayer(initialPlusPlayerId, transfer, new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d("RAFI", "Former player successfully rejoined.");
+
+                                    // Update the transfer with the new plus player
+                                    updateTransferDocument(transfer, transferEditor);
+                                }
+                            });
+                        }
+                    });
+                })
+                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private void rejoinFormerPlayer(long initialPlusPlayerId, Transfer transfer, OnSuccessListener<Void> onSuccessListener) {
+        Log.d("RAFI", "Querying FormerPlayers with firstTeamId: " + initialPlusPlayerId);
+
+        fmPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                .whereEqualTo("managerId", managerId)
+                .whereEqualTo("firstTeamId", initialPlusPlayerId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    Log.d("RAFI", "Query returned " + queryDocumentSnapshots.size() + " documents.");
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentSnapshot latestDocument = queryDocumentSnapshots.getDocuments()
+                                .stream()
+                                .max((d1, d2) -> {
+                                    Timestamp t1 = d1.toObject(FormerPlayer.class).getTimeAdded();
+                                    Timestamp t2 = d2.toObject(FormerPlayer.class).getTimeAdded();
+                                    return t1.compareTo(t2);
+                                }).orElse(null);
+
+                        if (latestDocument != null) {
+                            processFormerPlayerDocument(latestDocument, transfer, onSuccessListener);
+                        } else {
+                            Log.e("RAFI", "No valid FormerPlayer document found.");
+                            onSuccessListener.onSuccess(null);
+                        }
+                    } else {
+                        Log.e("RAFI", "No matching player found in FormerPlayers.");
+                        onSuccessListener.onSuccess(null);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("RAFI", "Failed to query FormerPlayers.", e);
+                    onSuccessListener.onSuccess(null);
+                });
+    }
+
+    private void processFormerPlayerDocument(DocumentSnapshot document, Transfer transfer, OnSuccessListener<Void> onSuccessListener) {
+        FormerPlayer formerPlayer = document.toObject(FormerPlayer.class);
+        if (formerPlayer != null) {
+            Log.d("RAFI", "Processing FormerPlayer: " + formerPlayer.getFullName());
+
+            // Remove from FormerPlayers
+            fmPlayersColRef.document(document.getId()).delete()
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("RAFI", "Former player deleted from FormerPlayers.");
+
+                        // Add the player back to FirstTeamPlayers
+                        addRejoinedPlayerToFirstTeam(formerPlayer, transfer, onSuccessListener);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("RAFI", "Failed to delete FormerPlayer.", e);
+                        onSuccessListener.onSuccess(null);
+                    });
+        } else {
+            Log.e("RAFI", "Failed to convert document to FormerPlayer.");
+            onSuccessListener.onSuccess(null);
+        }
+    }
+
+    private void addRejoinedPlayerToFirstTeam(FormerPlayer formerPlayer, Transfer transfer, OnSuccessListener<Void> onSuccessListener) {
+        ftPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                .whereEqualTo("managerId", managerId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    long maxId = queryDocumentSnapshots.getDocuments().stream()
+                            .map(doc -> doc.toObject(FirstTeamPlayer.class))
+                            .mapToLong(FirstTeamPlayer::getId)
+                            .max()
+                            .orElse(0);
+
+                    FirstTeamPlayer rejoinedPlayer = new FirstTeamPlayer();
+                    rejoinedPlayer.setId(maxId + 1);
+                    rejoinedPlayer.setFirstName(formerPlayer.getFirstName());
+                    rejoinedPlayer.setLastName(formerPlayer.getLastName());
+                    rejoinedPlayer.setFullName(formerPlayer.getFullName());
+                    rejoinedPlayer.setPosition(formerPlayer.getPosition());
+                    rejoinedPlayer.setNumber(formerPlayer.getNumber());
+                    rejoinedPlayer.setNationality(formerPlayer.getNationality());
+                    rejoinedPlayer.setOverall(formerPlayer.getOverall());
+                    rejoinedPlayer.setPotentialLow(formerPlayer.getPotentialLow());
+                    rejoinedPlayer.setPotentialHigh(formerPlayer.getPotentialHigh());
+                    rejoinedPlayer.setYearSigned(formerPlayer.getYearSigned());
+                    rejoinedPlayer.setYearScouted(formerPlayer.getYearScouted());
+                    rejoinedPlayer.setTeam(team);
+                    rejoinedPlayer.setUserId(UserApi.getInstance().getUserId());
+                    rejoinedPlayer.setManagerId(managerId);
+                    rejoinedPlayer.setTimeAdded(new Timestamp(new Date()));
+
+                    Log.d("RAFI", "Adding rejoinedPlayer: " + rejoinedPlayer.getFullName());
+
+                    ftPlayersColRef.add(rejoinedPlayer)
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d("RAFI", "Player successfully rejoined First Team.");
+                                onSuccessListener.onSuccess(null);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("RAFI", "Failed to rejoin player to First Team.", e);
+                                onSuccessListener.onSuccess(null);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("RAFI", "Failed to fetch max ID from FirstTeamPlayers.", e);
+                    onSuccessListener.onSuccess(null);
+                });
+    }
+
+    private void updateTransferDocument(Transfer transfer, TransferEditor transferEditor) {
+        transfersColRef.whereEqualTo("id", transfer.getId())
+                .whereEqualTo("managerId", managerId)
+                .whereEqualTo("userId", UserApi.getInstance().getUserId())
+                .get()
+                .addOnSuccessListener(transferSnapshots -> {
+                    if (!transferSnapshots.isEmpty()) {
+                        for (DocumentSnapshot doc : transferSnapshots) {
+                            DocumentReference transferDocRef = transfersColRef.document(doc.getId());
+                            transferDocRef.update(
+                                    "plusPlayerName", transferEditor.getPlusPlayerSpinnerEdit().getSelectedItem().toString().trim(),
+                                    "plusPlayerId", transferEditor.getPlayerSpinnerId(),
+                                    "hasPlusPlayer", true
+                            ).addOnSuccessListener(aVoid -> {
+                                Log.d("RAFI", "Transfer successfully updated.");
+
+                                 // Navigate back to the TransferDealsActivity
+                                Intent intent = new Intent(context, TransferDealsActivity.class);
+                                intent.putExtra("managerId", managerId);
+                                intent.putExtra("team", team);
+                                context.startActivity(intent);
+                                ((Activity) context).finish();
+                            }).addOnFailureListener(e -> {
+                                Log.e("RAFI", "Failed to update transfer document.", e);
+                            });
+                        }
+                    } else {
+                        Log.e("RAFI", "Transfer document not found.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("RAFI", "Failed to query transfer document.", e);
+                });
     }
 
     private void askToRemoveExchangePlayer(Transfer transfer, TransferEditor transferEditor) {
@@ -564,7 +799,6 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
         builder = new AlertDialog.Builder(context);
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.create_first_team_player_popup, null);
-
         builder.setView(view);
         builder.setCancelable(false);
 
@@ -697,63 +931,77 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
     }
 
-    private void letPlayerLeave(TransferEditor transferEditor) {
+    private void letPlayerLeave(TransferEditor transferEditor, OnSuccessListener<Void> onSuccessListener) {
         ftPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
+                .whereEqualTo("id", transferEditor.getPlayerSpinnerId())
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            List<DocumentSnapshot> doc = task.getResult().getDocuments();
-                            DocumentReference documentReference = null;
-                            for (DocumentSnapshot ds : doc) {
-                                FirstTeamPlayer player = ds.toObject(FirstTeamPlayer.class);
-                                assert player != null;
-                                if (player.getId() == transferEditor.getPlayerSpinnerId()) {
-                                    documentReference = ftPlayersColRef.document(ds.getId());
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        for (DocumentSnapshot ds : task.getResult().getDocuments()) {
+                            FirstTeamPlayer player = ds.toObject(FirstTeamPlayer.class);
+                            if (player != null) {
+                                DocumentReference documentReference = ftPlayersColRef.document(ds.getId());
 
-                                    FormerPlayer fmPlayer = new FormerPlayer();
-                                    fmPlayer.setId(0);
-                                    fmPlayer.setFirstName(player.getFirstName());
-                                    fmPlayer.setLastName(player.getLastName());
-                                    fmPlayer.setFullName(player.getFullName());
-                                    fmPlayer.setPosition(player.getPosition());
-                                    fmPlayer.setNumber(player.getNumber());
-                                    fmPlayer.setNationality(player.getNationality());
-                                    fmPlayer.setOverall(player.getOverall());
-                                    fmPlayer.setPotentialLow(player.getPotentialLow());
-                                    fmPlayer.setPotentialHigh(player.getPotentialHigh());
-                                    fmPlayer.setYearSigned(player.getYearSigned());
-                                    fmPlayer.setYearScouted(player.getYearScouted());
-                                    fmPlayer.setYearLeft(transferEditor.getYearEdit().getSelectedItem().toString().trim());
-                                    fmPlayer.setManagerId(managerId);
-                                    fmPlayer.setUserId(UserApi.getInstance().getUserId());
-                                    fmPlayer.setTimeAdded(new Timestamp(new Date()));
-
-                                    fmPlayersColRef.add(fmPlayer);
-                                }
-                            }
-
-                            assert documentReference != null;
-                            documentReference.delete()
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()) {
-                                                Intent intent = new Intent(context, TransferDealsActivity.class);
-                                                intent.putExtra("managerId", managerId);
-                                                intent.putExtra("team", team);
-                                                context.startActivity(intent);
-                                                ((Activity) context).finish();
-                                                Toast.makeText(context, "Transfer updated!", Toast.LENGTH_LONG).show();
+                                // Check for existing FormerPlayer documents with the same firstTeamId
+                                fmPlayersColRef.whereEqualTo("firstTeamId", player.getId())
+                                        .get()
+                                        .addOnSuccessListener(queryDocumentSnapshots -> {
+                                            // Delete all duplicates
+                                            for (DocumentSnapshot formerDoc : queryDocumentSnapshots) {
+                                                fmPlayersColRef.document(formerDoc.getId()).delete();
                                             }
-                                        }
-                                    });
+
+                                            // Add player to FormerPlayers
+                                            FormerPlayer fmPlayer = new FormerPlayer();
+                                            fmPlayer.setId(0);
+                                            fmPlayer.setFirstName(player.getFirstName());
+                                            fmPlayer.setLastName(player.getLastName());
+                                            fmPlayer.setFullName(player.getFullName());
+                                            fmPlayer.setPosition(player.getPosition());
+                                            fmPlayer.setNumber(player.getNumber());
+                                            fmPlayer.setNationality(player.getNationality());
+                                            fmPlayer.setOverall(player.getOverall());
+                                            fmPlayer.setPotentialLow(player.getPotentialLow());
+                                            fmPlayer.setPotentialHigh(player.getPotentialHigh());
+                                            fmPlayer.setYearSigned(player.getYearSigned());
+                                            fmPlayer.setYearScouted(player.getYearScouted());
+                                            fmPlayer.setYearLeft(transferEditor.getYearEdit().getSelectedItem().toString().trim());
+                                            fmPlayer.setManagerId(managerId);
+                                            fmPlayer.setUserId(UserApi.getInstance().getUserId());
+                                            fmPlayer.setTimeAdded(new Timestamp(new Date()));
+                                            fmPlayer.setFirstTeamId(player.getId());
+
+                                            fmPlayersColRef.add(fmPlayer)
+                                                    .addOnSuccessListener(aVoid -> {
+                                                        Log.d("RAFI", "Player moved to FormerPlayers: " + fmPlayer.getFullName());
+
+                                                        // Delete from FirstTeamPlayers
+                                                        documentReference.delete()
+                                                                .addOnSuccessListener(onSuccessListener)
+                                                                .addOnFailureListener(e -> {
+                                                                    Log.e("RAFI", "Failed to delete from FirstTeamPlayers", e);
+                                                                    onSuccessListener.onSuccess(null); // Proceed even if delete fails
+                                                                });
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.e("RAFI", "Failed to add player to FormerPlayers", e);
+                                                        onSuccessListener.onSuccess(null); // Proceed even if add fails
+                                                    });
+                                        });
                             }
+                        }
+                    } else {
+                        Log.d("RAFI", "No matching player found in FirstTeamPlayers");
+                        onSuccessListener.onSuccess(null); // No matching player, but proceed
                     }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("RAFI", "Failed to query FirstTeamPlayers", e);
+                    onSuccessListener.onSuccess(null); // Proceed even on query failure
                 });
     }
+
 
     private void addExchangePlayer(DocumentReference documentReference) {
         builder = new AlertDialog.Builder(context);
@@ -882,7 +1130,6 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                 assert player != null;
                                 if (player.getId() > maxFTPlayerId) {
                                     maxFTPlayerId = player.getId();
-                                    Log.d("RAFI", "maxFTPlayerId = " + maxFTPlayerId);
                                 }
                             }
                         }
@@ -906,7 +1153,9 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
         var yearEdit = transferEditor.getYearEdit().getSelectedItem().toString().trim();
         // TODO player exchange
 
-         if (PurchaseTransferEnum.FREE_TRANSFER.getDescription().equals(typeOfTransferSpinnerEdit)) {
+        Log.d("RAFI", "after variables");
+
+        if (PurchaseTransferEnum.FREE_TRANSFER.getDescription().equals(typeOfTransferSpinnerEdit)) {
             transferFeeEdit = "0";
             oldTeamEdit = "Free Agent";
         } else if (SaleTransferEnum.RELEASE.getDescription().equals(typeOfTransferSpinnerEdit)) {
@@ -920,8 +1169,9 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
              if (team.equals(oldTeamEdit)) {
                  wageEdit = "0";
              }
-         }
+        }
 
+        Log.d("RAFI", "before docRef update");
         documentReference.update("firstName", firstNameEdit,
                         "lastName", lastNameEdit,
                         "fullName", firstNameEdit + " " + lastNameEdit,
@@ -938,6 +1188,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                         "contractYears", (!contractYearsEdit.isEmpty()) ? Integer.parseInt(contractYearsEdit) : 0,
                         "year", (!yearEdit.equals("0")) ? yearEdit : "0",
                         "playerExchange", transferEditor.isExchangePlayer());
+        Log.d("RAFI", "after docRef update");
     }
 
     private void setEditTransferFields(Transfer transfer, TransferEditor transferEditor) {
