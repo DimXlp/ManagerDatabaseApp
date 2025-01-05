@@ -229,6 +229,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/new_team_til_trf_edit"
+                    android:hint="@string/transfer_fee"
                     app:boxStrokeColor="#D4AF37"
                     app:boxStrokeWidth="2dp">
 
@@ -238,8 +239,8 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/chivo"
                         android:inputType="number"
-                        android:textColor="@android:color/black"
-                        android:maxLines="1"/>
+                        android:maxLines="1"
+                        android:textColor="@android:color/black" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -267,6 +268,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/plus_player_text_trf_edit"
+                    android:hint="@string/wage"
                     app:boxStrokeColor="#D4AF37"
                     app:boxStrokeWidth="2dp">
 
