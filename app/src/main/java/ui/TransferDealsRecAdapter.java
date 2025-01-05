@@ -32,6 +32,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -367,6 +368,29 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
             builder = new AlertDialog.Builder(context);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.edit_transfer_deal_popup, null);
+
+            TextInputLayout feeInputLayout = view.findViewById(R.id.fee_til_trf_edit);
+            TextInputLayout wageInputLayout = view.findViewById(R.id.wage_til_trf_edit);
+
+            managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                    .whereEqualTo("id", managerId)
+                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            if (!queryDocumentSnapshots.isEmpty()) {
+                                List<Manager> managerList = new ArrayList<>();
+                                for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
+                                    Manager manager = doc.toObject(Manager.class);
+                                    managerList.add(manager);
+                                }
+                                Manager manager = managerList.get(0);
+                                String currency = manager.getCurrency();
+                                feeInputLayout.setHint("Transfer Fee (in " + currency + ")");
+                                wageInputLayout.setHint("Wage (in " + currency + ")");
+                            }
+                        }
+                    });
 
             TransferEditor transferEditor = new TransferEditor(view);
 
