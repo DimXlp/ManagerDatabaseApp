@@ -125,6 +125,10 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                 startActivity(homeIntent);
                 finish();
                 break;
+            case R.id.dr_manager_selection:
+                Intent managerSelectionIntent = new Intent(LoanedOutPlayersActivity.this, SelectManagerActivity.class);
+                startActivity(managerSelectionIntent);
+                break;
             case R.id.dr_profile:
                 Intent profileIntent = new Intent(LoanedOutPlayersActivity.this, ProfileActivity.class);
                 profileIntent.putExtra("managerId", managerId);

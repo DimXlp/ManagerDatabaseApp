@@ -5,6 +5,10 @@
             android:icon="@drawable/ic_home"
             android:title="@string/home" />
 
+        <item android:id="@+id/dr_manager_selection"
+            android:icon="@drawable/ic_whistle"
+            android:title="@string/select_manager" />
+
         <item android:id="@+id/dr_profile"
             android:icon="@drawable/ic_profile"
             android:title="@string/profile" />
@@ -35,7 +39,7 @@
 
         <item android:id="@+id/dr_logout"
             android:icon="@drawable/ic_logout"
-            android:title="Logout" />
+            android:title="@string/logout" />
     </group>
 
 </menu>
