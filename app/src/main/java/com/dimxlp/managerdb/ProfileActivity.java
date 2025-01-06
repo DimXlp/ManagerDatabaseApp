@@ -1,7 +1,6 @@
 package com.dimxlp.managerdb;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,7 +8,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,6 +22,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -51,7 +55,6 @@ import java.util.stream.Collectors;
 
 import enumeration.CurrencyEnum;
 import model.Manager;
-import ui.ManagerRecyclerAdapter;
 import util.UserApi;
 
 public class ProfileActivity extends AppCompatActivity {
@@ -115,6 +118,28 @@ public class ProfileActivity extends AppCompatActivity {
             team = extras.getString("team");
             Log.d("RAFI", "managerId = " + managerId + "\nteam = " + team);
         }
+
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this, initializationStatus -> {});
+
+        // Load Banner Ad
+        AdView profileBanner = findViewById(R.id.profile_banner);
+        AdRequest adBannerRequest = new AdRequest.Builder().build();
+        profileBanner.loadAd(adBannerRequest);
+
+        // Load Interstitial Ad
+        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        interstitialAd.show(ProfileActivity.this);
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        Log.d("RAFI", "Interstitial Ad failed to load: " + loadAdError.getMessage());
+                    }
+                });
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
