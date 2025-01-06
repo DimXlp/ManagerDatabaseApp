@@ -252,6 +252,10 @@ public class YouthTeamActivity extends AppCompatActivity {
                 startActivity(homeIntent);
                 finish();
                 break;
+            case R.id.dr_manager_selection:
+                Intent managerSelectionIntent = new Intent(YouthTeamActivity.this, SelectManagerActivity.class);
+                startActivity(managerSelectionIntent);
+                break;
             case R.id.dr_profile:
                 Intent profileIntent = new Intent(YouthTeamActivity.this, ProfileActivity.class);
                 profileIntent.putExtra("managerId", managerId);

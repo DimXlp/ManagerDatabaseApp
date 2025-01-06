@@ -5,6 +5,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -89,6 +90,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Spinner currencySpinnerEdit;
     private Button saveManagerButton;
     private Uri teamBadgeUriEdit;
+    private CardView selectManagerCard;
     private AlertDialog.Builder builder;
     private AlertDialog dialog;
 
@@ -170,6 +172,12 @@ public class ProfileActivity extends AppCompatActivity {
             public void onClick(View v) {
                 createPopupDialog();
             }
+        });
+
+        selectManagerCard = findViewById(R.id.select_manager_card);
+        selectManagerCard.setOnClickListener(v -> {
+            Intent intent = new Intent(ProfileActivity.this, SelectManagerActivity.class);
+            startActivity(intent);
         });
     }
 
@@ -346,6 +354,10 @@ public class ProfileActivity extends AppCompatActivity {
                 homeIntent.putExtra("team", team);
                 startActivity(homeIntent);
                 finish();
+                break;
+            case R.id.dr_manager_selection:
+                Intent managerSelectionIntent = new Intent(ProfileActivity.this, SelectManagerActivity.class);
+                startActivity(managerSelectionIntent);
                 break;
             case R.id.dr_profile:
                 break;

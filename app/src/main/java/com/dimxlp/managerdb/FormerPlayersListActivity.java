@@ -244,6 +244,10 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                 startActivity(homeIntent);
                 finish();
                 break;
+            case R.id.dr_manager_selection:
+                Intent managerSelectionIntent = new Intent(FormerPlayersListActivity.this, SelectManagerActivity.class);
+                startActivity(managerSelectionIntent);
+                break;
             case R.id.dr_profile:
                 Intent profileIntent = new Intent(FormerPlayersListActivity.this, ProfileActivity.class);
                 profileIntent.putExtra("managerId", managerId);
