@@ -9,11 +9,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -23,6 +20,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -153,6 +153,14 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         positionText = findViewById(R.id.position_text_shp);
         addPlayerFab = findViewById(R.id.add_new_sh_player_button);
         positionText.setText(PositionEnum.GK.getCategory());
+
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this, initializationStatus -> {});
+
+        // Load Banner Ads
+        AdView shortlistBanner = findViewById(R.id.shortlist_banner);
+        AdRequest adBannerRequest = new AdRequest.Builder().build();
+        shortlistBanner.loadAd(adBannerRequest);
 
         addPlayerFab.setOnClickListener(new View.OnClickListener() {
             @Override

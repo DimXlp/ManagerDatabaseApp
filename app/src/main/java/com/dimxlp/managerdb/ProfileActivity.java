@@ -23,12 +23,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -104,6 +107,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     private TextView managerNameHeader;
     private TextView teamHeader;
+    private NativeAd nativeAdTop, nativeAdBottom;
+    private NativeAdView nativeAdViewTop, nativeAdViewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,13 +126,12 @@ public class ProfileActivity extends AppCompatActivity {
             Log.d("RAFI", "managerId = " + managerId + "\nteam = " + team);
         }
 
-        // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        // Load Native Ads
+        nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
 
-        // Load Banner Ad
-        AdView profileBanner = findViewById(R.id.profile_banner);
-        AdRequest adBannerRequest = new AdRequest.Builder().build();
-        profileBanner.loadAd(adBannerRequest);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);  // Replace with top Ad Unit ID
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);  // Replace with bottom Ad Unit ID
 
         // Load Interstitial Ad
         InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
@@ -179,6 +183,65 @@ public class ProfileActivity extends AppCompatActivity {
             Intent intent = new Intent(ProfileActivity.this, SelectManagerActivity.class);
             startActivity(intent);
         });
+    }
+
+    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+                .forNativeAd(ad -> {
+                    if (isDestroyed()) {
+                        ad.destroy();
+                        return;
+                    }
+                    if (nativeAdView == nativeAdViewTop) {
+                        nativeAdTop = ad;
+                    } else {
+                        nativeAdBottom = ad;
+                    }
+                    populateNativeAdView(ad, nativeAdView);
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Log.e("RAFI", "Native ad failed to load: " + adError.getMessage());
+                    }
+                })
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+        // Dynamically assign IDs based on the nativeAdView
+        int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
+        int bodyId = nativeAdView == nativeAdViewTop ? R.id.ad_body_top : R.id.ad_body_bottom;
+        int callToActionId = nativeAdView == nativeAdViewTop ? R.id.ad_call_to_action_top : R.id.ad_call_to_action_bottom;
+
+        // Set views for the NativeAdView
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
+        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+
+        // Populate the Headline
+        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
+
+        // Populate the Body
+        if (nativeAd.getBody() != null) {
+            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
+            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getBodyView().setVisibility(View.GONE);
+        }
+
+        // Populate the Call-to-Action
+        if (nativeAd.getCallToAction() != null) {
+            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
+            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getCallToActionView().setVisibility(View.GONE);
+        }
+
+        // Bind native ad to the view
+        nativeAdView.setNativeAd(nativeAd);
     }
 
     private void createPopupDialog() {
@@ -546,5 +609,12 @@ public class ProfileActivity extends AppCompatActivity {
                     }
                 });
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (nativeAdTop != null) nativeAdTop.destroy();
+        if (nativeAdBottom != null) nativeAdBottom.destroy();
+        super.onDestroy();
     }
 }

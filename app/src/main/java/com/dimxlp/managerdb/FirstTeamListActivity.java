@@ -23,6 +23,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -152,6 +155,14 @@ public class FirstTeamListActivity extends AppCompatActivity {
         }
         managerNameHeader = headerLayout.findViewById(R.id.manager_name_header);
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
+
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this, initializationStatus -> {});
+
+        // Load Banner Ads
+        AdView firstTeamListBanner = findViewById(R.id.first_team_list_banner);
+        AdRequest adBannerRequest = new AdRequest.Builder().build();
+        firstTeamListBanner.loadAd(adBannerRequest);
 
         slideLeft = AnimationUtils.loadAnimation(FirstTeamListActivity.this, R.anim.slide_left);
         slideRight = AnimationUtils.loadAnimation(FirstTeamListActivity.this, R.anim.slide_right);

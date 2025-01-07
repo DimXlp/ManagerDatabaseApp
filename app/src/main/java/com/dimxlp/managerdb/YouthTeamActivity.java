@@ -20,6 +20,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdLoader;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -80,6 +88,9 @@ public class YouthTeamActivity extends AppCompatActivity {
 
     private TextView managerNameHeader;
     private TextView teamHeader;
+    private NativeAd nativeAd;
+    private NativeAd nativeAdTop, nativeAdBottom;
+    private NativeAdView nativeAdViewTop, nativeAdViewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +130,29 @@ public class YouthTeamActivity extends AppCompatActivity {
         managerNameHeader = headerLayout.findViewById(R.id.manager_name_header);
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
 
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this, initializationStatus -> {});
+
+        // Load Native Ads
+        nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);  // Replace with top ad unit ID
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);  // Replace with bottom ad unit ID
+
+        // Load Interstitial Ad
+        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        interstitialAd.show(YouthTeamActivity.this);
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        Log.d("RAFI", "Interstitial Ad failed to load: " + loadAdError.getMessage());
+                    }
+                });
+
         addPlayerFab = findViewById(R.id.add_player_button_yt);
         addPlayerText = findViewById(R.id.add_player_text_yt);
 
@@ -129,6 +163,64 @@ public class YouthTeamActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+                .forNativeAd(ad -> {
+                    if (isDestroyed()) {
+                        ad.destroy();
+                        return;
+                    }
+                    if (nativeAdView == nativeAdViewTop) {
+                        nativeAdTop = ad;
+                    } else {
+                        nativeAdBottom = ad;
+                    }
+                    populateNativeAdView(ad, nativeAdView);
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Log.e("RAFI", "Native ad failed to load: " + adError.getMessage());
+                    }
+                })
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+        // Check which NativeAdView is being populated
+        boolean isTopAd = nativeAdView == nativeAdViewTop;
+
+        // Dynamically set the correct child IDs
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(isTopAd ? R.id.ad_headline_top : R.id.ad_headline_bottom));
+        nativeAdView.setBodyView(nativeAdView.findViewById(isTopAd ? R.id.ad_body_top : R.id.ad_body_bottom));
+        nativeAdView.setCallToActionView(nativeAdView.findViewById(isTopAd ? R.id.ad_call_to_action_top : R.id.ad_call_to_action_bottom));
+
+        // Populate the Headline
+        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
+
+        // Populate the Body
+        if (nativeAd.getBody() != null) {
+            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
+            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getBodyView().setVisibility(View.GONE);
+        }
+
+        // Populate the Call-to-Action
+        if (nativeAd.getCallToAction() != null) {
+            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
+            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getCallToActionView().setVisibility(View.GONE);
+        }
+
+        // Bind the Native Ad object to the NativeAdView
+        nativeAdView.setNativeAd(nativeAd);
+    }
+
 
     private void createPopupDialog() {
         builder = new AlertDialog.Builder(this);
@@ -395,6 +487,17 @@ public class YouthTeamActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (nativeAdTop != null) {
+            nativeAdTop.destroy();
+        }
+        if (nativeAdBottom != null) {
+            nativeAdBottom.destroy();
+        }
+        super.onDestroy();
     }
 
     public static class SpinnerActivity extends FirstTeamActivity implements AdapterView.OnItemSelectedListener {

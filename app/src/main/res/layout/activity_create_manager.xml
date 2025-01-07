@@ -1,175 +1,263 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
+    android:background="@android:color/white"
     tools:context=".CreateManagerActivity">
 
-    <RelativeLayout
+    <!-- Top Native Ad -->
+    <com.google.android.gms.ads.nativead.NativeAdView
+        android:id="@+id/native_ad_view_top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:padding="16dp">
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <ProgressBar
-            android:id="@+id/create_progress_bar"
-            style="?android:progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_centerHorizontal="true"/>
-
+        <!-- Ad Headline -->
         <TextView
-            android:id="@+id/create_manager_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:fontFamily="@font/chivo"
-            android:text="@string/create_manager_text"
-            android:textAlignment="center"
-            android:textColor="@android:color/black"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/first_name_til_create"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/create_manager_title"
-            android:layout_marginTop="8dp">
-
-            <EditText
-                android:id="@+id/first_name_create"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
-                android:hint="@string/first_name_text"
-                android:inputType="textPersonName"
-                android:maxLines="1"
-                android:textColor="@android:color/black"
-                android:textColorHint="@color/colorPrimaryDark"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/last_name_til_create"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/first_name_til_create"
-            android:layout_marginTop="8dp">
-
-            <EditText
-                android:id="@+id/last_name_create"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
-                android:hint="@string/last_name_text"
-                android:inputType="textPersonName"
-                android:maxLines="1"
-                android:textColor="@android:color/black"
-                android:textColorHint="@color/colorPrimaryDark"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/nationality_til_create"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/last_name_til_create"
-            android:layout_marginTop="8dp">
-
-            <EditText
-                android:id="@+id/nationality_create"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
-                android:hint="@string/nationality_text"
-                android:inputType="textPersonName"
-                android:maxLines="1"
-                android:textColor="@android:color/black"
-                android:textColorHint="@color/colorPrimaryDark"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/team_til_create"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/nationality_til_create"
-            android:layout_marginTop="8dp">
-
-            <EditText
-                android:id="@+id/team_create"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
-                android:hint="@string/team_text"
-                android:inputType="textPersonName"
-                android:maxLines="1"
-                android:textColor="@android:color/black"
-                android:textColorHint="@color/colorPrimaryDark"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <ImageView
-            android:id="@+id/team_badge_image_create"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@android:drawable/ic_menu_upload"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@+id/team_til_create"
-            android:layout_marginTop="16dp"/>
-
-        <Button
-            android:id="@+id/upload_button_create"
+            android:id="@+id/ad_headline_top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/team_badge_image_create"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/outline_round_button"
-            android:backgroundTint="@android:color/white"
-            android:fontFamily="@font/chivo"
-            android:text="Upload Badge"
-            android:textColor="@color/colorAccent"
-            android:textStyle="bold" />
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
 
-        <!-- Position the LinearLayout below the button -->
-        <LinearLayout
+        <!-- Ad Body -->
+        <TextView
+            android:id="@+id/ad_body_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray" />
+
+        <!-- Call-to-Action Button -->
+        <Button
+            android:id="@+id/ad_call_to_action_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/transparent"
+            android:textColor="@color/colorAccent"
+            android:padding="4dp"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </com.google.android.gms.ads.nativead.NativeAdView>
+
+    <!-- Scrollable Content -->
+    <ScrollView
+        android:id="@+id/scrollViewContent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/native_ad_view_top"
+        app:layout_constraintBottom_toTopOf="@id/native_ad_view_bottom"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/upload_button_create"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
+            android:padding="16dp">
+
+            <ProgressBar
+                android:id="@+id/create_progress_bar"
+                style="?android:progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_centerHorizontal="true" />
 
             <TextView
-                android:id="@+id/currency_title_create"
-                android:layout_width="wrap_content"
+                android:id="@+id/create_manager_title"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
                 android:fontFamily="@font/chivo"
-                android:text="Currency: "
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="25sp" />
+                android:text="@string/create_manager_text"
+                android:textAlignment="center"
+                android:textColor="@android:color/black"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp" />
 
-            <Spinner
-                android:id="@+id/currency_spinner_create"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/first_name_til_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/create_manager_title"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/first_name_create"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:hint="@string/first_name_text"
+                    android:inputType="textPersonName"
+                    android:maxLines="1"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@color/colorPrimaryDark"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/last_name_til_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/first_name_til_create"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/last_name_create"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:hint="@string/last_name_text"
+                    android:inputType="textPersonName"
+                    android:maxLines="1"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@color/colorPrimaryDark"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/nationality_til_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/last_name_til_create"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/nationality_create"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:hint="@string/nationality_text"
+                    android:inputType="textPersonName"
+                    android:maxLines="1"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@color/colorPrimaryDark"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/team_til_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/nationality_til_create"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/team_create"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:hint="@string/team_text"
+                    android:inputType="textPersonName"
+                    android:maxLines="1"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@color/colorPrimaryDark"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/team_badge_image_create"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@android:drawable/ic_menu_upload"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/team_til_create"
+                android:layout_marginTop="16dp"/>
+
+            <Button
+                android:id="@+id/upload_button_create"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"/>
+                android:layout_below="@+id/team_badge_image_create"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/outline_round_button"
+                android:backgroundTint="@android:color/white"
+                android:fontFamily="@font/chivo"
+                android:text="Upload Badge"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold" />
 
-         </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/upload_button_create"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
 
+                <TextView
+                    android:id="@+id/currency_title_create"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/chivo"
+                    android:text="Currency: "
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="25sp" />
 
-    <Button
-            android:id="@+id/manager_create_button"
-            android:layout_width="match_parent"
+                <Spinner
+                    android:id="@+id/currency_spinner_create"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/manager_create_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_button"
+                android:text="@string/create_text"
+                android:textColor="@color/colorPrimary"
+                android:layout_marginTop="16dp"
+                android:layout_alignParentBottom="true"/>
+        </RelativeLayout>
+    </ScrollView>
+
+    <!-- Bottom Native Ad -->
+    <com.google.android.gms.ads.nativead.NativeAdView
+        android:id="@+id/native_ad_view_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Ad Headline -->
+        <TextView
+            android:id="@+id/ad_headline_bottom"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/round_button"
-            android:text="@string/create_text"
-            android:textColor="@color/colorPrimary"
-            android:layout_marginTop="16dp"
-            android:layout_alignParentBottom="true"/>
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
 
-    </RelativeLayout>
+        <!-- Ad Body -->
+        <TextView
+            android:id="@+id/ad_body_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray" />
 
-</ScrollView>
+        <!-- Call-to-Action Button -->
+        <Button
+            android:id="@+id/ad_call_to_action_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/transparent"
+            android:textColor="@color/colorAccent"
+            android:padding="4dp"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </com.google.android.gms.ads.nativead.NativeAdView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

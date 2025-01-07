@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:background="@color/colorPrimary"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp">
 
         <!-- Toolbar -->
         <include
@@ -73,6 +73,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Bottom Banner Ad -->
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/manage_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:adSize="BANNER"
+            app:adUnitId="ca-app-pub-3940256099942544/6300978111" />
     </LinearLayout>
 
     <!-- Navigation Drawer -->

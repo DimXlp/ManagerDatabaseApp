@@ -23,6 +23,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:animateLayoutChanges="true">
 
             <androidx.cardview.widget.CardView
@@ -74,6 +75,44 @@
                 app:layout_constraintVertical_bias="0.0" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Native Ad at the Bottom -->
+        <com.google.android.gms.ads.nativead.NativeAdView
+            android:id="@+id/native_ad_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp">
+
+            <!-- Native Ad Headline -->
+            <TextView
+                android:id="@+id/ad_headline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
+
+            <!-- Native Ad Body -->
+            <TextView
+                android:id="@+id/ad_body"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray" />
+
+            <!-- Call-to-Action Button -->
+            <Button
+                android:id="@+id/ad_call_to_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/transparent"
+                android:textColor="@color/colorAccent"
+                android:padding="4dp"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </com.google.android.gms.ads.nativead.NativeAdView>
 
     </LinearLayout>
 

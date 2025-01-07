@@ -22,7 +22,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 
+import com.google.android.gms.ads.AdLoader;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -81,6 +89,8 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
 
     private CollectionReference collectionReference = db.collection("Managers");
     private long maxId;
+    private NativeAd nativeAdTop, nativeAdBottom;
+    private NativeAdView nativeAdViewTop, nativeAdViewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +110,16 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         uploadButton = findViewById(R.id.upload_button_create);
         currencySpinner = findViewById(R.id.currency_spinner_create);
         create_button = findViewById(R.id.manager_create_button);
+
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this, initializationStatus -> {});
+
+        // Load Native Ads
+        nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);  // Replace with top Ad Unit ID
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);  // Replace with bottom Ad Unit ID
 
         List<String> currencies = Arrays.stream(CurrencyEnum.values())
                 .map(CurrencyEnum::getSymbol)
@@ -132,6 +152,64 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         };
     }
 
+    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+                .forNativeAd(ad -> {
+                    if (isDestroyed()) {
+                        ad.destroy();
+                        return;
+                    }
+                    if (nativeAdView == nativeAdViewTop) {
+                        nativeAdTop = ad;
+                    } else {
+                        nativeAdBottom = ad;
+                    }
+                    populateNativeAdView(ad, nativeAdView);
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Log.e("RAFI", "Native ad failed to load: " + adError.getMessage());
+                    }
+                })
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+        // Dynamically assign IDs
+        int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
+        int bodyId = nativeAdView == nativeAdViewTop ? R.id.ad_body_top : R.id.ad_body_bottom;
+        int callToActionId = nativeAdView == nativeAdViewTop ? R.id.ad_call_to_action_top : R.id.ad_call_to_action_bottom;
+
+        // Set views for the NativeAdView
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
+        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+
+        // Populate the Headline
+        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
+
+        // Populate the Body
+        if (nativeAd.getBody() != null) {
+            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
+            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getBodyView().setVisibility(View.GONE);
+        }
+
+        // Populate the Call-to-Action
+        if (nativeAd.getCallToAction() != null) {
+            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
+            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getCallToActionView().setVisibility(View.GONE);
+        }
+
+        // Bind the NativeAd object to the NativeAdView
+        nativeAdView.setNativeAd(nativeAd);
+    }
 
     @Override
     protected void onStart() {
@@ -283,5 +361,12 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
             badgeImage.setImageURI(teamBadgeUri);
             Picasso.get().load(teamBadgeUri).into(badgeImage);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (nativeAdTop != null) nativeAdTop.destroy();
+        if (nativeAdBottom != null) nativeAdBottom.destroy();
+        super.onDestroy();
     }
 }

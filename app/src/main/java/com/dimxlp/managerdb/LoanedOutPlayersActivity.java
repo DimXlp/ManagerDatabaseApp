@@ -13,8 +13,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdLoader;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -65,6 +72,8 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
 
     private TextView managerNameHeader;
     private TextView teamHeader;
+    private NativeAd nativeAd;
+    private NativeAdView nativeAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +113,65 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rec_view_lop);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this, initializationStatus -> {});
+
+        // Load Native Ad
+        nativeAdView = findViewById(R.id.native_ad_view);
+        loadNativeAd();
+    }
+
+    private void loadNativeAd() {
+        AdLoader adLoader = new AdLoader.Builder(this, "ca-app-pub-3940256099942544/2247696110") // Replace with your Native Ad Unit ID
+                .forNativeAd(ad -> {
+                    if (isDestroyed()) {
+                        ad.destroy();
+                        return;
+                    }
+                    nativeAd = ad;
+                    populateNativeAdView(nativeAd, nativeAdView);
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Log.e("RAFI", "Native ad failed to load: " + adError.getMessage());
+                    }
+                })
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+        Log.d("RAFI", "Populating native ad view");
+
+        // Set the views for the NativeAdView
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(R.id.ad_headline));
+        nativeAdView.setBodyView(nativeAdView.findViewById(R.id.ad_body));
+        nativeAdView.setCallToActionView(nativeAdView.findViewById(R.id.ad_call_to_action));
+
+        // Populate the Headline
+        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
+
+        // Populate the Body
+        if (nativeAd.getBody() != null) {
+            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
+            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getBodyView().setVisibility(View.GONE);
+        }
+
+        // Populate the Call-to-Action
+        if (nativeAd.getCallToAction() != null) {
+            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
+            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getCallToActionView().setVisibility(View.GONE);
+        }
+
+        // Bind native ad to the view
+        nativeAdView.setNativeAd(nativeAd);
     }
 
     private void setUpDrawerContent(NavigationView navView) {
@@ -315,5 +383,13 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                 maxId = player.getId();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (nativeAd != null) {
+            nativeAd.destroy();
+        }
+        super.onDestroy();
     }
 }
