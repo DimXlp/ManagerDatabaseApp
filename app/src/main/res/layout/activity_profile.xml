@@ -24,6 +24,44 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <!-- Top Native Ad -->
+        <com.google.android.gms.ads.nativead.NativeAdView
+            android:id="@+id/native_ad_view_top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp">
+
+            <!-- Native Ad Headline -->
+            <TextView
+                android:id="@+id/ad_headline_top"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
+
+            <!-- Native Ad Body -->
+            <TextView
+                android:id="@+id/ad_body_top"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray" />
+
+            <!-- Call-to-Action Button -->
+            <Button
+                android:id="@+id/ad_call_to_action_top"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/transparent"
+                android:textColor="@color/colorAccent"
+                android:padding="4dp"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </com.google.android.gms.ads.nativead.NativeAdView>
+
         <!-- Centered profile section with rounded image view -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -135,13 +173,43 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/profile_banner"
+        <!-- Bottom Native Ad -->
+        <com.google.android.gms.ads.nativead.NativeAdView
+            android:id="@+id/native_ad_view_bottom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:adSize="BANNER"
-            app:adUnitId="ca-app-pub-3940256099942544/6300978111" />
+            android:layout_margin="16dp">
+
+            <!-- Native Ad Headline -->
+            <TextView
+                android:id="@+id/ad_headline_bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
+
+            <!-- Native Ad Body -->
+            <TextView
+                android:id="@+id/ad_body_bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray" />
+
+            <!-- Call-to-Action Button -->
+            <Button
+                android:id="@+id/ad_call_to_action_bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/transparent"
+                android:textColor="@color/colorAccent"
+                android:padding="4dp"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </com.google.android.gms.ads.nativead.NativeAdView>
 
     </LinearLayout>
 

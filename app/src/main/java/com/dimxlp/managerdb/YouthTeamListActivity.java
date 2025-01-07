@@ -20,6 +20,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -138,6 +141,14 @@ public class YouthTeamListActivity extends AppCompatActivity {
         nextYearButton = findViewById(R.id.next_year_button_ytp);
         year = findViewById(R.id.year_text_ytp);
         addPlayerFab = findViewById(R.id.add_new_player_button_ytp);
+
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this, initializationStatus -> {});
+
+        // Load Banner Ads
+        AdView youthTeamListBanner = findViewById(R.id.youth_team_list_banner);
+        AdRequest adBannerRequest = new AdRequest.Builder().build();
+        youthTeamListBanner.loadAd(adBannerRequest);
 
         View.OnClickListener prevYearListener = new View.OnClickListener() {
             @Override

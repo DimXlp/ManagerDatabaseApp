@@ -19,6 +19,9 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -70,6 +73,18 @@ public class LoginActivity extends AppCompatActivity {
         loginButton = findViewById(R.id.login_button);
         createAccountButton = findViewById(R.id.create_account_button);
         progressBar = findViewById(R.id.login_progress_bar);
+
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this, initializationStatus -> {});
+
+        // Load Banner Ad
+        AdView mainBanner1 = findViewById(R.id.login_banner_1);
+        AdRequest adBannerRequest1 = new AdRequest.Builder().build();
+        mainBanner1.loadAd(adBannerRequest1);
+
+        AdView mainBanner2 = findViewById(R.id.login_banner_2);
+        AdRequest adBannerRequest2 = new AdRequest.Builder().build();
+        mainBanner2.loadAd(adBannerRequest2);
 
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override

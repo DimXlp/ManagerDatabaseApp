@@ -11,11 +11,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -116,6 +121,28 @@ public class ManageTeamActivity extends AppCompatActivity {
         }
         managerNameHeader = headerLayout.findViewById(R.id.manager_name_header);
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
+
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this, initializationStatus -> {});
+
+        // Load Banner Ad
+        AdView manageBanner = findViewById(R.id.manage_banner);
+        AdRequest adBannerRequest = new AdRequest.Builder().build();
+        manageBanner.loadAd(adBannerRequest);
+
+        // Load Interstitial Ad
+        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        interstitialAd.show(ManageTeamActivity.this);
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        Log.d("RAFI", "Interstitial Ad failed to load: " + loadAdError.getMessage());
+                    }
+                });
 
     }
 

@@ -1,14 +1,22 @@
 package com.dimxlp.managerdb;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.CollectionReference;
@@ -53,26 +61,32 @@ public class SelectManagerActivity extends AppCompatActivity {
                 startActivity(new Intent(SelectManagerActivity.this, CreateManagerActivity.class));
             }
         });
+
+        // Initialize Mobile Ads SDK
+        MobileAds.initialize(this, initializationStatus -> {});
+
+        // Load Banner Ad
+        AdView selectManagerBanner = findViewById(R.id.select_manager_banner);
+        AdRequest adBannerRequest = new AdRequest.Builder().build();
+        selectManagerBanner.loadAd(adBannerRequest);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
+        managerList.clear();
         managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
-                                Manager manager = doc.toObject(Manager.class);
-                                managerList.add(manager);
-                            }
-                            managerSelectionRecAdapter = new ManagerSelectionRecAdapter(SelectManagerActivity.this, managerList);
-                            recyclerView.setAdapter(managerSelectionRecAdapter);
-                            managerSelectionRecAdapter.notifyDataSetChanged();
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
+                            Manager manager = doc.toObject(Manager.class);
+                            managerList.add(manager);
                         }
+                        managerSelectionRecAdapter = new ManagerSelectionRecAdapter(SelectManagerActivity.this, managerList);
+                        recyclerView.setAdapter(managerSelectionRecAdapter);
+                        managerSelectionRecAdapter.notifyDataSetChanged();
                     }
                 });
     }
@@ -80,7 +94,5 @@ public class SelectManagerActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        managerList.clear();
     }
 }

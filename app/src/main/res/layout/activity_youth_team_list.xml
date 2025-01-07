@@ -23,6 +23,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:animateLayoutChanges="true">
 
             <androidx.cardview.widget.CardView
@@ -108,6 +109,13 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- Bottom Banner Ad -->
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/youth_team_list_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:adSize="BANNER"
+            app:adUnitId="ca-app-pub-3940256099942544/6300978111" />
 
     </LinearLayout>
 
