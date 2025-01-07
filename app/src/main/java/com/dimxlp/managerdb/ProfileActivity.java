@@ -10,6 +10,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -256,6 +257,9 @@ public class ProfileActivity extends AppCompatActivity {
         uploadBadgeEdit = view.findViewById(R.id.upload_button_edit);
         currencySpinnerEdit = view.findViewById(R.id.currency_spinner_edit);
         saveManagerButton = view.findViewById(R.id.save_manager_button);
+
+        teamEdit.setEnabled(false);
+        teamEdit.setTextColor(Color.GRAY);
 
         List<String> currencies = Arrays.stream(CurrencyEnum.values())
                 .map(CurrencyEnum::getSymbol)
