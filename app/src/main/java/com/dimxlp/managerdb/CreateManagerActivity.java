@@ -114,11 +114,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         // Initialize Mobile Ads SDK
         MobileAds.initialize(this, initializationStatus -> {});
 
-        // Load Native Ads
-        nativeAdViewTop = findViewById(R.id.native_ad_view_top);
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);  // Replace with top Ad Unit ID
         loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);  // Replace with bottom Ad Unit ID
 
         List<String> currencies = Arrays.stream(CurrencyEnum.values())
