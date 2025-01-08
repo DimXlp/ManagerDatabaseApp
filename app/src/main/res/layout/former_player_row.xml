@@ -287,7 +287,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/ic_edit"
+                android:background="@drawable/edit_outline_64"
+                android:backgroundTint="@color/white"
                 android:layout_below="@+id/year_scouted_fpl"/>
 
             <Button
@@ -297,7 +298,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/ic_add_list"
+                android:background="@drawable/add_outline_64"
+                android:backgroundTint="@color/white"
                 android:layout_below="@+id/year_scouted_fpl"
                 android:layout_toEndOf="@+id/edit_button_fpl"/>
 

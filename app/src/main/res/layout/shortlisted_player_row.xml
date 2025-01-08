@@ -262,7 +262,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/ic_edit"
+                android:background="@drawable/edit_outline_64"
+                android:backgroundTint="@color/white"
                 android:layout_below="@+id/comments_shp"/>
 
             <Button
@@ -272,7 +273,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/ic_buy"
+                android:background="@drawable/buy_outline_64"
+                android:backgroundTint="@color/white"
                 android:layout_below="@+id/comments_shp"
                 android:layout_toEndOf="@+id/edit_button_shp"/>
 
@@ -283,7 +285,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/ic_loan"
+                android:background="@drawable/loan_outline_64"
+                android:backgroundTint="@color/white"
                 android:layout_below="@+id/comments_shp"
                 android:layout_toEndOf="@+id/buy_button_shp"/>
 

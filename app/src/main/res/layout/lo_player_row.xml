@@ -274,7 +274,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="25dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/ic_edit"
+                android:background="@drawable/edit_outline_64"
+                android:backgroundTint="@color/white"
                 android:layout_below="@+id/loan_to_lop"/>
 
             <Button
@@ -284,7 +285,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="25dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/ic_loan"
+                android:background="@drawable/terminate_outline_64"
+                android:backgroundTint="@color/white"
                 android:layout_below="@+id/loan_to_lop"
                 android:layout_toEndOf="@+id/edit_button_lop"/>
 

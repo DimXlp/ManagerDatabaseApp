@@ -2,43 +2,43 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item android:id="@+id/dr_home"
-            android:icon="@drawable/ic_home"
+            android:icon="@drawable/home_filled_64"
             android:title="@string/home" />
 
         <item android:id="@+id/dr_manager_selection"
-            android:icon="@drawable/ic_whistle"
+            android:icon="@drawable/whistle_filled_64"
             android:title="@string/select_manager" />
 
         <item android:id="@+id/dr_profile"
-            android:icon="@drawable/ic_profile"
+            android:icon="@drawable/profile_filled_64"
             android:title="@string/profile" />
 
         <item android:id="@+id/dr_first_team"
-            android:icon="@drawable/ic_first_team"
+            android:icon="@drawable/first_team_filled_64"
             android:title="@string/first_team" />
 
         <item android:id="@+id/dr_youth_team"
-            android:icon="@drawable/ic_youth_team_1"
+            android:icon="@drawable/youth_team_filled_64"
             android:title="@string/youth_team" />
 
         <item android:id="@+id/dr_former_players"
-            android:icon="@drawable/ic_goodbye_filled"
+            android:icon="@drawable/goodbye_filled_64"
             android:title="@string/former_players" />
 
         <item android:id="@+id/dr_shortlist"
-            android:icon="@drawable/ic_shortlist"
+            android:icon="@drawable/shortlist_filled_64"
             android:title="@string/shortlist" />
 
         <item android:id="@+id/dr_loaned_out_players"
-            android:icon="@drawable/ic_loaned_out_players"
+            android:icon="@drawable/loan_filled_64"
             android:title="@string/loaned_out_players" />
 
         <item android:id="@+id/dr_transfer_deals"
-            android:icon="@drawable/ic_transfer_deals"
+            android:icon="@drawable/deal_filled_64"
             android:title="@string/transfer_deals" />
 
         <item android:id="@+id/dr_logout"
-            android:icon="@drawable/ic_logout"
+            android:icon="@drawable/logout_filled_64"
             android:title="@string/logout" />
     </group>
 

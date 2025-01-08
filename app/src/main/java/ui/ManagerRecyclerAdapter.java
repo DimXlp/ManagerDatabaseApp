@@ -2,6 +2,7 @@ package ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,37 +69,44 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
             case 0:
                 buttonList.get(position).setTitle("Profile");
                 holder.buttonTitle.setText("Profile");
-                holder.buttonImage.setBackgroundResource(R.drawable.ic_profile);
+                holder.buttonImage.setBackgroundResource(R.drawable.profile_filled_64);
+                holder.buttonImage.getBackground().setTint(Color.WHITE);
                 break;
             case 1:
                 buttonList.get(position).setTitle("First Team");
                 holder.buttonTitle.setText("First Team");
-                holder.buttonImage.setBackgroundResource(R.drawable.ic_first_team);
+                holder.buttonImage.setBackgroundResource(R.drawable.first_team_filled_64);
+                holder.buttonImage.getBackground().setTint(Color.WHITE);
                 break;
             case 2:
                 buttonList.get(position).setTitle("Youth Team");
                 holder.buttonTitle.setText("Youth Team");
-                holder.buttonImage.setBackgroundResource(R.drawable.ic_youth_team_1);
+                holder.buttonImage.setBackgroundResource(R.drawable.youth_team_filled_64);
+                holder.buttonImage.getBackground().setTint(Color.WHITE);
                 break;
             case 3:
                 buttonList.get(position).setTitle("Former Players");
                 holder.buttonTitle.setText("Former Players");
-                holder.buttonImage.setBackgroundResource(R.drawable.ic_goodbye_filled);
+                holder.buttonImage.setBackgroundResource(R.drawable.goodbye_filled_64);
+                holder.buttonImage.getBackground().setTint(Color.WHITE);
                 break;
             case 4:
                 buttonList.get(position).setTitle("Shortlist");
                 holder.buttonTitle.setText("Shortlist");
-                holder.buttonImage.setBackgroundResource(R.drawable.ic_shortlist);
+                holder.buttonImage.setBackgroundResource(R.drawable.shortlist_filled_64);
+                holder.buttonImage.getBackground().setTint(Color.WHITE);
                 break;
             case 5:
                 buttonList.get(position).setTitle("Loaned Out Players");
                 holder.buttonTitle.setText("Loaned Out Players");
-                holder.buttonImage.setBackgroundResource(R.drawable.ic_loaned_out_players);
+                holder.buttonImage.setBackgroundResource(R.drawable.loan_filled_64);
+                holder.buttonImage.getBackground().setTint(Color.WHITE);
                 break;
             case 6:
                 buttonList.get(position).setTitle("Transfer Deals");
                 holder.buttonTitle.setText("Transfer Deals");
-                holder.buttonImage.setBackgroundResource(R.drawable.ic_transfer_deals);
+                holder.buttonImage.setBackgroundResource(R.drawable.deal_filled_64);
+                holder.buttonImage.getBackground().setTint(Color.WHITE);
                 break;
             case 7:
                 buttonList.get(position).setTitle("Compare Players");
