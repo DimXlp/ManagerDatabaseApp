@@ -214,7 +214,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/ic_edit"
+                android:background="@drawable/edit_outline_64"
+                android:backgroundTint="@color/white"
                 android:layout_below="@+id/year_scouted_ytp"/>
 
             <Button
@@ -224,7 +225,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/ic_goodbye_outline"
+                android:background="@drawable/goodbye_outline_64"
+                android:backgroundTint="@color/white"
                 android:layout_below="@+id/year_scouted_ytp"
                 android:layout_toEndOf="@+id/edit_button_ytp"/>
 
@@ -235,7 +237,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/ic_promote"
+                android:background="@drawable/promote_outline_64"
+                android:backgroundTint="@color/white"
                 android:layout_below="@+id/year_scouted_ytp"
                 android:layout_toEndOf="@+id/depart_button_ytp"/>
 
