@@ -2,14 +2,18 @@ package com.dimxlp.managerdb;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,6 +23,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Subscribe to app_updates topic
+        FirebaseMessaging.getInstance().subscribeToTopic("app_updates")
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d("FCM", "Subscribed to app_updates topic");
+                    }
+                });
+
+        // Check for a stored message in SharedPreferences
+        SharedPreferences preferences = getSharedPreferences("AppMessages", MODE_PRIVATE);
+        String title = preferences.getString("title", null);
+        String message = preferences.getString("message", null);
+
+        if (title != null && message != null) {
+            showUpdateDialog(title, message);
+
+            // Clear the message after displaying it
+            preferences.edit().clear().apply();
+        }
 
         // Initialize Mobile Ads SDK
         MobileAds.initialize(this, initializationStatus -> {});
@@ -42,5 +66,14 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void showUpdateDialog(String title, String message) {
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .create()
+                .show();
     }
 }
