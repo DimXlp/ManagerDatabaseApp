@@ -408,6 +408,13 @@ public class YouthTeamActivity extends AppCompatActivity {
                 startActivity(transferIntent);
                 finish();
                 break;
+            case R.id.dr_support_info:
+                Intent supportIntent = new Intent(YouthTeamActivity.this, SupportActivity.class);
+                supportIntent.putExtra("managerId", managerId);
+                supportIntent.putExtra("team", team);
+                startActivity(supportIntent);
+                finish();
+                break;
             case R.id.dr_logout:
                 if (user != null && firebaseAuth != null) {
                     firebaseAuth.signOut();
