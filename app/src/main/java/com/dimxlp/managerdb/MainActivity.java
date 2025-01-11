@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,6 +35,10 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("FCM", "Subscribed to app_updates topic");
                     }
                 });
+
+        // Enable Crashlytics collection
+        FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
+        crashlytics.setCrashlyticsCollectionEnabled(true);
 
         // Check for a stored message in SharedPreferences
         SharedPreferences preferences = getSharedPreferences("AppMessages", MODE_PRIVATE);
