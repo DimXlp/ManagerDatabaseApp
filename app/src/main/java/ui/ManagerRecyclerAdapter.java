@@ -3,20 +3,15 @@ package ui;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.dimxlp.managerdb.ComparisonActivity;
 import com.dimxlp.managerdb.FirstTeamActivity;
 import com.dimxlp.managerdb.FirstTeamListActivity;
 import com.dimxlp.managerdb.FormerPlayersListActivity;
@@ -25,13 +20,13 @@ import com.dimxlp.managerdb.ProfileActivity;
 import com.dimxlp.managerdb.R;
 import com.dimxlp.managerdb.ShortlistActivity;
 import com.dimxlp.managerdb.ShortlistPlayersActivity;
+import com.dimxlp.managerdb.SupportActivity;
 import com.dimxlp.managerdb.TransferDealsActivity;
 import com.dimxlp.managerdb.YouthTeamActivity;
 import com.dimxlp.managerdb.YouthTeamListActivity;
 
 import java.util.List;
 
-import model.ShortlistedPlayer;
 import util.ManageTeamButton;
 
 public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecyclerAdapter.ViewHolder> {
@@ -109,10 +104,16 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
                 holder.buttonImage.getBackground().setTint(Color.WHITE);
                 break;
             case 7:
-                buttonList.get(position).setTitle("Compare Players");
-                holder.buttonTitle.setText("Compare Players");
-                holder.buttonImage.setBackgroundResource(R.drawable.ic_compare);
+                buttonList.get(position).setTitle("Support & Info");
+                holder.buttonTitle.setText("Support & Info");
+                holder.buttonImage.setBackgroundResource(R.drawable.info_filled_64_2);
+                holder.buttonImage.getBackground().setTint(Color.WHITE);
                 break;
+//            case 7:
+//                buttonList.get(position).setTitle("Compare Players");
+//                holder.buttonTitle.setText("Compare Players");
+//                holder.buttonImage.setBackgroundResource(R.drawable.ic_compare);
+//                break;
         }
 
     }
@@ -202,6 +203,12 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
                             transferIntent.putExtra("managerId", managerId);
                             transferIntent.putExtra("team", team);
                             ctx.startActivity(transferIntent);
+                            break;
+                        case 7:
+                            Intent supportIntent = new Intent(ctx, SupportActivity.class);
+                            supportIntent.putExtra("managerId", managerId);
+                            supportIntent.putExtra("team", team);
+                            ctx.startActivity(supportIntent);
                             break;
 //                        case 7:
 //                            Intent compareIntent = new Intent(ctx, ComparisonActivity.class);

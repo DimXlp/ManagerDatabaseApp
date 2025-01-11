@@ -37,6 +37,10 @@
             android:icon="@drawable/deal_filled_64"
             android:title="@string/transfer_deals" />
 
+        <item android:id="@+id/dr_support_info"
+            android:icon="@drawable/info_filled_64_2"
+            android:title="@string/support_info" />
+
         <item android:id="@+id/dr_logout"
             android:icon="@drawable/logout_filled_64"
             android:title="@string/logout" />

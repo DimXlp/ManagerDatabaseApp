@@ -482,6 +482,13 @@ public class ShortlistActivity extends AppCompatActivity {
                 startActivity(transferIntent);
                 finish();
                 break;
+            case R.id.dr_support_info:
+                Intent supportIntent = new Intent(ShortlistActivity.this, SupportActivity.class);
+                supportIntent.putExtra("managerId", managerId);
+                supportIntent.putExtra("team", myTeam);
+                startActivity(supportIntent);
+                finish();
+                break;
             case R.id.dr_logout:
                 if (user != null && firebaseAuth != null) {
                     firebaseAuth.signOut();
