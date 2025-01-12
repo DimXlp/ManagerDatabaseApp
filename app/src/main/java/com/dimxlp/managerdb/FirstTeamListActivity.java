@@ -228,6 +228,19 @@ public class FirstTeamListActivity extends AppCompatActivity {
 
     private void listPlayers(final int buttonInt) {
         playerList.clear();
+
+        // Ensure currentYear is initialized
+        if (currentYear == null) {
+            if (barYear != null) {
+                currentYear = barYear;
+            } else if (minYearText != null) {
+                currentYear = minYearText;
+            } else {
+                Toast.makeText(this, "Unable to determine the current year. Please try again.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
                 .get()
@@ -488,6 +501,16 @@ public class FirstTeamListActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        // Ensure currentYear has a fallback value
+        if (barYear != null) {
+            currentYear = barYear;
+        } else if (minYearText != null) {
+            currentYear = minYearText;
+        } else {
+            Log.e("RAFI", "No barYear or minYearText available to initialize currentYear.");
+            currentYear = "2020/21"; // Default fallback
+        }
+
         db.collection("YouthTeamPlayers").whereEqualTo("userId", currentUserId)
                 .whereEqualTo("managerId", managerId)
                 .get()
@@ -628,6 +651,11 @@ public class FirstTeamListActivity extends AppCompatActivity {
     }
 
     private void findMinYearSigned(List<FirstTeamPlayer> ftplayers) {
+        if (ftplayers == null || ftplayers.isEmpty()) {
+            minYearText = "2020/21";
+            return;
+        }
+
         String ySigned = ftplayers.get(0).getYearSigned().substring(0, 4);
         int minYear = Integer.parseInt(ySigned);
         for (FirstTeamPlayer player: ftplayers) {
