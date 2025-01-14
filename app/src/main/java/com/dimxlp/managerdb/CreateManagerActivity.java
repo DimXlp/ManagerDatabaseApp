@@ -62,6 +62,7 @@ import util.UserApi;
 
 public class CreateManagerActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final String LOG_TAG = "RAFI|CreateManager";
     private static final int PICK_IMAGE_REQUEST = 1;
     private ProgressBar progressBar;
     private EditText firstNameText;
@@ -97,6 +98,8 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_manager);
 
+        Log.i(LOG_TAG, "CreateManagerActivity launched.");
+
         storageReference = FirebaseStorage.getInstance().getReference();
 
         progressBar = findViewById(R.id.create_progress_bar);
@@ -112,7 +115,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         create_button = findViewById(R.id.manager_create_button);
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
         loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);  // Replace with bottom Ad Unit ID
@@ -133,6 +136,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         if (UserApi.getInstance() != null) {
             currentUserId = UserApi.getInstance().getUserId();
             currentUserName = UserApi.getInstance().getUsername();
+            Log.d(LOG_TAG, "UserApi initialized: userId=" + currentUserId + ", username=" + currentUserName);
         }
 
         authStateListener = new FirebaseAuth.AuthStateListener() {
@@ -140,9 +144,9 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 currentUser = firebaseAuth.getCurrentUser();
                 if (currentUser != null) {
-
+                    Log.i(LOG_TAG, "User logged in: " + currentUser.getUid());
                 } else {
-
+                    Log.i(LOG_TAG, "No user logged in.");
                 }
             }
         };
@@ -161,11 +165,12 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
                         nativeAdBottom = ad;
                     }
                     populateNativeAdView(ad, nativeAdView);
+                    Log.d(LOG_TAG, "Native ad loaded successfully.");
                 })
                 .withAdListener(new com.google.android.gms.ads.AdListener() {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
-                        Log.e("RAFI", "Native ad failed to load: " + adError.getMessage());
+                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
                     }
                 })
                 .build();
@@ -174,6 +179,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+        Log.d(LOG_TAG, "Populating native ad view.");
         // Dynamically assign IDs
         int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
         int bodyId = nativeAdView == nativeAdViewTop ? R.id.ad_body_top : R.id.ad_body_bottom;
@@ -210,6 +216,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
     @Override
     protected void onStart() {
         super.onStart();
+        Log.i(LOG_TAG, "CreateManagerActivity started.");
         currentUser = firebaseAuth.getCurrentUser();
         firebaseAuth.addAuthStateListener(authStateListener);
 
@@ -218,6 +225,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            Log.d(LOG_TAG, "Managers data retrieved successfully.");
                             List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
                             List<Manager> managers = new ArrayList<>();
                             for (DocumentSnapshot doc : docs) {
@@ -232,8 +240,11 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
                                     manager.setId(maxId+1);
                                     collectionReference.document(ds.getId()).update("id", manager.getId());
                                     maxId++;
+                                    Log.d(LOG_TAG, "Assigned new ID to manager: " + manager.getId());
                                 }
                             }
+                        } else {
+                            Log.w(LOG_TAG, "No managers data found.");
                         }
                     }
                 });
@@ -246,6 +257,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
                 maxId = mng.getId();
             }
         }
+        Log.d(LOG_TAG, "Max ID found: " + maxId);
     }
 
     @Override
@@ -254,21 +266,25 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         if (firebaseAuth != null) {
             firebaseAuth.removeAuthStateListener(authStateListener);
         }
+        Log.i(LOG_TAG, "CreateManagerActivity stopped.");
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.manager_create_button:
+                Log.d(LOG_TAG, "Create Manager button clicked.");
                 saveManager();
                 break;
             case R.id.upload_button_create:
+                Log.d(LOG_TAG, "Upload button clicked.");
                 openFileChooser();
                 break;
         }
     }
 
     private void openFileChooser() {
+        Log.d(LOG_TAG, "Opening file chooser for image selection.");
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -276,6 +292,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
     }
 
     private void saveManager() {
+        Log.d(LOG_TAG, "Attempting to save manager.");
         final String firstName = firstNameText.getText().toString().trim();
         final String lastName = lastNameText.getText().toString().trim();
         final String nationality = nationalityText.getText().toString().trim();
@@ -287,6 +304,8 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
             !TextUtils.isEmpty(nationality) &&
             !TextUtils.isEmpty(team) &&
             !TextUtils.isEmpty(currency)) {
+
+            Log.i(LOG_TAG, "All fields validated. Preparing to save manager: " + firstName + " " + lastName);
 
             final StorageReference filepath = storageReference
                     .child("team_badges")
@@ -303,13 +322,14 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
                                     @Override
                                     public void onSuccess(Uri uri) {
                                         String imageUrl = uri.toString();
-                                        Log.d("RAFI", "onSuccess: " + imageUrl);
+                                        Log.d(LOG_TAG, "Image uploaded successfully. URL: " + imageUrl);
 
                                         manager.setTeamBadgeUrl(imageUrl);
                                     }
                                 });
                             }
-                        });
+                        })
+                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Image upload failed: " + e.getMessage(), e));
             }
 
             manager.setId(maxId+1);
@@ -320,13 +340,14 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
             manager.setTeam(team);
             manager.setCurrency(currency);
             manager.setTimeAdded(new Timestamp(new Date()));
-            Log.d("currentUserId", "saveManager: " + currentUserId);
             manager.setUserId(currentUserId);
+            Log.d(LOG_TAG, "Manager object prepared: " + manager);
 
             collectionReference.add(manager)
                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                         @Override
                         public void onSuccess(DocumentReference documentReference) {
+                            Log.i(LOG_TAG, "Manager saved successfully. ID: " + manager.getId());
                             progressBar.setVisibility(View.INVISIBLE);
 
                             Intent intent = new Intent(CreateManagerActivity.this, ManageTeamActivity.class);
@@ -339,11 +360,12 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-
+                            Log.e(LOG_TAG, "Failed to save manager: " + e.getMessage(), e);
                         }
                     });
 
         } else {
+            Log.w(LOG_TAG, "Validation failed: One or more fields are empty.");
             progressBar.setVisibility(View.INVISIBLE);
         }
     }
@@ -356,6 +378,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
             teamBadgeUri = data.getData();
             badgeImage.setImageURI(teamBadgeUri);
             Picasso.get().load(teamBadgeUri).into(badgeImage);
+            Log.d(LOG_TAG, "Image selected successfully: " + teamBadgeUri.toString());
         }
     }
 
@@ -363,6 +386,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
     protected void onDestroy() {
         if (nativeAdTop != null) nativeAdTop.destroy();
         if (nativeAdBottom != null) nativeAdBottom.destroy();
+        Log.i(LOG_TAG, "CreateManagerActivity destroyed.");
         super.onDestroy();
     }
 }

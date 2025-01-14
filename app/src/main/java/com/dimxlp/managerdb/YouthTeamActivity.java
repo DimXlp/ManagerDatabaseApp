@@ -53,6 +53,7 @@ import util.UserApi;
 
 public class YouthTeamActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "RAFI|YouthTeam";
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private NavigationView navView;
@@ -96,20 +97,31 @@ public class YouthTeamActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_youth_team);
+        Log.i(LOG_TAG, "YouthTeamActivity launched.");
 
         if (UserApi.getInstance() != null) {
             currentUserId = UserApi.getInstance().getUserId();
             currentUserName = UserApi.getInstance().getUsername();
+            Log.d(LOG_TAG, "UserApi initialized: userId=" + currentUserId + ", username=" + currentUserName);
+        } else {
+            Log.w(LOG_TAG, "UserApi instance is null.");
         }
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
+        if (user != null) {
+            Log.d(LOG_TAG, "Authenticated user: " + user.getUid());
+        } else {
+            Log.w(LOG_TAG, "No authenticated user.");
+        }
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             managerId = extras.getLong("managerId");
             team = extras.getString("team");
-            Log.d("RAFI", "managerId = " + managerId + "\nteam = " + team);
+            Log.d(LOG_TAG, "Extras received: managerId=" + managerId + ", team=" + team);
+        } else {
+            Log.w(LOG_TAG, "No extras received in intent.");
         }
 
         toolbar = findViewById(R.id.toolbar);
@@ -131,7 +143,7 @@ public class YouthTeamActivity extends AppCompatActivity {
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         // Load Native Ads
         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
@@ -149,7 +161,7 @@ public class YouthTeamActivity extends AppCompatActivity {
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        Log.d("RAFI", "Interstitial Ad failed to load: " + loadAdError.getMessage());
+
                     }
                 });
 
@@ -181,7 +193,7 @@ public class YouthTeamActivity extends AppCompatActivity {
                 .withAdListener(new com.google.android.gms.ads.AdListener() {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
-                        Log.e("RAFI", "Native ad failed to load: " + adError.getMessage());
+
                     }
                 })
                 .build();
@@ -223,6 +235,8 @@ public class YouthTeamActivity extends AppCompatActivity {
 
 
     private void createPopupDialog() {
+        Log.d(LOG_TAG, "Creating popup dialog for adding a youth team player.");
+
         builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.create_youth_team_player_popup, null);
 
@@ -250,13 +264,16 @@ public class YouthTeamActivity extends AppCompatActivity {
         createPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(LOG_TAG, "Create player button clicked.");
                 if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
                         !positionSpinner.getSelectedItem().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty() &&
                         !yearScouted.getSelectedItem().toString().equals("0")) {
+                    Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
                     createPlayer();
                 } else {
+                    Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
                     Toast.makeText(YouthTeamActivity.this, "Last Name/Nickname, Nationality, Position, Overall and Year Scouted are required", Toast.LENGTH_LONG)
                             .show();
                 }
@@ -269,6 +286,8 @@ public class YouthTeamActivity extends AppCompatActivity {
     }
 
     private void createPlayer() {
+        Log.d(LOG_TAG, "Creating a new youth team player.");
+
         String firstNamePlayer = firstName.getText().toString().trim();
         String lastNamePlayer = lastName.getText().toString().trim();
         String fullNamePlayer;
@@ -284,9 +303,9 @@ public class YouthTeamActivity extends AppCompatActivity {
         String potentialLowPlayer = potentialLow.getText().toString().trim();
         String potentialHiPlayer = potentialHigh.getText().toString().trim();
         final String yScoutedPlayer = yearScouted.getSelectedItem().toString().trim();
+        Log.d(LOG_TAG, "Player details collected: Full Name = " + fullNamePlayer + ", Position = " + positionPlayer);
 
         YouthTeamPlayer player = new YouthTeamPlayer();
-
         player.setId(1);
         player.setFirstName(firstNamePlayer);
         player.setLastName(lastNamePlayer);
@@ -310,19 +329,23 @@ public class YouthTeamActivity extends AppCompatActivity {
         player.setManagerId(managerId);
         player.setUserId(currentUserId);
         player.setTimeAdded(new Timestamp(new Date()));
+        Log.d(LOG_TAG, "YouthTeamPlayer object created: " + player);
 
         collectionReference.add(player)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        Log.i(LOG_TAG, "Player successfully added to Firestore. Document ID: " + documentReference.getId());
                         Intent intent = new Intent(YouthTeamActivity.this, YouthTeamListActivity.class);
                         intent.putExtra("managerId", managerId);
                         intent.putExtra("team", team);
                         intent.putExtra("barYear", yScoutedPlayer);
                         startActivity(intent);
                         finish();
+                        Log.d(LOG_TAG, "YouthTeamListActivity started. Current activity finished.");
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding player to Firestore.", e));
     }
 
     private void setUpDrawerContent(NavigationView navView) {
@@ -420,7 +443,12 @@ public class YouthTeamActivity extends AppCompatActivity {
                     firebaseAuth.signOut();
                     startActivity(new Intent(YouthTeamActivity.this, MainActivity.class));
                     finishAffinity();
+                } else {
+                    Log.w(LOG_TAG, "Logout attempt failed: currentUser or firebaseAuth is null.");
                 }
+                break;
+            default:
+                Log.w(LOG_TAG, "Unhandled drawer item selected: " + item.getTitle());
                 break;
         }
 
@@ -443,6 +471,7 @@ public class YouthTeamActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(LOG_TAG, "onStart called: Fetching data for shortlisted players, first team players, and manager details.");
 
         db.collection("ShortlistedPlayers").whereEqualTo("userId", currentUserId)
                 .whereEqualTo("managerId", managerId)
@@ -451,11 +480,10 @@ public class YouthTeamActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                shPlayersExist = true;
-                            } else {
-                                shPlayersExist = false;
-                            }
+                            shPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
+                            Log.d(LOG_TAG, "Shortlisted players existence: " + shPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching shortlisted players.", task.getException());
                         }
                     }
                 });
@@ -467,12 +495,12 @@ public class YouthTeamActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                ftPlayersExist = true;
-                            } else {
-                                ftPlayersExist = false;
-                            }
+                            ftPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
+                            Log.d(LOG_TAG, "First Team players existence: " + ftPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
                         }
+
                     }
                 });
 
@@ -483,21 +511,29 @@ public class YouthTeamActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            Log.d(LOG_TAG, "Manager data fetched from Firestore.");
                             List<Manager> managerList = new ArrayList<>();
                             for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                                 Manager manager = doc.toObject(Manager.class);
                                 managerList.add(manager);
+                                Log.d(LOG_TAG, "Manager added to list: " + manager.getFullName());
                             }
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());
                             teamHeader.setText(theManager.getTeam());
+                            Log.d(LOG_TAG, "UI updated with manager details.");
+                        } else {
+                            Log.w(LOG_TAG, "No manager data found for managerId=" + managerId);
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching manager data.", e));
     }
 
     @Override
     protected void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy called: Cleaning up resources.");
+
         if (nativeAdTop != null) {
             nativeAdTop.destroy();
         }
@@ -505,6 +541,7 @@ public class YouthTeamActivity extends AppCompatActivity {
             nativeAdBottom.destroy();
         }
         super.onDestroy();
+        Log.d(LOG_TAG, "YouthTeamActivity destroyed.");
     }
 
     public static class SpinnerActivity extends FirstTeamActivity implements AdapterView.OnItemSelectedListener {

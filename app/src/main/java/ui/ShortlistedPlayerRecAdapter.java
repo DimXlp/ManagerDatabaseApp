@@ -60,6 +60,7 @@ import util.ValueFormatter;
 
 public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<ShortlistedPlayerRecAdapter.ViewHolder> {
 
+    private static final String LOG_TAG = "RAFI|ShortlistedPlayersRecAdapter";
     private Context context;
     private List<ShortlistedPlayer> playerList;
     private long managerId;
@@ -129,7 +130,6 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                             }
                             Manager manager = managerList.get(0);
                             String currency = manager.getCurrency();
-                            Log.d("RAFI", "onSuccess: Currency: " + currency);
                             if (player.getValue() != 0) {
                                 holder.valueNoText.setText(String.format("%s %s", currency, NumberFormat.getInstance().format(player.getValue())));
                             } else {
@@ -371,7 +371,6 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                         public void onClick(View v) {
                                             if (!yearSigned.getSelectedItem().toString().equals("0") &&
                                                 !typeOfTransferSpinner.getSelectedItem().toString().isEmpty()) {
-                                                Log.d("ID", "Id = " + ftPlayerId);
                                                 transferPlayer(playerList.get(getAdapterPosition()), false);
                                             } else {
                                                 Toast.makeText(context, "Transfer Type & Year Signed are required!", Toast.LENGTH_LONG).show();
@@ -525,6 +524,8 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
         }
 
         private void deletePlayer(final ShortlistedPlayer player) {
+            Log.d(LOG_TAG, "deletePlayer called for player: " + player.getFullName());
+
             shPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
                     .get()
@@ -532,6 +533,8 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
+                                Log.d(LOG_TAG, "ShortlistedPlayers collection fetched successfully.");
+
                                 List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                 DocumentReference documentReference = null;
                                 for (DocumentSnapshot ds : doc) {
@@ -545,6 +548,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Player successfully deleted: " + player.getFullName());
                                                 Toast.makeText(context, "Player deleted!", Toast.LENGTH_LONG)
                                                         .show();
                                                 shPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
@@ -555,6 +559,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
+                                                                        Log.d(LOG_TAG, "Navigating to ShortlistPlayersActivity.");
                                                                         Intent intent = new Intent(context, ShortlistPlayersActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -562,6 +567,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                                         context.startActivity(intent);
                                                                         ((Activity)context).finish();
                                                                     } else {
+                                                                        Log.d(LOG_TAG, "Navigating to ShortlistActivity.");
                                                                         Intent intent = new Intent(context, ShortlistActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -573,12 +579,15 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                         });
                                             }
                                         });
+                            } else {
+                                Log.e(LOG_TAG, "Error fetching ShortlistedPlayers collection.", task.getException());
                             }
                         }
                     });
         }
 
         private void transferPlayer(final ShortlistedPlayer player, boolean isLoan) {
+            Log.d(LOG_TAG, "transferPlayer called for player: " + player.getFullName() + ", isLoan: " + isLoan);
 
             shPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
@@ -587,6 +596,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
+                                Log.d(LOG_TAG, "ShortlistedPlayers collection fetched successfully.");
                                 List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                 DocumentReference documentReference = null;
                                 for (DocumentSnapshot ds : doc) {
@@ -600,6 +610,8 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Player removed from shortlist: " + player.getFullName());
+
                                                 final Transfer newTransfer = new Transfer();
                                                 newTransfer.setId(0);
                                                 newTransfer.setFirstName(player.getFirstName());
@@ -619,12 +631,13 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
 
                                                 if (isLoan) {
                                                     newTransfer.setPlusPlayerName(null);
+                                                    Log.d(LOG_TAG, "Transfer is a loan. No additional player involved.");
                                                 } else {
-                                                    Log.d("RAFI", "not loan");
                                                     newTransfer.setHasPlusPlayer(hasPlusPlayer);
                                                     String plusPlayerName = playerSpinner.getSelectedItem().toString().trim();
                                                     newTransfer.setPlusPlayerName((!plusPlayerName.isEmpty()) ? plusPlayerName : "");
                                                     newTransfer.setPlusPlayerId(ftPlayerId);
+                                                    Log.d(LOG_TAG, "Transfer involves another player: " + plusPlayerName);
                                                 }
 
                                                 String wg = wage.getText().toString().trim().replaceAll(",", "");
@@ -638,7 +651,10 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                 newTransfer.setUserId(UserApi.getInstance().getUserId());
                                                 newTransfer.setTimeAdded(new Timestamp(new Date()));
 
+                                                Log.d(LOG_TAG, "New transfer created: " + newTransfer.getFullName());
+
                                                 if (ftPlayerId != 0) {
+                                                    Log.d(LOG_TAG, "Processing additional player involved in transfer.");
 
                                                     ftPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                                             .whereEqualTo("managerId", managerId)
@@ -648,6 +664,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                                 @Override
                                                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                     if (task.isSuccessful()) {
+                                                                        Log.d(LOG_TAG, "Successfully fetched FirstTeamPlayer collection for additional player.");
 
                                                                         List<FirstTeamPlayer> ftPlayerList = new ArrayList<>();
                                                                         DocumentReference ftPlayerDocRef = null;
@@ -658,8 +675,6 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                                         }
                                                                         // Only one player in this list
                                                                         FirstTeamPlayer thePlayer = ftPlayerList.get(0);
-                                                                        Log.d("RAFI", "nameeee = " + thePlayer.getFullName());
-
 
                                                                         FormerPlayer fmPlayer = new FormerPlayer();
                                                                         fmPlayer.setId(0);
@@ -681,8 +696,10 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                                         fmPlayer.setTimeAdded(new Timestamp(new Date()));
                                                                         fmPlayer.setFirstTeamId(ftPlayerId);
                                                                         frmPlayersColRef.add(fmPlayer);
+                                                                        Log.d(LOG_TAG, "Former player added for additional player: " + thePlayer.getFullName());
 
                                                                         ftPlayerDocRef.delete();
+                                                                        Log.d(LOG_TAG, "Additional player removed from First Team.");
                                                                     }
                                                                 }
                                                             });
@@ -706,11 +723,13 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                 ftPlayer.setLoanPlayer(isLoan);
 
                                                 transfersColRef.add(newTransfer);
+                                                Log.d(LOG_TAG, "Transfer added to Firestore.");
 
                                                 ftPlayersColRef.add(ftPlayer)
                                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                             @Override
                                                             public void onSuccess(DocumentReference documentReference) {
+                                                                Log.d(LOG_TAG, "Player successfully added to First Team: " + player.getFullName());
                                                                 Toast.makeText(context, "Player bought!", Toast.LENGTH_LONG)
                                                                         .show();
                                                             }
@@ -723,6 +742,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
+                                                                        Log.d(LOG_TAG, "Navigating to ShortlistPlayersActivity.");
                                                                         Intent intent = new Intent(context, ShortlistPlayersActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -730,6 +750,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                                         context.startActivity(intent);
                                                                         ((Activity)context).finish();
                                                                     } else {
+                                                                        Log.d(LOG_TAG, "Navigating to ShortlistActivity.");
                                                                         Intent intent = new Intent(context, ShortlistActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -747,6 +768,8 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
         }
 
         private void editPlayer(final ShortlistedPlayer player) {
+            Log.d(LOG_TAG, "editPlayer called for player: " + player.getFullName());
+
             builder = new AlertDialog.Builder(context);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.create_shortlisted_player_popup, null);
@@ -858,6 +881,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
+                                                            Log.d(LOG_TAG, "Player successfully updated: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
                                                             dialog.dismiss();
                                                             Intent intent = new Intent(context, ShortlistPlayersActivity.class);

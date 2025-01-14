@@ -3,6 +3,7 @@ package ui;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ import util.ManageTeamButton;
 
 public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecyclerAdapter.ViewHolder> {
 
+    private static final String LOG_TAG = "RAFI|ManagerRecyclerAdapter";
     private Context context;
     private List<ManageTeamButton> buttonList;
     private boolean ftPlayersExist;
@@ -52,6 +54,7 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
     @NonNull
     @Override
     public ManagerRecyclerAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Log.d(LOG_TAG, "onCreateViewHolder called.");
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.button_row, parent, false);
         return new ViewHolder(view, context);
@@ -59,6 +62,7 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
 
     @Override
     public void onBindViewHolder(@NonNull ManagerRecyclerAdapter.ViewHolder holder, int position) {
+        Log.d(LOG_TAG, "onBindViewHolder called for position: " + position);
 
         switch (position) {
             case 0:
@@ -139,15 +143,18 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
                 @Override
                 public void onClick(View v) {
                     int position = getAdapterPosition();
+                    Log.d(LOG_TAG, "Button clicked at position: " + position);
 
                     switch (position) {
                         case 0:
+                            Log.d(LOG_TAG, "Navigating to ProfileActivity.");
                             Intent profileIntent = new Intent(ctx, ProfileActivity.class);
                             profileIntent.putExtra("managerId", managerId);
                             profileIntent.putExtra("team", team);
                             ctx.startActivity(profileIntent);
                             break;
                         case 1:
+                            Log.d(LOG_TAG, ftPlayersExist ? "Navigating to FirstTeamListActivity." : "Navigating to FirstTeamActivity.");
                             if (ftPlayersExist) {
                                 Intent intent = new Intent(ctx, FirstTeamListActivity.class);
                                 intent.putExtra("managerId", managerId);
@@ -161,6 +168,7 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
                             }
                             break;
                         case 2:
+                            Log.d(LOG_TAG, ytPlayersExist ? "Navigating to YouthTeamListActivity." : "Navigating to YouthTeamActivity.");
                             if (ytPlayersExist) {
                                 Intent intent = new Intent(ctx, YouthTeamListActivity.class);
                                 intent.putExtra("managerId", managerId);
@@ -174,12 +182,14 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
                             }
                             break;
                         case 3:
+                            Log.d(LOG_TAG, "Navigating to FormerPlayersListActivity.");
                             Intent formerPlayersIntent = new Intent(ctx, FormerPlayersListActivity.class);
                             formerPlayersIntent.putExtra("managerId", managerId);
                             formerPlayersIntent.putExtra("team", team);
                             ctx.startActivity(formerPlayersIntent);
                             break;
                         case 4:
+                            Log.d(LOG_TAG, shPlayersExist ? "Navigating to ShortlistPlayersActivity." : "Navigating to ShortlistActivity.");
                             if (shPlayersExist) {
                                 Intent intent = new Intent(ctx, ShortlistPlayersActivity.class);
                                 intent.putExtra("managerId", managerId);
@@ -193,18 +203,21 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
                             }
                             break;
                         case 5:
+                            Log.d(LOG_TAG, "Navigating to LoanedOutPlayersActivity.");
                             Intent loanIntent = new Intent(ctx, LoanedOutPlayersActivity.class);
                             loanIntent.putExtra("managerId", managerId);
                             loanIntent.putExtra("team", team);
                             ctx.startActivity(loanIntent);
                             break;
                         case 6:
+                            Log.d(LOG_TAG, "Navigating to TransferDealsActivity.");
                             Intent transferIntent = new Intent(ctx, TransferDealsActivity.class);
                             transferIntent.putExtra("managerId", managerId);
                             transferIntent.putExtra("team", team);
                             ctx.startActivity(transferIntent);
                             break;
                         case 7:
+                            Log.d(LOG_TAG, "Navigating to SupportActivity.");
                             Intent supportIntent = new Intent(ctx, SupportActivity.class);
                             supportIntent.putExtra("managerId", managerId);
                             supportIntent.putExtra("team", team);

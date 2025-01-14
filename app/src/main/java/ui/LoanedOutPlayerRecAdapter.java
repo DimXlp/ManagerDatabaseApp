@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +51,7 @@ import util.UserApi;
 
 public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPlayerRecAdapter.ViewHolder> {
 
+    private static final String LOG_TAG = "RAFI|LoanedOutPlayerRecAdapter";
     private Context context;
     private List<LoanedOutPlayer> loanedOutPlayerList;
     private long managerId;
@@ -248,6 +250,8 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
         }
 
         private void deletePlayer(final LoanedOutPlayer player) {
+            Log.d(LOG_TAG, "deletePlayer called for player: " + player.getFullName());
+
             loPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
                     .get()
@@ -255,6 +259,8 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
+                                Log.d(LOG_TAG, "LoanedOutPlayers collection fetched successfully.");
+
                                 List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                 DocumentReference documentReference = null;
                                 for (DocumentSnapshot ds : doc) {
@@ -268,6 +274,7 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Player successfully deleted: " + player.getFullName());
                                                 Toast.makeText(context, "Player deleted!", Toast.LENGTH_LONG)
                                                         .show();
                                                 Intent intent = new Intent(context, LoanedOutPlayersActivity.class);
@@ -276,13 +283,19 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                                 context.startActivity(intent);
                                                 ((Activity)context).finish();
                                             }
-                                        });
+                                        })
+                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error deleting player.", e));
+                            } else {
+                                Log.e(LOG_TAG, "Error fetching LoanedOutPlayers collection.", task.getException());
                             }
+
                         }
                     });
         }
 
         private void terminateLoanDeal(final LoanedOutPlayer player) {
+            Log.d(LOG_TAG, "terminateLoanDeal called for player: " + player.getFullName());
+
             loPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
                     .get()
@@ -290,6 +303,8 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
+                                Log.d(LOG_TAG, "LoanedOutPlayers collection fetched successfully.");
+
                                 List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                 DocumentReference documentReference = null;
                                 for (DocumentSnapshot ds : doc) {
@@ -303,6 +318,8 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Loan deal successfully terminated for player: " + player.getFullName());
+
                                                 FirstTeamPlayer ftPlayer = new FirstTeamPlayer();
                                                 ftPlayer.setId(0);
                                                 ftPlayer.setFirstName(player.getFirstName());
@@ -324,23 +341,31 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                             @Override
                                                             public void onSuccess(DocumentReference documentReference) {
+                                                                Log.d(LOG_TAG, "Player returned to First Team: " + ftPlayer.getFullName());
                                                                 Toast.makeText(context, "Player has returned!", Toast.LENGTH_LONG)
                                                                         .show();
                                                             }
-                                                        });
+                                                        })
+                                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error returning player to First Team.", e));
+
                                                 Intent intent = new Intent(context, LoanedOutPlayersActivity.class);
                                                 intent.putExtra("managerId", managerId);
                                                 intent.putExtra("team", team);
                                                 context.startActivity(intent);
                                                 ((Activity)context).finish();
                                             }
-                                        });
+                                        })
+                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error terminating loan deal.", e));
+                            } else {
+                                Log.e(LOG_TAG, "Error fetching LoanedOutPlayers collection.", task.getException());
                             }
                         }
                     });
         }
 
         private void editPlayer(final LoanedOutPlayer player) {
+            Log.d(LOG_TAG, "editPlayer called for player: " + player.getFullName());
+
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.edit_loaned_out_player_popup, null);
@@ -406,6 +431,7 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
             teamText.setText(player.getTeam());
             yearLoaned.setSelection(yearAdapter.getPosition(player.getYearLoanedOut()));
             typeOfLoanSpinner.setSelection(loanAdapter.getPosition(player.getTypeOfLoan()));
+            Log.d(LOG_TAG, "Player data populated into fields for editing: " + player.getFullName());
 
             builder.setView(view);
             final AlertDialog dialog = builder.create();
@@ -414,12 +440,16 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
             editPlayerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.d(LOG_TAG, "Save Player button clicked for player: " + player.getFullName());
+
                     if (!lastName.getText().toString().isEmpty() &&
                             !nationality.getText().toString().isEmpty() &&
                             !positionSpinner.getSelectedItem().toString().isEmpty() &&
                             !overall.getText().toString().isEmpty() &&
                             !yearSigned.getSelectedItem().toString().equals("0") &&
                             !yearLoaned.getSelectedItem().toString().equals("0")) {
+                        Log.d(LOG_TAG, "Validation successful. Proceeding to update player.");
+
                         loPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -427,6 +457,8 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                         if (task.isSuccessful()) {
+                                            Log.d(LOG_TAG, "Loaned out players fetched successfully.");
+
                                             List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                             DocumentReference documentReference = null;
                                             for (DocumentSnapshot ds : doc) {
@@ -440,6 +472,7 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                             String ptlHi = potentialHigh.getText().toString().trim();
                                             String yScouted = yearScouted.getSelectedItem().toString().trim();
                                             assert documentReference != null;
+                                            Log.d(LOG_TAG, "Document reference found for player: " + player.getFullName());
                                             documentReference.update("firstName", firstName.getText().toString().trim(),
                                                     "lastName", lastName.getText().toString().trim(),
                                                     "fullName", firstName.getText().toString().trim() + " " + lastName.getText().toString().trim(),
@@ -457,6 +490,7 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
+                                                            Log.d(LOG_TAG, "Player successfully updated in Firestore: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
                                                             dialog.dismiss();
                                                             Intent intent = new Intent(context, LoanedOutPlayersActivity.class);
@@ -468,13 +502,15 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                                                     .show();
 
                                                         }
-                                                    });
-
-
+                                                    })
+                                                    .addOnFailureListener(e -> Log.e(LOG_TAG, "Error updating player in Firestore.", e));
+                                        } else {
+                                            Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
                                         }
                                     }
                                 });
                     } else {
+                        Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
                         Toast.makeText(context, "Last Name/Nickname, Nationality, Position, Overall, Year Signed and Year Loaned are required", Toast.LENGTH_LONG)
                                 .show();
                     }

@@ -61,6 +61,7 @@ import util.ValueFormatter;
 
 public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPlayerRecAdapter.ViewHolder> {
 
+    private static final String LOG_TAG = "RAFI|FirstTeamPlayerRecAdapter";
     private Context context;
     private List<FirstTeamPlayer> playerList;
     private long managerId;
@@ -96,6 +97,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
     @NonNull
     @Override
     public FirstTeamPlayerRecAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Log.d(LOG_TAG, "onCreateViewHolder called: Creating ViewHolder.");
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.ft_player_row, parent, false);
         return new ViewHolder(view, context);
@@ -103,7 +105,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
 
     @Override
     public void onBindViewHolder(@NonNull FirstTeamPlayerRecAdapter.ViewHolder holder, int position) {
-
+        Log.d(LOG_TAG, "onBindViewHolder called: Binding data for position " + position);
         FirstTeamPlayer player = playerList.get(position);
 
         holder.numberText.setText(String.valueOf(player.getNumber()));
@@ -123,6 +125,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         } else {
             holder.yearScoutedDateText.setText("????/??");
         }
+        Log.d(LOG_TAG, "Player data set: " + player.getFullName());
+
         if (!player.isLoanPlayer()) {
             holder.line5.setVisibility(View.GONE);
             holder.loanText.setVisibility(View.GONE);
@@ -212,6 +216,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         public ViewHolder(@NonNull View itemView, final Context ctx) {
             super(itemView);
             context = ctx;
+            Log.d(LOG_TAG, "ViewHolder initialized.");
 
             numberText = itemView.findViewById(R.id.number_ftp);
             fullNameText = itemView.findViewById(R.id.full_name_ftp);
@@ -513,6 +518,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         }
 
         private void terminateLoan(final FirstTeamPlayer player) {
+            Log.d(LOG_TAG, "terminateLoan called for player: " + player.getFullName());
+
             ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
                     .get()
@@ -520,6 +527,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
+                                Log.d(LOG_TAG, "First Team players fetched successfully.");
+
                                 List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                 DocumentReference documentReference = null;
                                 for (DocumentSnapshot ds : doc) {
@@ -529,10 +538,13 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     }
                                 }
                                 assert documentReference != null;
+                                Log.d(LOG_TAG, "Document reference found for player: " + player.getFullName());
                                 documentReference.delete()
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Player successfully removed from First Team: " + player.getFullName());
+
                                                 FormerPlayer fmPlayer = new FormerPlayer();
                                                 fmPlayer.setId(0);
                                                 fmPlayer.setFirstName(player.getFirstName());
@@ -556,10 +568,12 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                             @Override
                                                             public void onSuccess(DocumentReference documentReference) {
+                                                                Log.d(LOG_TAG, "Player added to FormerPlayer collection: " + fmPlayer.getFullName());
                                                                 Toast.makeText(context, "Player returned to his team!", Toast.LENGTH_LONG)
                                                                         .show();
                                                             }
                                                         });
+
                                                 ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                                         .whereEqualTo("managerId", managerId)
                                                         .get()
@@ -568,6 +582,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
+                                                                        Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + task.getResult().size());
                                                                         Intent intent = new Intent(context, FirstTeamListActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -575,6 +590,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                         context.startActivity(intent);
                                                                         ((Activity)context).finish();
                                                                     } else {
+                                                                        Log.d(LOG_TAG, "No players left in First Team. Navigating to FirstTeamActivity.");
                                                                         Intent intent = new Intent(context, FirstTeamActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -592,6 +608,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         }
 
         private void loanPlayer(final FirstTeamPlayer player) {
+            Log.d(LOG_TAG, "loanPlayer called for player: " + player.getFullName());
+
             ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
                     .get()
@@ -599,6 +617,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
+                                Log.d(LOG_TAG, "First Team players fetched successfully.");
+
                                 List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                 DocumentReference documentReference = null;
                                 for (DocumentSnapshot ds : doc) {
@@ -608,10 +628,13 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     }
                                 }
                                 assert documentReference != null;
+                                Log.d(LOG_TAG, "Document reference found for player: " + player.getFullName());
                                 documentReference.delete()
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Player successfully removed from First Team: " + player.getFullName());
+
                                                 final Transfer newTransfer = new Transfer();
                                                 newTransfer.setId(0);
                                                 newTransfer.setFirstName(player.getFirstName());
@@ -632,6 +655,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 newTransfer.setManagerId(managerId);
                                                 newTransfer.setUserId(UserApi.getInstance().getUserId());
                                                 newTransfer.setTimeAdded(new Timestamp(new Date()));
+                                                Log.d(LOG_TAG, "Transfer object created for player: " + player.getFullName());
 
                                                 LoanedOutPlayer loPlayer = new LoanedOutPlayer();
                                                 loPlayer.setId(0);
@@ -652,17 +676,23 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 loPlayer.setManagerId(managerId);
                                                 loPlayer.setUserId(UserApi.getInstance().getUserId());
                                                 loPlayer.setTimeAdded(new Timestamp(new Date()));
+                                                Log.d(LOG_TAG, "LoanedOutPlayer object created for player: " + player.getFullName());
 
-                                                transfersReference.add(newTransfer);
+                                                transfersReference.add(newTransfer)
+                                                        .addOnSuccessListener(docRef -> Log.d(LOG_TAG, "Transfer added to Firestore: " + newTransfer.getFullName()))
+                                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding transfer to Firestore.", e));
+
 
                                                 loPlayersReference.add(loPlayer)
                                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                             @Override
                                                             public void onSuccess(DocumentReference documentReference) {
+                                                                Log.d(LOG_TAG, "Player added to LoanedOutPlayer collection: " + loPlayer.getFullName());
                                                                 Toast.makeText(context, "Player loaned out!", Toast.LENGTH_LONG)
                                                                         .show();
                                                             }
                                                         });
+
                                                 ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                                         .whereEqualTo("managerId", managerId)
                                                         .get()
@@ -671,6 +701,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
+                                                                        Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + task.getResult().size());
                                                                         Intent intent = new Intent(context, FirstTeamListActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -678,23 +709,30 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                         context.startActivity(intent);
                                                                         ((Activity)context).finish();
                                                                     } else {
+                                                                        Log.d(LOG_TAG, "No players left in First Team. Navigating to FirstTeamActivity.");
                                                                         Intent intent = new Intent(context, FirstTeamActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
                                                                         context.startActivity(intent);
                                                                         ((Activity)context).finish();
                                                                     }
+                                                                } else {
+                                                                    Log.e(LOG_TAG, "Error refreshing First Team list.", task.getException());
                                                                 }
                                                             }
-                                                        });
+                                                        })
+                                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding player to LoanedOutPlayer collection.", e));
                                             }
-                                        });
+                                        })
+                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error removing player from First Team.", e));
                             }
                         }
                     });
         }
 
         private void deletePlayer(final FirstTeamPlayer player) {
+            Log.d(LOG_TAG, "deletePlayer called for player: " + player.getFullName());
+
             ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
                     .get()
@@ -702,6 +740,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
+                                Log.d(LOG_TAG, "First Team players fetched successfully.");
+
                                 List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                 DocumentReference documentReference = null;
                                 for (DocumentSnapshot ds : doc) {
@@ -711,12 +751,15 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     }
                                 }
                                 assert documentReference != null;
+                                Log.d(LOG_TAG, "Document reference found for player: " + player.getFullName());
                                 documentReference.delete()
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Player successfully deleted from First Team: " + player.getFullName());
                                                 Toast.makeText(context, "Player deleted!", Toast.LENGTH_LONG)
                                                         .show();
+
                                                 ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                                         .whereEqualTo("managerId", managerId)
                                                         .get()
@@ -725,6 +768,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
+                                                                        Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + task.getResult().size());
                                                                         Intent intent = new Intent(context, FirstTeamListActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -732,23 +776,29 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                         context.startActivity(intent);
                                                                         ((Activity)context).finish();
                                                                     } else {
+                                                                        Log.d(LOG_TAG, "No players left in First Team. Navigating to FirstTeamActivity.");
                                                                         Intent intent = new Intent(context, FirstTeamActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
                                                                         context.startActivity(intent);
                                                                         ((Activity)context).finish();
                                                                     }
+                                                                } else {
+                                                                    Log.e(LOG_TAG, "Error refreshing First Team list.", task.getException());
                                                                 }
                                                             }
                                                         });
                                             }
-                                        });
+                                        })
+                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error deleting player from First Team.", e));
                             }
                         }
                     });
         }
 
         private void letPlayerLeave(final FirstTeamPlayer player) {
+            Log.d(LOG_TAG, "letPlayerLeave called for player: " + player.getFullName());
+
             ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
                     .get()
@@ -756,6 +806,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
+                                Log.d(LOG_TAG, "First Team players fetched successfully.");
+
                                 List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                 DocumentReference documentReference = null;
                                 for (DocumentSnapshot ds : doc) {
@@ -766,10 +818,13 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     }
                                 }
                                 assert documentReference != null;
+                                Log.d(LOG_TAG, "Document reference found for player: " + player.getFullName());
                                 documentReference.delete()
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Player successfully removed from First Team: " + player.getFullName());
+
                                                 final Transfer newTransfer = new Transfer();
                                                 findMaxTransferId();
                                                 newTransfer.setId(maxTransferId);
@@ -797,6 +852,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 newTransfer.setManagerId(managerId);
                                                 newTransfer.setUserId(UserApi.getInstance().getUserId());
                                                 newTransfer.setTimeAdded(new Timestamp(new Date()));
+                                                Log.d(LOG_TAG, "Transfer object created: " + newTransfer.getFullName());
 
                                                 FormerPlayer fmPlayer = new FormerPlayer();
                                                 fmPlayer.setId(0);
@@ -816,19 +872,25 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 fmPlayer.setUserId(UserApi.getInstance().getUserId());
                                                 fmPlayer.setTimeAdded(new Timestamp(new Date()));
                                                 fmPlayer.setFirstTeamId(player.getId());
+                                                Log.d(LOG_TAG, "FormerPlayer object created: " + fmPlayer.getFullName());
 
                                                 fmPlayersReference.add(fmPlayer)
                                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                             @Override
                                                             public void onSuccess(DocumentReference documentReference) {
+                                                                Log.d(LOG_TAG, "Player added to FormerPlayer collection: " + fmPlayer.getFullName());
                                                                 Toast.makeText(context, "Player transferred!", Toast.LENGTH_LONG)
                                                                         .show();
                                                             }
-                                                        });
+                                                        })
+                                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding player to FormerPlayer collection.", e));
                                                 if (hasExchangePlayer) {
                                                     addExchangePlayer(newTransfer);
                                                 } else {
-                                                    transfersReference.add(newTransfer);
+                                                    transfersReference.add(newTransfer)
+                                                            .addOnSuccessListener(docRef2 -> Log.d(LOG_TAG, "Transfer added to Firestore: " + newTransfer.getFullName()))
+                                                            .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding transfer to Firestore.", e));
+
                                                     ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                                             .whereEqualTo("managerId", managerId)
                                                             .get()
@@ -837,6 +899,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                     if (task.isSuccessful()) {
                                                                         if (!task.getResult().isEmpty()) {
+                                                                            Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + task.getResult().size());
                                                                             Intent intent = new Intent(context, FirstTeamListActivity.class);
                                                                             intent.putExtra("managerId", managerId);
                                                                             intent.putExtra("team", team);
@@ -844,25 +907,31 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                             context.startActivity(intent);
                                                                             ((Activity) context).finish();
                                                                         } else {
+                                                                            Log.d(LOG_TAG, "No players left in First Team. Navigating to FirstTeamActivity.");
                                                                             Intent intent = new Intent(context, FirstTeamActivity.class);
                                                                             intent.putExtra("managerId", managerId);
                                                                             intent.putExtra("team", team);
                                                                             context.startActivity(intent);
                                                                             ((Activity) context).finish();
                                                                         }
+                                                                    } else {
+                                                                        Log.e(LOG_TAG, "Error refreshing First Team list.", task.getException());
                                                                     }
                                                                 }
                                                             });
                                                 }
 
                                             }
-                                        });
+                                        })
+                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error removing player from First Team.", e));
                             }
                         }
                     });
         }
 
         private void addExchangePlayer(Transfer transfer) {
+            Log.d(LOG_TAG, "addExchangePlayer called for transfer: " + transfer.getFullName());
+
             builder = new AlertDialog.Builder(context);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.create_first_team_player_popup, null);
@@ -900,19 +969,25 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
             savePlayerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.d(LOG_TAG, "Save Exchange Player button clicked.");
+
                     if (!lastName.getText().toString().isEmpty() &&
                             !nationality.getText().toString().isEmpty() &&
                             !positionSpinner.getSelectedItem().toString().isEmpty() &&
                             !overall.getText().toString().isEmpty() &&
                             !yearSigned.getSelectedItem().toString().equals("0")) {
+                        Log.d(LOG_TAG, "Validation successful. Proceeding to create exchange player.");
                         createPlayer(transfer);
                     } else {
+                        Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
                         Toast.makeText(context, "Last Name/Nickname, Nationality, Position, Overall and Year Signed are required", Toast.LENGTH_LONG)
                                 .show();
                     }
                 }
 
                 private void createPlayer(Transfer newTransfer) {
+                    Log.d(LOG_TAG, "Creating exchange player for transfer: " + newTransfer.getFullName());
+
                     String firstNamePlayer = firstName.getText().toString().trim();
                     String lastNamePlayer = lastName.getText().toString().trim();
                     String fullNamePlayer;
@@ -928,9 +1003,9 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                     String potentialLowPlayer = potentialLow.getText().toString().trim();
                     String potentialHiPlayer = potentialHigh.getText().toString().trim();
                     final String ySignedPlayer = yearSigned.getSelectedItem().toString().trim();
+                    Log.d(LOG_TAG, "Exchange player details: Full Name = " + fullNamePlayer + ", Position = " + positionPlayer);
 
                     FirstTeamPlayer player = new FirstTeamPlayer();
-
                     player.setId(maxId+1);
                     newTransfer.setExchangePlayerId(maxId+1);
                     player.setFirstName(firstNamePlayer);
@@ -958,12 +1033,21 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                     player.setTimeAdded(new Timestamp(new Date()));
                     player.setManagerId(managerId);
                     player.setLoanPlayer(loanSwitch.isChecked());
+                    Log.d(LOG_TAG, "FirstTeamPlayer object created for exchange player: " + fullNamePlayer);
 
                     newTransfer.setExchangePlayerId(player.getId());
                     newTransfer.setExchangePlayerName(player.getFullName());
 
-                    transfersReference.add(newTransfer);
-                    ftPlayersReference.add(player);
+                    transfersReference.add(newTransfer)
+                            .addOnSuccessListener(docRef -> Log.d(LOG_TAG, "Transfer added to Firestore: " + newTransfer.getFullName()))
+                            .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding transfer to Firestore.", e));
+
+                    ftPlayersReference.add(player)
+                            .addOnSuccessListener(docRef -> {
+                                        Log.d(LOG_TAG, "Exchange player added to FirstTeamPlayer collection: " + player.getFullName());
+                                        Toast.makeText(context, "Exchange Player added!", Toast.LENGTH_LONG).show();
+                                    })
+                            .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding exchange player to Firestore.", e));
 
                     ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                             .whereEqualTo("managerId", managerId)
@@ -973,6 +1057,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                     if (task.isSuccessful()) {
                                         if (!task.getResult().isEmpty()) {
+                                            Log.d(LOG_TAG, "Navigating to FirstTeamListActivity.");
                                             Intent intent = new Intent(context, FirstTeamListActivity.class);
                                             intent.putExtra("managerId", managerId);
                                             intent.putExtra("team", team);
@@ -980,6 +1065,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                             context.startActivity(intent);
                                             ((Activity) context).finish();
                                         } else {
+                                            Log.d(LOG_TAG, "No players left. Navigating to FirstTeamActivity.");
                                             Intent intent = new Intent(context, FirstTeamActivity.class);
                                             intent.putExtra("managerId", managerId);
                                             intent.putExtra("team", team);
@@ -998,6 +1084,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         }
 
         private void editPlayer(final FirstTeamPlayer player) {
+            Log.d(LOG_TAG, "editPlayer called for player: " + player.getFullName());
+
             builder = new AlertDialog.Builder(context);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.create_first_team_player_popup, null);
@@ -1039,6 +1127,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
             yearSigned.setSelection(yearAdapter.getPosition(player.getYearSigned()));
             yearScouted.setSelection(yearAdapter.getPosition(player.getYearScouted()));
             loanSwitch.setChecked(player.isLoanPlayer());
+            Log.d(LOG_TAG, "Player data populated into fields for editing: " + player.getFullName());
 
             builder.setView(view);
             dialog = builder.create();
@@ -1047,11 +1136,15 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
             savePlayerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.d(LOG_TAG, "Save Player button clicked for player: " + player.getFullName());
+
                     if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
                         !positionSpinner.getSelectedItem().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty() &&
                         !yearSigned.getSelectedItem().toString().equals("0")) {
+                        Log.d(LOG_TAG, "Validation successful. Proceeding to update player.");
+
                         ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -1059,6 +1152,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                         if (task.isSuccessful()) {
+                                            Log.d(LOG_TAG, "First Team players fetched successfully.");
+
                                             List<DocumentSnapshot> doc =  task.getResult().getDocuments();
                                             DocumentReference documentReference = null;
                                             for (DocumentSnapshot ds: doc) {
@@ -1072,6 +1167,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                             String ptlHi = potentialHigh.getText().toString().trim();
                                             String yScouted = yearScouted.getSelectedItem().toString().trim();
                                             assert documentReference != null;
+                                            Log.d(LOG_TAG, "Document reference found for player: " + player.getFullName());
                                             documentReference.update("firstName", firstName.getText().toString().trim(),
                                                     "lastName", lastName.getText().toString().trim(),
                                                     "fullName", firstName.getText().toString().trim() + " " + lastName.getText().toString().trim(),
@@ -1087,6 +1183,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
+                                                            Log.d(LOG_TAG, "Player successfully updated in Firestore: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
                                                             dialog.dismiss();
                                                             Intent intent = new Intent(context, FirstTeamListActivity.class);
@@ -1098,12 +1195,15 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                             Toast.makeText(context, "Player updated!", Toast.LENGTH_LONG)
                                                                     .show();
                                                         }
-                                                    });
-
+                                                    })
+                                                    .addOnFailureListener(e -> Log.e(LOG_TAG, "Error updating player in Firestore.", e));
+                                        } else {
+                                            Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
                                         }
                                     }
                                 });
                     } else {
+                        Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
                         Toast.makeText(context, "Last Name/Nickname, Nationality, Position and Overall are required", Toast.LENGTH_LONG)
                                 .show();
                     }
@@ -1120,6 +1220,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
+                        Log.d(LOG_TAG, "Transfers fetched successfully for calculating max transfer ID.");
+
                         maxTransferId = queryDocumentSnapshots.toObjects(Transfer.class).get(0).getId();
                         for (DocumentSnapshot doc : queryDocumentSnapshots) {
                             Transfer transfer = doc.toObject(Transfer.class);
@@ -1129,7 +1231,11 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                 Log.d("RAFI", "maxTransferId = " + maxTransferId);
                             }
                         }
+                    } else {
+                        Log.d(LOG_TAG, "No transfers found. Defaulting maxTransferId to 0.");
+                        maxTransferId = 0;
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching transfers for maxTransferId.", e));
     }
 }

@@ -54,6 +54,7 @@ import util.UserApi;
 
 public class FirstTeamActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "RAFI|FirstTeam";
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private NavigationView navView;
@@ -102,19 +103,31 @@ public class FirstTeamActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first_team);
+        Log.i(LOG_TAG, "FirstTeamActivity launched.");
 
         if (UserApi.getInstance() != null) {
             currentUserId = UserApi.getInstance().getUserId();
             currentUserName = UserApi.getInstance().getUsername();
+            Log.d(LOG_TAG, "UserApi initialized: userId=" + currentUserId + ", username=" + currentUserName);
+        } else {
+            Log.w(LOG_TAG, "UserApi instance is null.");
         }
 
         firebaseAuth = FirebaseAuth.getInstance();
         currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser != null) {
+            Log.d(LOG_TAG, "Current user: " + currentUser.getUid());
+        } else {
+            Log.w(LOG_TAG, "No user is currently authenticated.");
+        }
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             managerId = extras.getLong("managerId");
             team = extras.getString("team");
+            Log.d(LOG_TAG, "Extras received: managerId=" + managerId + ", team=" + team);
+        } else {
+            Log.w(LOG_TAG, "No extras received in intent.");
         }
 
         toolbar = findViewById(R.id.toolbar);
@@ -138,15 +151,13 @@ public class FirstTeamActivity extends AppCompatActivity {
         managerNameHeader = headerLayout.findViewById(R.id.manager_name_header);
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
 
-        addPlayerFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                createPopupDialog();
-            }
+        addPlayerFab.setOnClickListener(v -> {
+            Log.d(LOG_TAG, "Add player button clicked.");
+            createPopupDialog();
         });
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         // Load Native Ads
         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
@@ -160,11 +171,12 @@ public class FirstTeamActivity extends AppCompatActivity {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
                         interstitialAd.show(FirstTeamActivity.this);
+                        Log.d(LOG_TAG, "Interstitial ad loaded and displayed.");
                     }
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        Log.d("RAFI", "Interstitial Ad failed to load: " + loadAdError.getMessage());
+                        Log.e(LOG_TAG, "Interstitial ad failed to load: " + loadAdError.getMessage());
                     }
                 });
     }
@@ -186,7 +198,7 @@ public class FirstTeamActivity extends AppCompatActivity {
                 .withAdListener(new com.google.android.gms.ads.AdListener() {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
-                        Log.e("RAFI", "Native ad failed to load: " + adError.getMessage());
+
                     }
                 })
                 .build();
@@ -195,7 +207,6 @@ public class FirstTeamActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        Log.d("RAFI", "Populating native ad view");
 
         // Dynamically identify view IDs based on the nativeAdView
         int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
@@ -236,6 +247,7 @@ public class FirstTeamActivity extends AppCompatActivity {
     }
 
     private void createPopupDialog() {
+        Log.d(LOG_TAG, "Creating popup dialog for adding a new player.");
         builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.create_first_team_player_popup, null);
 
@@ -264,6 +276,7 @@ public class FirstTeamActivity extends AppCompatActivity {
         createPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(LOG_TAG, "Create player button clicked in popup dialog.");
                 if (!lastName.getText().toString().isEmpty() &&
                     !nationality.getText().toString().isEmpty() &&
                     !positionSpinner.getSelectedItem().toString().isEmpty() &&
@@ -271,6 +284,7 @@ public class FirstTeamActivity extends AppCompatActivity {
                     !yearSigned.getSelectedItem().toString().equals("0")) {
                     createPlayer();
                 } else {
+                    Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
                     Toast.makeText(FirstTeamActivity.this, "Last Name/Nickname, Nationality, Position, Overall and Year Signed are required", Toast.LENGTH_LONG)
                             .show();
                 }
@@ -283,6 +297,7 @@ public class FirstTeamActivity extends AppCompatActivity {
     }
 
     private void createPlayer() {
+        Log.d(LOG_TAG, "Creating a new player.");
         String firstNamePlayer = firstName.getText().toString().trim();
         String lastNamePlayer = lastName.getText().toString().trim();
         String fullNamePlayer;
@@ -330,12 +345,14 @@ public class FirstTeamActivity extends AppCompatActivity {
         player.setManagerId(managerId);
         player.setLoanPlayer(loanSwitch.isChecked());
 
+        Log.d(LOG_TAG, "Player object created: " + player);
         playerId++;
 
         collectionReference.add(player)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        Log.i(LOG_TAG, "Player successfully added to Firestore. Document ID: " + documentReference.getId());
                         Intent intent = new Intent(FirstTeamActivity.this, FirstTeamListActivity.class);
                         intent.putExtra("managerId", managerId);
                         intent.putExtra("team", team);
@@ -343,7 +360,8 @@ public class FirstTeamActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Failed to add player to Firestore: " + e.getMessage(), e));
     }
 
 
@@ -440,10 +458,15 @@ public class FirstTeamActivity extends AppCompatActivity {
             case R.id.dr_logout:
                 if (currentUser != null && firebaseAuth != null) {
                     firebaseAuth.signOut();
+                    Log.i(LOG_TAG, "User logged out successfully.");
                     startActivity(new Intent(FirstTeamActivity.this, MainActivity.class));
                     finishAffinity();
+                } else {
+                    Log.w(LOG_TAG, "Logout attempt failed: currentUser or firebaseAuth is null.");
                 }
                 break;
+            default:
+                Log.w(LOG_TAG, "Unhandled drawer item selected: " + item.getTitle());
         }
 
         item.setChecked(true);
@@ -465,6 +488,7 @@ public class FirstTeamActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(LOG_TAG, "FirstTeamActivity started.");
 
         db.collection("YouthTeamPlayers").whereEqualTo("userId", currentUserId)
                 .whereEqualTo("managerId", managerId)
@@ -527,6 +551,7 @@ public class FirstTeamActivity extends AppCompatActivity {
             nativeAdBottom.destroy();
         }
         super.onDestroy();
+        Log.d(LOG_TAG, "FirstTeamActivity destroyed.");
     }
 
 }

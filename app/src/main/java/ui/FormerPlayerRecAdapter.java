@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +46,7 @@ import util.UserApi;
 
 public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRecAdapter.ViewHolder> {
 
+    private static final String LOG_TAG = "RAFI|FormerPlayerRecAdapter";
     private Context context;
     private List<FormerPlayer> formerPlayerList;
     private long managerId;
@@ -275,6 +277,8 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
         }
 
         private void addToList(final FormerPlayer player) {
+            Log.d(LOG_TAG, "addToList called for player: " + player.getFullName());
+
             frmPlayerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
                     .get()
@@ -282,6 +286,8 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
+                                Log.d(LOG_TAG, "FormerPlayer collection fetched successfully.");
+
                                 List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                 for (DocumentSnapshot ds : doc) {
                                     FormerPlayer frmPlayer = ds.toObject(FormerPlayer.class);
@@ -301,28 +307,34 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                         shPlayer.setManagerId(managerId);
                                         shPlayer.setUserId(UserApi.getInstance().getUserId());
                                         shPlayer.setTimeAdded(new Timestamp(new Date()));
+
                                         db.collection("ShortlistedPlayers").add(shPlayer)
                                                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                     @Override
                                                     public void onSuccess(DocumentReference documentReference) {
+                                                        Log.d(LOG_TAG, "Player added to ShortlistedPlayers: " + shPlayer.getFullName());
                                                         Toast.makeText(context, "Player added to the shortlist!", Toast.LENGTH_LONG)
                                                                 .show();
-                                                    }
-                                                });
-                                        Intent intent = new Intent(context, FormerPlayersListActivity.class);
-                                        intent.putExtra("managerId", managerId);
-                                        intent.putExtra("team", team);
-                                        intent.putExtra("barTeam", barTeam);
-                                        context.startActivity(intent);
-                                        ((Activity)context).finish();
+                                                        Intent intent = new Intent(context, FormerPlayersListActivity.class);
+                                                        intent.putExtra("managerId", managerId);
+                                                        intent.putExtra("team", team);
+                                                        intent.putExtra("barTeam", barTeam);
+                                                        context.startActivity(intent);
+                                                        ((Activity)context).finish();}
+                                                })
+                                                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding player to ShortlistedPlayers.", e));
                                     }
                                 }
+                            } else {
+                                Log.e(LOG_TAG, "Error fetching FormerPlayer collection.", task.getException());
                             }
                         }
                     });
         }
 
         private void deletePlayer(final FormerPlayer player) {
+            Log.d(LOG_TAG, "deletePlayer called for player: " + player.getFullName());
+
             frmPlayerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
                     .get()
@@ -330,6 +342,8 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
+                                Log.d(LOG_TAG, "FormerPlayer collection fetched successfully.");
+
                                 List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                 DocumentReference documentReference = null;
                                 for (DocumentSnapshot ds : doc) {
@@ -343,6 +357,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Player successfully deleted: " + player.getFullName());
                                                 Toast.makeText(context, "Player deleted!", Toast.LENGTH_LONG)
                                                         .show();
                                                 Intent intent = new Intent(context, FormerPlayersListActivity.class);
@@ -352,7 +367,10 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                 context.startActivity(intent);
                                                 ((Activity) context).finish();
                                             }
-                                        });
+                                        })
+                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error deleting player.", e));
+                            } else {
+                                Log.e(LOG_TAG, "Error fetching FormerPlayer collection.", task.getException());
                             }
                         }
                     });
@@ -368,6 +386,8 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
         }
 
         private void editFormerYouthTeamPlayer(final FormerPlayer player) {
+            Log.d(LOG_TAG, "editFormerYouthTeamPlayer called for player: " + player.getFullName());
+
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.edit_former_player_popup, null);
@@ -426,6 +446,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
             yearSigned.setSelection(yearAdapter.getPosition(player.getYearSigned()));
             yearScouted.setSelection(yearAdapter.getPosition(player.getYearScouted()));
             yearLeft.setSelection(yearAdapter.getPosition(player.getYearLeft()));
+            Log.d(LOG_TAG, "Player data populated for editing: " + player.getFullName());
 
             builder.setView(view);
             dialog = builder.create();
@@ -434,6 +455,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
             editPlayerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.d(LOG_TAG, "Save button clicked for player: " + player.getFullName());
 
                     if (!lastName.getText().toString().isEmpty() &&
                             !nationality.getText().toString().isEmpty() &&
@@ -441,6 +463,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                             !overall.getText().toString().isEmpty() &&
                             !yearScouted.getSelectedItem().toString().equals("0") &&
                             !yearLeft.getSelectedItem().toString().equals("0")) {
+
                         frmPlayerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -448,6 +471,8 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                         if (task.isSuccessful()) {
+                                            Log.d(LOG_TAG, "FormerPlayer collection fetched successfully for updating.");
+
                                             List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                             DocumentReference documentReference = null;
                                             for (DocumentSnapshot ds : doc) {
@@ -476,6 +501,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
+                                                            Log.d(LOG_TAG, "Player successfully updated: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
                                                             dialog.dismiss();
                                                             Intent intent = new Intent(context, FormerPlayersListActivity.class);
@@ -487,12 +513,15 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                             Toast.makeText(context, "Player edited!", Toast.LENGTH_LONG)
                                                                     .show();
                                                         }
-                                                    });
-
+                                                    })
+                                                    .addOnFailureListener(e -> Log.e(LOG_TAG, "Error updating player.", e));
+                                        } else {
+                                            Log.e(LOG_TAG, "Error fetching FormerPlayer collection.", task.getException());
                                         }
                                     }
                                 });
                     } else {
+                        Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
                         Toast.makeText(context, "Last Name/Nickname, Nationality, Position, Overall, Year Signed and Year Left are required", Toast.LENGTH_LONG)
                                 .show();
                     }
@@ -501,6 +530,8 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
         }
 
         private void editFormerFirstTeamPlayer(final FormerPlayer player) {
+            Log.d(LOG_TAG, "editFormerFirstTeamPlayer called for player: " + player.getFullName());
+
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.edit_former_player_popup, null);
@@ -554,6 +585,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
             yearSigned.setSelection(yearAdapter.getPosition(player.getYearSigned()));
             yearScouted.setSelection(yearAdapter.getPosition(player.getYearScouted()));
             yearLeft.setSelection(yearAdapter.getPosition(player.getYearLeft()));
+            Log.d(LOG_TAG, "Player data populated for editing: " + player.getFullName());
 
             builder.setView(view);
             final AlertDialog dialog1 = builder.create();
@@ -562,6 +594,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
             editPlayerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.d(LOG_TAG, "Save button clicked for player: " + player.getFullName());
 
                     if (!lastName.getText().toString().isEmpty() &&
                             !nationality.getText().toString().isEmpty() &&
@@ -569,6 +602,8 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                             !overall.getText().toString().isEmpty() &&
                             !yearSigned.getSelectedItem().toString().equals("0") &&
                             !yearLeft.getSelectedItem().toString().equals("0")) {
+                        Log.d(LOG_TAG, "Validation successful. Proceeding to update player.");
+
                         frmPlayerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -576,6 +611,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                         if (task.isSuccessful()) {
+                                            Log.d(LOG_TAG, "FormerPlayer collection fetched successfully for updating.");
                                             List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                             DocumentReference documentReference = null;
                                             for (DocumentSnapshot ds : doc) {
@@ -589,6 +625,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                             String ptlHi = potentialHigh.getText().toString().trim();
                                             String yScouted = yearScouted.getSelectedItem().toString().trim();
                                             assert documentReference != null;
+                                            Log.d(LOG_TAG, "Document reference found for player: " + player.getFullName());
                                             documentReference.update("firstName", firstName.getText().toString().trim(),
                                                     "lastName", lastName.getText().toString().trim(),
                                                     "fullName", firstName.getText().toString().trim() + " " + lastName.getText().toString().trim(),
@@ -604,6 +641,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
+                                                            Log.d(LOG_TAG, "Player successfully updated: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
                                                             dialog1.dismiss();
                                                             Intent intent = new Intent(context, FormerPlayersListActivity.class);
@@ -615,12 +653,15 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                             Toast.makeText(context, "Player edited!", Toast.LENGTH_LONG)
                                                                     .show();
                                                         }
-                                                    });
-
+                                                    })
+                                                    .addOnFailureListener(e -> Log.e(LOG_TAG, "Error updating player.", e));
+                                        } else {
+                                            Log.e(LOG_TAG, "Error fetching FormerPlayer collection.", task.getException());
                                         }
                                     }
                                 });
                     } else {
+                        Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
                         Toast.makeText(context, "Last Name/Nickname, Nationality, Position, Overall, Year Signed and Year Left are required", Toast.LENGTH_LONG)
                                 .show();
                     }

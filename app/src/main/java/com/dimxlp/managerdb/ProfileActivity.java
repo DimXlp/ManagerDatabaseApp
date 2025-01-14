@@ -63,6 +63,8 @@ import model.Manager;
 import util.UserApi;
 
 public class ProfileActivity extends AppCompatActivity {
+
+    private static final String LOG_TAG = "RAFI|Profile";
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private NavigationView navView;
@@ -115,6 +117,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        Log.i(LOG_TAG, "ProfileActivity launched.");
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
@@ -124,7 +127,9 @@ public class ProfileActivity extends AppCompatActivity {
         if (extras != null) {
             managerId = extras.getLong("managerId");
             team = extras.getString("team");
-            Log.d("RAFI", "managerId = " + managerId + "\nteam = " + team);
+            Log.d(LOG_TAG, "Extras received: managerId = " + managerId + ", team = " + team);
+        } else {
+            Log.w(LOG_TAG, "No extras received in intent.");
         }
 
         // Load Native Ads
@@ -140,11 +145,12 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
                         interstitialAd.show(ProfileActivity.this);
+                        Log.d(LOG_TAG, "Interstitial ad loaded and displayed.");
                     }
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        Log.d("RAFI", "Interstitial Ad failed to load: " + loadAdError.getMessage());
+                        Log.e(LOG_TAG, "Interstitial ad failed to load: " + loadAdError.getMessage());
                     }
                 });
 
@@ -171,16 +177,19 @@ public class ProfileActivity extends AppCompatActivity {
         teamText = findViewById(R.id.team_profile);
         nationality = findViewById(R.id.nationality_profile);
         editFab = findViewById(R.id.edit_button_profile);
+        Log.d(LOG_TAG, "Profile fields initialized.");
 
         editFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(LOG_TAG, "Edit FAB clicked.");
                 createPopupDialog();
             }
         });
 
         selectManagerCard = findViewById(R.id.select_manager_card);
         selectManagerCard.setOnClickListener(v -> {
+            Log.d(LOG_TAG, "Select Manager Card clicked.");
             Intent intent = new Intent(ProfileActivity.this, SelectManagerActivity.class);
             startActivity(intent);
         });
@@ -203,7 +212,7 @@ public class ProfileActivity extends AppCompatActivity {
                 .withAdListener(new com.google.android.gms.ads.AdListener() {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
-                        Log.e("RAFI", "Native ad failed to load: " + adError.getMessage());
+
                     }
                 })
                 .build();
@@ -246,6 +255,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void createPopupDialog() {
+        Log.d(LOG_TAG, "Creating popup dialog to edit manager profile.");
         builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.edit_manager_popup, null);
 
@@ -269,6 +279,7 @@ public class ProfileActivity extends AppCompatActivity {
         currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         currencySpinnerEdit.setAdapter(currencyAdapter);
 
+        Log.d(LOG_TAG, "Fetching manager data for popup dialog.");
         collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("id", managerId)
                 .get()
@@ -282,6 +293,8 @@ public class ProfileActivity extends AppCompatActivity {
                                 managerList.add(manager);
                             }
                             Manager theManager = managerList.get(0);
+                            Log.d(LOG_TAG, "Manager data fetched: " + theManager);
+
                             firstNameEdit.setText(theManager.getFirstName());
                             lastNameEdit.setText(theManager.getLastName());
                             teamEdit.setText(theManager.getTeam());
@@ -289,10 +302,13 @@ public class ProfileActivity extends AppCompatActivity {
                             String imageUrlEdit = theManager.getTeamBadgeUrl();
                             Picasso.get().load(imageUrlEdit).into(badgeImageEdit);
                             currencySpinnerEdit.setSelection(currencyAdapter.getPosition(theManager.getCurrency()));
-
+                            Log.d(LOG_TAG, "Popup dialog fields populated with manager data.");
+                        } else {
+                            Log.w(LOG_TAG, "No manager data found for userId=" + UserApi.getInstance().getUserId());
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching manager data.", e));
 
         uploadBadgeEdit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -309,8 +325,10 @@ public class ProfileActivity extends AppCompatActivity {
                     !teamEdit.getText().toString().isEmpty() &&
                     !nationalityEdit.getText().toString().isEmpty() &&
                     !currencySpinnerEdit.getSelectedItem().toString().isEmpty()) {
+                    Log.d(LOG_TAG, "Validation successful. Saving manager data.");
                     saveManager();
                 } else {
+                    Log.w(LOG_TAG, "Validation failed: One or more fields are empty.");
                     Toast.makeText(ProfileActivity.this, "First Name, Last Name, Team, Nationality and Currency are required!", Toast.LENGTH_LONG)
                             .show();
                 }
@@ -323,6 +341,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void openFileChooser() {
+        Log.d(LOG_TAG, "Opening file chooser for badge image selection.");
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -337,17 +356,23 @@ public class ProfileActivity extends AppCompatActivity {
             teamBadgeUriEdit = data.getData();
             badgeImage.setImageURI(teamBadgeUriEdit);
             Picasso.get().load(teamBadgeUriEdit).into(badgeImageEdit);
+            Log.d(LOG_TAG, "Badge image updated in popup dialog.");
+        } else {
+            Log.w(LOG_TAG, "Image selection canceled or failed.");
         }
     }
 
     private void saveManager() {
+        Log.d(LOG_TAG, "Saving manager updates.");
+
         collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("id", managerId)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull final Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                            Log.d(LOG_TAG, "Manager data found. Preparing to update.");
                             final StorageReference filepath = storageReference
                                     .child("team_badges")
                                     .child(team + "_" + Timestamp.now().getSeconds());
@@ -364,12 +389,13 @@ public class ProfileActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onSuccess(Uri uri) {
                                                         String imageUrl = uri.toString();
-
                                                         documentReference.update("teamBadgeUrl", imageUrl);
+                                                        Log.d(LOG_TAG, "Badge image updated successfully: " + imageUrl);
                                                     }
                                                 });
                                             }
-                                        });
+                                        })
+                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error uploading badge image.", e));
                             }
 
                             documentReference.update("firstName", firstNameEdit.getText().toString().trim(),
@@ -381,6 +407,7 @@ public class ProfileActivity extends AppCompatActivity {
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void aVoid) {
+                                            Log.d(LOG_TAG, "Manager details updated successfully.");
                                             Intent intent = new Intent(ProfileActivity.this, ProfileActivity.class);
                                             intent.putExtra("managerId", managerId);
                                             intent.putExtra("team", team);
@@ -389,11 +416,15 @@ public class ProfileActivity extends AppCompatActivity {
                                             Toast.makeText(ProfileActivity.this, "Manager updated!", Toast.LENGTH_LONG)
                                                     .show();
                                         }
-                                    });
-
+                                    })
+                                    .addOnFailureListener(e -> Log.e(LOG_TAG, "Error updating manager details.", e));
+                        } else {
+                            Log.w(LOG_TAG, "No manager data found for update.");
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching manager data.", e));
+
 
         dialog.dismiss();
 
@@ -401,6 +432,7 @@ public class ProfileActivity extends AppCompatActivity {
         fullName.setText(fullNameText);
         teamText.setText(teamEdit.getText().toString().trim());
         nationality.setText(nationalityEdit.getText().toString().trim());
+        Log.d(LOG_TAG, "UI updated with new manager details.");
     }
 
     private void setUpDrawerContent(NavigationView navView) {
@@ -506,7 +538,12 @@ public class ProfileActivity extends AppCompatActivity {
                     firebaseAuth.signOut();
                     startActivity(new Intent(ProfileActivity.this, MainActivity.class));
                     finishAffinity();
+                } else {
+                    Log.w(LOG_TAG, "Logout attempt failed: currentUser or firebaseAuth is null.");
                 }
+                break;
+            default:
+                Log.w(LOG_TAG, "Unhandled drawer item selected: " + item.getTitle());
                 break;
         }
 
@@ -529,6 +566,7 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(LOG_TAG, "onStart called: Fetching manager and player data.");
 
         db.collection("ShortlistedPlayers").whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -537,11 +575,10 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                shPlayersExist = true;
-                            } else {
-                                shPlayersExist = false;
-                            }
+                            shPlayersExist = Objects.requireNonNull(task.getResult()).size() > 0;
+                            Log.d(LOG_TAG, "Shortlisted players exist: " + shPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching Shortlisted Players.", task.getException());
                         }
                     }
                 });
@@ -560,12 +597,15 @@ public class ProfileActivity extends AppCompatActivity {
                                 managerList.add(manager);
                             }
                             Manager theManager = managerList.get(0);
+                            Log.d(LOG_TAG, "Manager data fetched: " + theManager);
                             fullName.setText(theManager.getFullName());
                             teamText.setText(theManager.getTeam());
                             nationality.setText(theManager.getNationality());
                             String imageUrl = theManager.getTeamBadgeUrl();
-                            Log.d("RAFI", "onComplete: url = " + imageUrl);
                             Picasso.get().load(imageUrl).into(badgeImage);
+                            Log.d(LOG_TAG, "UI updated with manager details.");
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching manager data.", task.getException());
                         }
                     }
                 });
@@ -577,12 +617,12 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if(Objects.requireNonNull(task.getResult()).size() > 0) {
-                                ftPlayersExist = true;
-                            } else {
-                                ftPlayersExist = false;
-                            }
+                            ftPlayersExist = Objects.requireNonNull(task.getResult()).size() > 0;
+                            Log.d(LOG_TAG, "First Team players exist: " + ftPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
                         }
+
                         db.collection("YouthTeamPlayers").whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -590,11 +630,10 @@ public class ProfileActivity extends AppCompatActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                         if (task.isSuccessful()) {
-                                            if(task.getResult().size() > 0) {
-                                                ytPlayersExist = true;
-                                            } else {
-                                                ytPlayersExist = false;
-                                            }
+                                            ytPlayersExist = Objects.requireNonNull(task.getResult()).size() > 0;
+                                            Log.d(LOG_TAG, "Youth Team players exist: " + ytPlayersExist);
+                                        } else {
+                                            Log.e(LOG_TAG, "Error fetching Youth Team players.", task.getException());
                                         }
                                     }
                                 });
@@ -612,18 +651,23 @@ public class ProfileActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                                 Manager manager = doc.toObject(Manager.class);
                                 managerList.add(manager);
+                                Log.d(LOG_TAG, "Header Manager data fetched: " + manager);
                             }
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());
                             teamHeader.setText(theManager.getTeam());
+                            Log.d(LOG_TAG, "Header UI updated with manager details.");
+                        } else {
+                            Log.w(LOG_TAG, "No manager data found for header.");
                         }
                     }
-                });
-
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching header manager data.", e));
     }
 
     @Override
     protected void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy called: Cleaning up resources.");
         if (nativeAdTop != null) nativeAdTop.destroy();
         if (nativeAdBottom != null) nativeAdBottom.destroy();
         super.onDestroy();

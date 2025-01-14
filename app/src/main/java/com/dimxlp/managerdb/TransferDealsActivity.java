@@ -44,6 +44,7 @@ import util.UserApi;
 
 public class TransferDealsActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "RAFI|TransferDeals";
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -78,15 +79,23 @@ public class TransferDealsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_deals);
+        Log.i(LOG_TAG, "TransferDealsActivity launched.");
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
+        if (user != null) {
+            Log.d(LOG_TAG, "Authenticated user: " + user.getUid());
+        } else {
+            Log.w(LOG_TAG, "No authenticated user.");
+        }
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             managerId = extras.getLong("managerId");
             team = extras.getString("team");
-            Log.d("RAFI", "managerId = " + managerId + "\nteam = " + team);
+            Log.d(LOG_TAG, "Extras received: managerId=" + managerId + ", team=" + team);
+        } else {
+            Log.w(LOG_TAG, "No extras received in intent.");
         }
 
         toolbar = findViewById(R.id.toolbar);
@@ -118,7 +127,7 @@ public class TransferDealsActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         // Load Banner Ads
         AdView transfersBanner = findViewById(R.id.transfers_banner);
@@ -173,7 +182,10 @@ public class TransferDealsActivity extends AppCompatActivity {
     }
 
     private void listPlayersLeft(final int buttonInt) {
+        Log.d(LOG_TAG, "Listing players who left. ButtonInt: " + buttonInt);
+
         transferList.clear();
+        Log.d(LOG_TAG, "Transfer list cleared.");
 
         transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -182,10 +194,12 @@ public class TransferDealsActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            Log.d(LOG_TAG, "Transfers fetched from Firestore for players who left.");
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 Transfer transfer = doc.toObject(Transfer.class);
                                 if (transfer.isFormerPlayer()) {
                                     transferList.add(transfer);
+                                    Log.d(LOG_TAG, "Player added to list: " + transfer.getFullName());
                                 }
                             }
                             Collections.sort(transferList, new Comparator<Transfer>() {
@@ -194,16 +208,24 @@ public class TransferDealsActivity extends AppCompatActivity {
                                     return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                 }
                             });
+                            Log.d(LOG_TAG, "Transfer list sorted by time added.");
+
                             transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, team, buttonInt);
                             recyclerView.setAdapter(transferDealsRecAdapter);
                             transferDealsRecAdapter.notifyDataSetChanged();
+                        } else {
+                            Log.w(LOG_TAG, "No players found who left.");
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching players who left from Firestore.", e));
     }
 
     private void listPlayersArrived(final int buttonInt) {
+        Log.d(LOG_TAG, "Listing players who arrived. ButtonInt: " + buttonInt);
+
         transferList.clear();
+        Log.d(LOG_TAG, "Transfer list cleared.");
 
         transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -212,10 +234,12 @@ public class TransferDealsActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            Log.d(LOG_TAG, "Transfers fetched from Firestore for players who arrived.");
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 Transfer transfer = doc.toObject(Transfer.class);
                                 if (!transfer.isFormerPlayer()) {
                                     transferList.add(transfer);
+                                    Log.d(LOG_TAG, "Player added to list: " + transfer.getFullName());
                                 }
                             }
                             Collections.sort(transferList, new Comparator<Transfer>() {
@@ -224,15 +248,18 @@ public class TransferDealsActivity extends AppCompatActivity {
                                     return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                 }
                             });
+                            Log.d(LOG_TAG, "Transfer list sorted by time added.");
+
                             transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, team, buttonInt);
                             recyclerView.setAdapter(transferDealsRecAdapter);
                             transferDealsRecAdapter.notifyDataSetChanged();
+                        } else {
+                            Log.w(LOG_TAG, "No players found who arrived.");
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching players who arrived from Firestore.", e));
     }
-
-
 
     private void setUpDrawerContent(NavigationView navView) {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -337,7 +364,12 @@ public class TransferDealsActivity extends AppCompatActivity {
                     firebaseAuth.signOut();
                     startActivity(new Intent(TransferDealsActivity.this, MainActivity.class));
                     finishAffinity();
+                } else {
+                    Log.w(LOG_TAG, "Logout attempt failed: currentUser or firebaseAuth is null.");
                 }
+                break;
+            default:
+                Log.w(LOG_TAG, "Unhandled drawer item selected: " + item.getTitle());
                 break;
         }
 
@@ -360,6 +392,7 @@ public class TransferDealsActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(LOG_TAG, "onStart called: Fetching data for transfers, players, and manager details.");
 
         shPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -368,11 +401,10 @@ public class TransferDealsActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                shPlayersExist = true;
-                            } else {
-                                shPlayersExist = false;
-                            }
+                            shPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
+                            Log.d(LOG_TAG, "Shortlisted players existence: " + shPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching shortlisted players.", task.getException());
                         }
                     }
                 });
@@ -384,11 +416,10 @@ public class TransferDealsActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (task.getResult().size() > 0) {
-                                ftPlayersExist = true;
-                            } else {
-                                ftPlayersExist = false;
-                            }
+                            ftPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
+                            Log.d(LOG_TAG, "First Team players existence: " + ftPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
                         }
                     }
                 });
@@ -400,11 +431,10 @@ public class TransferDealsActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (task.getResult().size() > 0) {
-                                ytPlayersExist = true;
-                            } else {
-                                ytPlayersExist = false;
-                            }
+                            ytPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
+                            Log.d(LOG_TAG, "Youth Team players existence: " + ytPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching Youth Team players.", task.getException());
                         }
                     }
                 });
@@ -420,10 +450,14 @@ public class TransferDealsActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                                 Manager manager = doc.toObject(Manager.class);
                                 managerList.add(manager);
+                                Log.d(LOG_TAG, "Manager data fetched: " + manager);
                             }
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());
                             teamHeader.setText(theManager.getTeam());
+                            Log.d(LOG_TAG, "UI updated with manager details.");
+                        } else {
+                            Log.w(LOG_TAG, "No manager data found for managerId=" + managerId);
                         }
                     }
                 });
@@ -440,6 +474,7 @@ public class TransferDealsActivity extends AppCompatActivity {
                                 Transfer transfer = doc.toObject(Transfer.class);
                                 transfers.add(transfer);
                             }
+                            Log.d(LOG_TAG, "Transfers fetched for ID updates. Count: " + transfers.size());
                             findMaxTransferId(transfers);
                             for (DocumentSnapshot ds: queryDocumentSnapshots) {
                                 Transfer transfer = ds.toObject(Transfer.class);
@@ -447,12 +482,16 @@ public class TransferDealsActivity extends AppCompatActivity {
                                     transfer.setId(maxId+1);
                                     transfersColRef.document(ds.getId()).update("id", transfer.getId());
                                     maxId++;
+                                    Log.d(LOG_TAG, "Transfer ID updated: " + transfer.getFullName());
                                 }
                             }
                             refreshTransfers();
+                        } else {
+                            Log.w(LOG_TAG, "No transfers found for ID updates.");
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching transfers for ID updates.", e));
 
         transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -467,20 +506,26 @@ public class TransferDealsActivity extends AppCompatActivity {
                                     transferList.add(transfer);
                                 }
                             }
+                            Log.d(LOG_TAG, "Players who arrived fetched: " + transferList.size());
+
                             Collections.sort(transferList, new Comparator<Transfer>() {
                                 @Override
                                 public int compare(Transfer o1, Transfer o2) {
                                     return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                 }
                             });
+                            Log.d(LOG_TAG, "Transfers sorted by time added.");
+
                             typeOfTransfer.setText("Arrived");
                             transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, team, 0);
                             recyclerView.setAdapter(transferDealsRecAdapter);
                             transferDealsRecAdapter.notifyDataSetChanged();
+                        } else {
+                            Log.w(LOG_TAG, "No players found who arrived.");
                         }
                     }
-                });
-
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching players who arrived.", e));
     }
 
     private void findMaxTransferId(List<Transfer> transfers) {
@@ -490,9 +535,11 @@ public class TransferDealsActivity extends AppCompatActivity {
                 maxId = transfer.getId();
             }
         }
+        Log.d(LOG_TAG, "Max transfer ID determined: " + maxId);
     }
 
     private void refreshTransfers() {
+        Log.d(LOG_TAG, "Refreshing transfers list.");
         transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
                 .get()
@@ -502,17 +549,19 @@ public class TransferDealsActivity extends AppCompatActivity {
                         Transfer transfer = doc.toObject(Transfer.class);
                         transferList.add(transfer);
                     }
+                    Log.d(LOG_TAG, "Transfer list refreshed. Count: " + transferList.size());
+
                     Collections.sort(transferList, Comparator.comparing(Transfer::getTimeAdded));
                     transferDealsRecAdapter.notifyDataSetChanged();
                 })
-                .addOnFailureListener(e -> Log.e("RAFI", "Failed to refresh transfer list", e));
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Failed to refresh transfer list.", e));
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
-
+        Log.d(LOG_TAG, "onResume called: Clearing transfer list.");
         transferList.clear();
     }
 }

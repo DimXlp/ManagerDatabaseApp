@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -42,6 +43,7 @@ import util.UserApi;
 
 public class FormerPlayersListActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "RAFI|FirstTeamList";
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -80,20 +82,32 @@ public class FormerPlayersListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_former_players_list);
+        Log.i(LOG_TAG, "FirstTeamListActivity launched.");
 
         if (UserApi.getInstance() != null) {
             currentUserId = UserApi.getInstance().getUserId();
             currentUserName = UserApi.getInstance().getUsername();
+            Log.d(LOG_TAG, "UserApi initialized: userId=" + currentUserId + ", username=" + currentUserName);
+        } else {
+            Log.w(LOG_TAG, "UserApi instance is null.");
         }
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
+        if (user != null) {
+            Log.d(LOG_TAG, "Current user authenticated: " + user.getUid());
+        } else {
+            Log.w(LOG_TAG, "No user is authenticated.");
+        }
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             managerId = extras.getLong("managerId");
             team = extras.getString("team");
             barTeam = extras.getString("barTeam");
+            Log.d(LOG_TAG, "Extras received: managerId=" + managerId + ", team=" + team + ", barTeam=" + barTeam);
+        } else {
+            Log.w(LOG_TAG, "No extras received in intent.");
         }
 
         toolbar = findViewById(R.id.toolbar);
@@ -119,12 +133,13 @@ public class FormerPlayersListActivity extends AppCompatActivity {
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         // Load Banner Ads
         AdView formerPlayersListBanner = findViewById(R.id.former_players_list_banner);
         AdRequest adBannerRequest = new AdRequest.Builder().build();
         formerPlayersListBanner.loadAd(adBannerRequest);
+        Log.d(LOG_TAG, "Banner ad loaded.");
 
         View.OnClickListener prevYearListener = new View.OnClickListener() {
             @Override
@@ -177,6 +192,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
     }
 
     private void listFormerYouthTeamPlayers(final int buttonInt) {
+        Log.d(LOG_TAG, "Listing former Youth Team players.");
         ytPlayerList.clear();
 
         frpColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
@@ -201,12 +217,17 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                             formerPlayerRecAdapter = new FormerPlayerRecAdapter(FormerPlayersListActivity.this, ytPlayerList, managerId, team, "Youth Team", buttonInt);
                             recyclerView.setAdapter(formerPlayerRecAdapter);
                             formerPlayerRecAdapter.notifyDataSetChanged();
+                            Log.d(LOG_TAG, "Former Youth Team players listed successfully.");
+                        } else {
+                            Log.w(LOG_TAG, "No former Youth Team players found.");
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching Youth Team players: " + e.getMessage(), e));
     }
 
     private void listFormerFirstTeamPlayers(final int buttonInt) {
+        Log.d(LOG_TAG, "Listing former First Team players.");
         ftPlayerList.clear();
 
         frpColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
@@ -231,9 +252,13 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                             formerPlayerRecAdapter = new FormerPlayerRecAdapter(FormerPlayersListActivity.this, ftPlayerList, managerId, team, "First Team", buttonInt);
                             recyclerView.setAdapter(formerPlayerRecAdapter);
                             formerPlayerRecAdapter.notifyDataSetChanged();
+                            Log.d(LOG_TAG, "Former First Team players listed successfully.");
+                        } else {
+                            Log.w(LOG_TAG, "No former First Team players found.");
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching First Team players: " + e.getMessage(), e));
     }
 
     private void setUpDrawerContent(NavigationView navView) {
@@ -338,8 +363,14 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                 if (user != null && firebaseAuth != null) {
                     firebaseAuth.signOut();
                     startActivity(new Intent(FormerPlayersListActivity.this, MainActivity.class));
+                    Log.i(LOG_TAG, "User logged out successfully.");
                     finishAffinity();
+                } else {
+                    Log.w(LOG_TAG, "Logout attempt failed: currentUser or firebaseAuth is null.");
                 }
+                break;
+            default:
+                Log.w(LOG_TAG, "Unhandled drawer item selected: " + item.getTitle());
                 break;
         }
 
@@ -362,6 +393,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(LOG_TAG, "FirstTeamListActivity started.");
 
         db.collection("ShortlistedPlayers").whereEqualTo("userId", currentUserId)
                 .whereEqualTo("managerId", managerId)
@@ -370,11 +402,10 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                shPlayersExist = true;
-                            } else {
-                                shPlayersExist = false;
-                            }
+                            shPlayersExist = Objects.requireNonNull(task.getResult()).size() > 0;
+                            Log.d(LOG_TAG, "Shortlisted players existence: " + shPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching ShortlistedPlayers.", task.getException());
                         }
                     }
                 });
@@ -386,11 +417,10 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (task.getResult().size() > 0) {
-                                ftPlayersExist = true;
-                            } else {
-                                ftPlayersExist = false;
-                            }
+                            ftPlayersExist = task.getResult().size() > 0;
+                            Log.d(LOG_TAG, "First Team players existence: " + ftPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching FirstTeamPlayers.", task.getException());
                         }
                     }
                 });
@@ -402,11 +432,10 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (task.getResult().size() > 0) {
-                                ytPlayersExist = true;
-                            } else {
-                                ytPlayersExist = false;
-                            }
+                            ytPlayersExist = task.getResult().size() > 0;
+                            Log.d(LOG_TAG, "Youth Team players existence: " + ytPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching YouthTeamPlayers.", task.getException());
                         }
                     }
                 });
@@ -418,6 +447,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            Log.d(LOG_TAG, "Former players data fetched successfully.");
                             for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                                 FormerPlayer player = doc.toObject(FormerPlayer.class);
                                 if (barTeam == null || barTeam.equals("First Team")) {
@@ -463,9 +493,12 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                                 recyclerView.setAdapter(formerPlayerRecAdapter);
                                 formerPlayerRecAdapter.notifyDataSetChanged();
                             }
+                        } else {
+                            Log.w(LOG_TAG, "No former players found.");
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching FormerPlayers.", e));
 
         db.collection("Managers").whereEqualTo("userId", currentUserId)
                 .whereEqualTo("id", managerId)
@@ -482,6 +515,9 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());
                             teamHeader.setText(theManager.getTeam());
+                            Log.d(LOG_TAG, "Manager data loaded: " + theManager);
+                        } else {
+                            Log.w(LOG_TAG, "No manager data found.");
                         }
                     }
                 });
@@ -494,6 +530,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                 maxId = player.getId();
             }
         }
+        Log.d(LOG_TAG, "Max player ID found: " + maxId);
     }
 
     @Override

@@ -42,6 +42,7 @@ import util.UserApi;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "RAFI|Login";
     private AutoCompleteTextView email;
     private EditText password;
     private Button loginButton;
@@ -63,8 +64,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-       //Objects.requireNonNull(getSupportActionBar()).setElevation(0);
+        Log.i(LOG_TAG, "LoginActivity launched.");
 
         firebaseAuth = FirebaseAuth.getInstance();
 
@@ -75,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.login_progress_bar);
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         // Load Banner Ad
         AdView mainBanner1 = findViewById(R.id.login_banner_1);
@@ -106,6 +106,7 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(LOG_TAG, "Login button clicked.");
                 loginUser(email.getText().toString().trim(), password.getText().toString().trim());
             }
         });
@@ -182,14 +183,15 @@ public class LoginActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(emailText) &&
             !TextUtils.isEmpty(pwdText)) {
 
+            Log.d(LOG_TAG, "Attempting to log in user with email: " + emailText);
             firebaseAuth.signInWithEmailAndPassword(emailText, pwdText)
                     .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
 
                             if (task.isSuccessful()) {
+                                Log.i(LOG_TAG, "User successfully logged in.");
                                 // Sign in success, update UI with the signed-in user's information
-                                Log.d("LoginActivity", "signInWithEmail:success");
                                 FirebaseUser user = firebaseAuth.getCurrentUser();
                                 assert user != null;
                                 String userId = user.getUid();
@@ -207,12 +209,13 @@ public class LoginActivity extends AppCompatActivity {
                                             @Override
                                             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                                                 if (error != null) {
-                                                    Log.w("LoginActivity", "Error fetching user data", error);
+                                                    Log.e(LOG_TAG, "Error fetching user data.", error);
                                                     return;
                                                 }
                                                 assert value != null;
                                                 if (!value.isEmpty()) {
                                                     progressBar.setVisibility(View.INVISIBLE);
+                                                    Log.d(LOG_TAG, "User data fetched successfully.");
 
                                                     for (QueryDocumentSnapshot snapshot: value) {
                                                         UserApi userApi = UserApi.getInstance();
@@ -225,7 +228,7 @@ public class LoginActivity extends AppCompatActivity {
                                                                     @Override
                                                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                         if (task.isSuccessful()) {
-                                                                            Log.d("RAFI", "onComplete: size = " + task.getResult().size());
+                                                                            Log.d(LOG_TAG, "Manager data fetched. Size: " + task.getResult().size());
                                                                             if (Objects.requireNonNull(task.getResult()).size() > 0) {
                                                                                 startActivity(new Intent(LoginActivity.this, SelectManagerActivity.class));
                                                                             } else {
@@ -239,11 +242,10 @@ public class LoginActivity extends AppCompatActivity {
                                             }
                                         });
                             } else {
+                                Log.w(LOG_TAG, "Email or password is empty. Login aborted.");
                                 // If sign in fails, display a message to the user.
-                                Log.w("LoginActivity", "signInWithEmail:failure", task.getException());
                                 Toast.makeText(LoginActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
-//                                updateUI(null);
                             }
 
 
@@ -265,7 +267,6 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
-
+        Log.d(LOG_TAG, "onStart called.");
     }
 }

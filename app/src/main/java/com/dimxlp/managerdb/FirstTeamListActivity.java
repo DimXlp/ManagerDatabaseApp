@@ -130,7 +130,6 @@ public class FirstTeamListActivity extends AppCompatActivity {
             managerId = extras.getLong("managerId");
             team = extras.getString("team");
             barYear = extras.getString("barYear");
-//            Log.d("RAFI", "onCreate: currentYear = " + currentYear);
         }
 
         toolbar = findViewById(R.id.toolbar);
@@ -171,8 +170,6 @@ public class FirstTeamListActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 animateYearButtons(v);
-                Log.d("RAFI", "curYear: " + currentYear);
-                Log.d("RAFI", "minYear: " + minYearText);
                 int cYear = Integer.parseInt(currentYear.substring(0, 4));
                 int minYear = Integer.parseInt(minYearText.substring(0, 4));
                 if (cYear > minYear) {
@@ -339,7 +336,6 @@ public class FirstTeamListActivity extends AppCompatActivity {
         final FirstTeamPlayer player = new FirstTeamPlayer();
 
         player.setId(maxId+1);
-        Log.d("RAFI", "createPlayer: id = " + player.getId());
         player.setFirstName(firstNamePlayer);
         player.setLastName(lastNamePlayer);
         player.setFullName(fullNamePlayer);
@@ -507,7 +503,6 @@ public class FirstTeamListActivity extends AppCompatActivity {
         } else if (minYearText != null) {
             currentYear = minYearText;
         } else {
-            Log.e("RAFI", "No barYear or minYearText available to initialize currentYear.");
             currentYear = "2020/21"; // Default fallback
         }
 
@@ -572,7 +567,6 @@ public class FirstTeamListActivity extends AppCompatActivity {
                         if (!queryDocumentSnapshots.isEmpty()) {
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 FirstTeamPlayer player = doc.toObject(FirstTeamPlayer.class);
-//                                Log.d("RAFI", "onStart: currentYear = " + currentYear);
                                 if (barYear == null || barYear.equals(minYearText)) {
                                     if (player.getYearSigned().equals(minYearText)) {
                                         playerList.add(player);
