@@ -44,6 +44,7 @@ import util.UserApi;
 
 public class SupportActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "RAFI|Support";
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -69,15 +70,23 @@ public class SupportActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_support);
+        Log.i(LOG_TAG, "SupportActivity launched.");
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
+        if (user != null) {
+            Log.d(LOG_TAG, "Authenticated user: " + user.getUid());
+        } else {
+            Log.w(LOG_TAG, "No authenticated user.");
+        }
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             managerId = extras.getLong("managerId");
             team = extras.getString("team");
-            Log.d("RAFI", "managerId = " + managerId + "\nteam = " + team);
+            Log.d(LOG_TAG, "Extras received: managerId=" + managerId + ", team=" + team);
+        } else {
+            Log.w(LOG_TAG, "No extras received in intent.");
         }
 
         toolbar = findViewById(R.id.toolbar);
@@ -99,7 +108,7 @@ public class SupportActivity extends AppCompatActivity {
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
         loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);  // Replace with bottom ad unit ID
@@ -114,7 +123,7 @@ public class SupportActivity extends AppCompatActivity {
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        Log.d("RAFI", "Interstitial Ad failed to load: " + loadAdError.getMessage());
+
                     }
                 });
 
@@ -123,12 +132,15 @@ public class SupportActivity extends AppCompatActivity {
         sendFeedbackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(LOG_TAG, "Send Feedback button clicked.");
                 Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setData(Uri.parse("mailto:managerdb@example.com")); // Replace with your email
+                intent.setData(Uri.parse("mailto:managerdb@gmail.com")); // Replace with your email
                 intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback for ManagerDB");
                 if (intent.resolveActivity(getPackageManager()) != null) {
                     startActivity(intent);
+                    Log.d(LOG_TAG, "Feedback email intent started.");
                 } else {
+                    Log.w(LOG_TAG, "No email apps installed.");
                     Toast.makeText(SupportActivity.this, "No email apps installed.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -139,6 +151,7 @@ public class SupportActivity extends AppCompatActivity {
         appGuidesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(LOG_TAG, "App Guides button clicked.");
                 Toast.makeText(SupportActivity.this, "App guides are not supported yet.", Toast.LENGTH_SHORT).show();
             }
         });
@@ -161,7 +174,7 @@ public class SupportActivity extends AppCompatActivity {
                 .withAdListener(new com.google.android.gms.ads.AdListener() {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
-                        Log.e("RAFI", "Native ad failed to load: " + adError.getMessage());
+
                     }
                 })
                 .build();
@@ -187,6 +200,7 @@ public class SupportActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy called: Cleaning up resources.");
         if (nativeAdBottom != null) nativeAdBottom.destroy();
         super.onDestroy();
     }
@@ -294,7 +308,12 @@ public class SupportActivity extends AppCompatActivity {
                     firebaseAuth.signOut();
                     startActivity(new Intent(SupportActivity.this, MainActivity.class));
                     finishAffinity();
+                } else {
+                    Log.w(LOG_TAG, "Logout attempt failed: currentUser or firebaseAuth is null.");
                 }
+                break;
+            default:
+                Log.w(LOG_TAG, "Unhandled drawer item selected: " + item.getTitle());
                 break;
         }
 
@@ -316,6 +335,7 @@ public class SupportActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(LOG_TAG, "onStart called: Fetching data for teams and manager.");
 
         shortlistedPlayersCollection.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -325,6 +345,9 @@ public class SupportActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             shPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
+                            Log.d(LOG_TAG, "Shortlisted players existence: " + shPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching shortlisted players.", task.getException());
                         }
                     }
                 });
@@ -337,6 +360,9 @@ public class SupportActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             ftPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
+                            Log.d(LOG_TAG, "First Team players existence: " + ftPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
                         }
                     }
                 });
@@ -349,6 +375,9 @@ public class SupportActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             ytPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
+                            Log.d(LOG_TAG, "Youth Team players existence: " + ytPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching Youth Team players.", task.getException());
                         }
                     }
                 });
@@ -364,12 +393,17 @@ public class SupportActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                                 Manager manager = doc.toObject(Manager.class);
                                 managerList.add(manager);
+                                Log.d(LOG_TAG, "Manager data fetched: " + manager);
                             }
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());
                             teamHeader.setText(theManager.getTeam());
+                            Log.d(LOG_TAG, "UI updated with manager details.");
+                        } else {
+                            Log.w(LOG_TAG, "No manager data found for managerId=" + managerId);
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching manager data.", e));
     }
 }

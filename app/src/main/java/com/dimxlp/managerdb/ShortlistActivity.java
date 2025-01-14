@@ -56,6 +56,7 @@ import util.ValueFormatter;
 
 public class ShortlistActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "RAFI|Shortlist";
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private NavigationView navView;
@@ -104,16 +105,25 @@ public class ShortlistActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shortlist);
+        Log.i(LOG_TAG, "ShortlistActivity launched.");
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
+        if (user != null) {
+            Log.d(LOG_TAG, "User authenticated: " + user.getUid());
+        } else {
+            Log.w(LOG_TAG, "No authenticated user.");
+        }
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             managerId = extras.getLong("managerId");
             myTeam = extras.getString("team");
-            Log.d("RAFI", "managerId = " + managerId + "\nteam = " + myTeam);
+            Log.d(LOG_TAG, "Extras received: managerId = " + managerId + ", team = " + myTeam);
+        } else {
+            Log.w(LOG_TAG, "No extras received in intent.");
         }
+
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -139,12 +149,13 @@ public class ShortlistActivity extends AppCompatActivity {
         addPlayerFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(LOG_TAG, "Add player FAB clicked.");
                 createPopupDialog();
             }
         });
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         // Load Native Ads
         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
@@ -162,7 +173,7 @@ public class ShortlistActivity extends AppCompatActivity {
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        Log.d("RAFI", "Interstitial Ad failed to load: " + loadAdError.getMessage());
+
                     }
                 });
     }
@@ -184,7 +195,7 @@ public class ShortlistActivity extends AppCompatActivity {
                 .withAdListener(new com.google.android.gms.ads.AdListener() {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
-                        Log.e("RAFI", "Native ad failed to load: " + adError.getMessage());
+
                     }
                 })
                 .build();
@@ -193,7 +204,6 @@ public class ShortlistActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        Log.d("RAFI", "Populating native ad view");
 
         // Dynamically identify view IDs based on the nativeAdView
         int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
@@ -234,6 +244,7 @@ public class ShortlistActivity extends AppCompatActivity {
     }
 
     private void createPopupDialog() {
+        Log.d(LOG_TAG, "Creating popup dialog for adding a shortlisted player.");
         builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.create_shortlisted_player_popup, null);
 
@@ -255,6 +266,7 @@ public class ShortlistActivity extends AppCompatActivity {
         ValueFormatter.formatValue(value);
         ValueFormatter.formatValue(wage);
 
+        Log.d(LOG_TAG, "Fetching manager data for currency.");
         managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("id", managerId)
                 .get()
@@ -270,9 +282,13 @@ public class ShortlistActivity extends AppCompatActivity {
                             currency = managerList.get(0).getCurrency();
                             valueTil.setHint("Value (in " + currency + ")");
                             wageTil.setHint("Wage (in " + currency + ")");
+                            Log.d(LOG_TAG, "Currency fetched and hints updated: " + currency);
+                        } else {
+                            Log.w(LOG_TAG, "No manager data found for currency update.");
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching manager data for currency.", e));
 
         ArrayAdapter<CharSequence> positionAdapter = ArrayAdapter.createFromResource(this, R.array.position_array, android.R.layout.simple_spinner_item);
         positionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -281,13 +297,16 @@ public class ShortlistActivity extends AppCompatActivity {
         createButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(LOG_TAG, "Create player button clicked.");
                 if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
                         !positionSpinner.getSelectedItem().toString().isEmpty() &&
                         !team.getText().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty()) {
+                    Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
                     createPlayer();
                 } else {
+                    Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
                     Toast.makeText(ShortlistActivity.this, "Last Name/Nickname, Nationality, Position, Team and Overall are required", Toast.LENGTH_LONG)
                             .show();
                 }
@@ -300,6 +319,8 @@ public class ShortlistActivity extends AppCompatActivity {
     }
 
     private void createPlayer() {
+        Log.d(LOG_TAG, "Creating a new shortlisted player.");
+
         String firstNamePlayer = firstName.getText().toString().trim();
         String lastNamePlayer = lastName.getText().toString().trim();
         String fullNamePlayer;
@@ -317,6 +338,7 @@ public class ShortlistActivity extends AppCompatActivity {
         String valuePlayer = value.getText().toString().trim().replaceAll(",", "");
         String wagePlayer = wage.getText().toString().trim().replaceAll(",", "");
         String commentsPlayer = comments.getText().toString().trim();
+        Log.d(LOG_TAG, "Player details collected: Full Name = " + fullNamePlayer + ", Position = " + positionPlayer);
 
         final ShortlistedPlayer player = new ShortlistedPlayer();
 
@@ -344,11 +366,13 @@ public class ShortlistActivity extends AppCompatActivity {
         player.setManagerId(managerId);
         player.setUserId(UserApi.getInstance().getUserId());
         player.setTimeAdded(new Timestamp(new Date()));
+        Log.d(LOG_TAG, "Player object created: " + player);
 
         shortlistColRef.add(player)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        Log.i(LOG_TAG, "Player successfully added to Firestore: " + documentReference.getId());
                         Intent intent = new Intent(ShortlistActivity.this, ShortlistPlayersActivity.class);
                         intent.putExtra("managerId", managerId);
                         intent.putExtra("team", myTeam);
@@ -392,11 +416,14 @@ public class ShortlistActivity extends AppCompatActivity {
                                 break;
 
                         }
+                        Log.d(LOG_TAG, "Bar position determined: " + barPosition);
                         intent.putExtra("barPosition", barPosition);
                         startActivity(intent);
                         finish();
+                        Log.d(LOG_TAG, "ShortlistPlayersActivity started, and ShortlistActivity finished.");
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding player to Firestore.", e));
     }
 
     private void setUpDrawerContent(NavigationView navView) {
@@ -494,7 +521,12 @@ public class ShortlistActivity extends AppCompatActivity {
                     firebaseAuth.signOut();
                     startActivity(new Intent(ShortlistActivity.this, MainActivity.class));
                     finishAffinity();
+                } else {
+                    Log.w(LOG_TAG, "Logout attempt failed: currentUser or firebaseAuth is null.");
                 }
+                break;
+            default:
+                Log.w(LOG_TAG, "Unhandled drawer item selected: " + item.getTitle());
                 break;
         }
 
@@ -517,6 +549,7 @@ public class ShortlistActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(LOG_TAG, "onStart called: Fetching data for First Team, Youth Team, and Manager details.");
 
         ftPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -525,11 +558,10 @@ public class ShortlistActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                ftPlayersExist = true;
-                            } else {
-                                ftPlayersExist = false;
-                            }
+                            ftPlayersExist = Objects.requireNonNull(task.getResult()).size() > 0;
+                            Log.d(LOG_TAG, "First Team players existence: " + ftPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
                         }
                     }
                 });
@@ -541,11 +573,10 @@ public class ShortlistActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                ytPlayersExist = true;
-                            } else {
-                                ytPlayersExist = false;
-                            }
+                            ytPlayersExist = Objects.requireNonNull(task.getResult()).size() > 0;
+                            Log.d(LOG_TAG, "Youth Team players existence: " + ytPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching Youth Team players.", task.getException());
                         }
                     }
                 });
@@ -561,17 +592,24 @@ public class ShortlistActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                                 Manager manager = doc.toObject(Manager.class);
                                 managerList.add(manager);
+                                Log.d(LOG_TAG, "Manager data fetched: " + manager);
                             }
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());
                             teamHeader.setText(theManager.getTeam());
+                            Log.d(LOG_TAG, "UI updated with manager details.");
+                        } else {
+                            Log.w(LOG_TAG, "No manager data found for managerId=" + managerId);
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching manager data.", e));
     }
 
     @Override
     protected void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy called: Cleaning up resources.");
+
         if (nativeAdTop != null) {
             nativeAdTop.destroy();
         }
@@ -579,5 +617,6 @@ public class ShortlistActivity extends AppCompatActivity {
             nativeAdBottom.destroy();
         }
         super.onDestroy();
+        Log.d(LOG_TAG, "ShortlistActivity destroyed.");
     }
 }

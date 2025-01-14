@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -52,6 +53,7 @@ import util.UserApi;
 
 public class YouthTeamListActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "RAFI|YouthTeamList";
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private NavigationView navView;
@@ -103,20 +105,32 @@ public class YouthTeamListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_youth_team_list);
+        Log.i(LOG_TAG, "YouthTeamListActivity launched.");
 
         if (UserApi.getInstance() != null) {
             currentUserId = UserApi.getInstance().getUserId();
             currentUserName = UserApi.getInstance().getUsername();
+            Log.d(LOG_TAG, "UserApi initialized: userId=" + currentUserId + ", username=" + currentUserName);
+        } else {
+            Log.w(LOG_TAG, "UserApi instance is null.");
         }
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
+        if (user != null) {
+            Log.d(LOG_TAG, "Authenticated user: " + user.getUid());
+        } else {
+            Log.w(LOG_TAG, "No authenticated user.");
+        }
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             managerId = extras.getLong("managerId");
             team = extras.getString("team");
             barYear = extras.getString("barYear");
+            Log.d(LOG_TAG, "Extras received: managerId=" + managerId + ", team=" + team + ", barYear=" + barYear);
+        } else {
+            Log.w(LOG_TAG, "No extras received in intent.");
         }
 
         toolbar = findViewById(R.id.toolbar);
@@ -143,7 +157,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
         addPlayerFab = findViewById(R.id.add_new_player_button_ytp);
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         // Load Banner Ads
         AdView youthTeamListBanner = findViewById(R.id.youth_team_list_banner);
@@ -208,7 +222,11 @@ public class YouthTeamListActivity extends AppCompatActivity {
     }
 
     private void listPlayers(final int buttonInt) {
+        Log.d(LOG_TAG, "Listing players for year: " + currentYear + ", buttonInt: " + buttonInt);
+
         playerList.clear();
+        Log.d(LOG_TAG, "Player list cleared.");
+
         collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
                 .get()
@@ -216,11 +234,14 @@ public class YouthTeamListActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            Log.d(LOG_TAG, "Players fetched from Firestore. Filtering by year: " + currentYear);
+
                             List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 YouthTeamPlayer player = doc.toObject(YouthTeamPlayer.class);
                                 if (player.getYearScouted().equals(currentYear)) {
                                     playerList.add(player);
+                                    Log.d(LOG_TAG, "Player added to list: " + player.getFullName());
                                 }
                             }
                             Collections.sort(playerList, new Comparator<YouthTeamPlayer>() {
@@ -229,16 +250,23 @@ public class YouthTeamListActivity extends AppCompatActivity {
                                     return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                 }
                             });
+                            Log.d(LOG_TAG, "Player list sorted by time added.");
+
                             year.setText(currentYear);
                             youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(YouthTeamListActivity.this, playerList, managerId, team, currentYear, buttonInt);
                             recyclerView.setAdapter(youthTeamPlayerRecAdapter);
                             youthTeamPlayerRecAdapter.notifyDataSetChanged();
+                        } else {
+                            Log.w(LOG_TAG, "No players found for year: " + currentYear);
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching players from Firestore.", e));
     }
 
     private void createPopupDialog() {
+        Log.d(LOG_TAG, "Creating popup dialog to add a youth team player.");
+
         builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.create_youth_team_player_popup, null);
 
@@ -264,13 +292,16 @@ public class YouthTeamListActivity extends AppCompatActivity {
         createPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(LOG_TAG, "Create player button clicked.");
                 if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
                         !positionSpinner.getSelectedItem().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty() &&
                         !yearScouted.getSelectedItem().toString().equals("0")) {
+                    Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
                     createPlayer();
                 } else {
+                    Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
                     Toast.makeText(YouthTeamListActivity.this, "Last Name/Nickname, Nationality, Position, Overall and Year Scouted are required", Toast.LENGTH_LONG)
                             .show();
                 }
@@ -283,6 +314,8 @@ public class YouthTeamListActivity extends AppCompatActivity {
     }
 
     private void createPlayer() {
+        Log.d(LOG_TAG, "Creating a new youth team player.");
+
         String firstNamePlayer = firstName.getText().toString().trim();
         String lastNamePlayer = lastName.getText().toString().trim();
         String fullNamePlayer;
@@ -298,9 +331,9 @@ public class YouthTeamListActivity extends AppCompatActivity {
         String potentialLowPlayer = potentialLow.getText().toString().trim();
         String potentialHiPlayer = potentialHigh.getText().toString().trim();
         final String yScoutedPlayer = yearScouted.getSelectedItem().toString().trim();
+        Log.d(LOG_TAG, "Player details: Full Name = " + fullNamePlayer + ", Position = " + positionPlayer);
 
         final YouthTeamPlayer player = new YouthTeamPlayer();
-
         player.setId(maxId+1);
         player.setFirstName(firstNamePlayer);
         player.setLastName(lastNamePlayer);
@@ -324,11 +357,13 @@ public class YouthTeamListActivity extends AppCompatActivity {
         player.setManagerId(managerId);
         player.setUserId(currentUserId);
         player.setTimeAdded(new Timestamp(new Date()));
+        Log.d(LOG_TAG, "YouthTeamPlayer object created: " + player);
 
         collectionReference.add(player)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        Log.i(LOG_TAG, "Player successfully added to Firestore: Document ID = " + documentReference.getId());
                         dialog.dismiss();
                         Intent intent = new Intent(YouthTeamListActivity.this, YouthTeamListActivity.class);
                         intent.putExtra("managerId", managerId);
@@ -336,6 +371,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
                         intent.putExtra("barYear", yScoutedPlayer);
                         startActivity(intent);
                         finish();
+                        Log.d(LOG_TAG, "YouthTeamListActivity restarted. Current activity finished.");
                     }
                 });
     }
@@ -435,7 +471,12 @@ public class YouthTeamListActivity extends AppCompatActivity {
                     firebaseAuth.signOut();
                     startActivity(new Intent(YouthTeamListActivity.this, MainActivity.class));
                     finishAffinity();
+                } else {
+                    Log.w(LOG_TAG, "Logout attempt failed: currentUser or firebaseAuth is null.");
                 }
+                break;
+            default:
+                Log.w(LOG_TAG, "Unhandled drawer item selected: " + item.getTitle());
                 break;
         }
 
@@ -458,6 +499,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(LOG_TAG, "onStart called: Fetching data for shortlisted players, first team players, youth team players, and manager details.");
 
         db.collection("ShortlistedPlayers").whereEqualTo("userId", currentUserId)
                 .whereEqualTo("managerId", managerId)
@@ -466,12 +508,12 @@ public class YouthTeamListActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                shPlayersExist = true;
-                            } else {
-                                shPlayersExist = false;
-                            }
+                            shPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
+                            Log.d(LOG_TAG, "Shortlisted players existence: " + shPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching shortlisted players.", task.getException());
                         }
+
                     }
                 });
 
@@ -482,11 +524,10 @@ public class YouthTeamListActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                ftPlayersExist = true;
-                            } else {
-                                ftPlayersExist = false;
-                            }
+                            ftPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
+                            Log.d(LOG_TAG, "First Team players existence: " + ftPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
                         }
                     }
                 });
@@ -498,6 +539,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            Log.d(LOG_TAG, "Youth team players fetched to determine min year and max ID.");
                             List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
                             List<YouthTeamPlayer> ytplayers = new ArrayList<>();
                             for (DocumentSnapshot doc: docs) {
@@ -509,12 +551,17 @@ public class YouthTeamListActivity extends AppCompatActivity {
 
                             if (barYear != null) {
                                 currentYear = barYear;
+                                Log.d(LOG_TAG, "Bar year provided: " + barYear);
                             } else {
                                 currentYear = minYearText;
+                                Log.d(LOG_TAG, "Bar year not provided. Using min year: " + minYearText);
                             }
+                        } else {
+                            Log.w(LOG_TAG, "No youth team players found.");
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching youth team players for min year and max ID.", e));
 
         collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -523,6 +570,8 @@ public class YouthTeamListActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            Log.d(LOG_TAG, "Youth team players fetched for display.");
+
                             List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 YouthTeamPlayer player = doc.toObject(YouthTeamPlayer.class);
@@ -554,9 +603,12 @@ public class YouthTeamListActivity extends AppCompatActivity {
                                 youthTeamPlayerRecAdapter.notifyDataSetChanged();
                             }
 
+                        } else {
+                            Log.w(LOG_TAG, "No youth team players found for display.");
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching youth team players for display.", e));
 
         db.collection("Managers").whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("id", managerId)
@@ -565,6 +617,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            Log.d(LOG_TAG, "Manager details fetched.");
                             List<Manager> managerList = new ArrayList<>();
                             for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                                 Manager manager = doc.toObject(Manager.class);
@@ -573,9 +626,12 @@ public class YouthTeamListActivity extends AppCompatActivity {
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());
                             teamHeader.setText(theManager.getTeam());
+                        } else {
+                            Log.w(LOG_TAG, "No manager data found for managerId=" + managerId);
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching manager data.", e));
     }
 
     private void findMaxPlayerId(List<YouthTeamPlayer> ytplayers) {
@@ -585,6 +641,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
                 maxId = player.getId();
             }
         }
+        Log.d(LOG_TAG, "Max player ID determined: " + maxId);
     }
 
     private void findMinYearScouted(List<YouthTeamPlayer> ytplayers) {
@@ -597,12 +654,13 @@ public class YouthTeamListActivity extends AppCompatActivity {
             }
         }
         minYearText = minYear + "/" + ((minYear % 100) + 1);
+        Log.d(LOG_TAG, "Min year scouted determined: " + minYearText);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
+        Log.d(LOG_TAG, "onResume called: Clearing player list.");
         playerList.clear();
     }
 }

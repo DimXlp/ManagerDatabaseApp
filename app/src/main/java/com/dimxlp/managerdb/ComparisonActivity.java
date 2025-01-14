@@ -41,6 +41,7 @@ import util.UserApi;
 
 public class ComparisonActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "RAFI|Comparison";
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener authStateListener;
     private FirebaseUser user;
@@ -89,19 +90,31 @@ public class ComparisonActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comparison);
+        Log.i(LOG_TAG, "ComparisonActivity launched.");
 
         if (UserApi.getInstance() != null) {
             currentUserId = UserApi.getInstance().getUserId();
             currentUserName = UserApi.getInstance().getUsername();
+            Log.d(LOG_TAG, "UserApi initialized: userId=" + currentUserId + ", username=" + currentUserName);
+        } else {
+            Log.w(LOG_TAG, "UserApi instance is null.");
         }
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
+        if (user != null) {
+            Log.d(LOG_TAG, "Authenticated user: " + user.getUid());
+        } else {
+            Log.w(LOG_TAG, "No authenticated user.");
+        }
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             managerId = extras.getLong("managerId");
             team = extras.getString("team");
+            Log.d(LOG_TAG, "Extras received: managerId=" + managerId + ", team=" + team);
+        } else {
+            Log.w(LOG_TAG, "No extras received in intent.");
         }
 
         toolbar = findViewById(R.id.toolbar);
@@ -130,6 +143,7 @@ public class ComparisonActivity extends AppCompatActivity {
     }
 
     private void populatePlayerSpinners() {
+        Log.d(LOG_TAG, "Populating player spinners with First Team and Youth Team players.");
         final List<String> playersList = new ArrayList<>();
 
         // Fetch first team players
@@ -140,7 +154,9 @@ public class ComparisonActivity extends AppCompatActivity {
                         queryDocumentSnapshots.getDocuments().stream()
                                 .map(doc -> Objects.requireNonNull(doc.toObject(FirstTeamPlayer.class)).getFullName())
                                 .forEach(playersList::add);
-                        Log.d("populatePlayerSpinners", "First Team Players Fetched: " + playersList.size());
+                        Log.d(LOG_TAG, "First Team players fetched: " + playersList.size());
+                    } else {
+                        Log.w(LOG_TAG, "No First Team players found.");
                     }
 
                     // After fetching first team players, fetch youth team players
@@ -151,7 +167,9 @@ public class ComparisonActivity extends AppCompatActivity {
                                     youthQuerySnapshots.getDocuments().stream()
                                             .map(doc -> Objects.requireNonNull(doc.toObject(YouthTeamPlayer.class)).getFullName())
                                             .forEach(playersList::add);
-                                    Log.d("populatePlayerSpinners", "Youth Team Players Fetched: " + playersList.size());
+                                    Log.d(LOG_TAG, "Youth Team players fetched: " + playersList.size());
+                                } else {
+                                    Log.w(LOG_TAG, "No Youth Team players found.");
                                 }
 
                                 // Now both queries are complete, set the adapter
@@ -159,9 +177,11 @@ public class ComparisonActivity extends AppCompatActivity {
                                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                 player1Spinner.setAdapter(adapter);
                                 player2Spinner.setAdapter(adapter);
-                            });
-                });
-
+                                Log.d(LOG_TAG, "Player spinners populated with " + playersList.size() + " players.");
+                            })
+                            .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching Youth Team players.", e));
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching First Team players.", e));
     }
 
     private void setUpDrawerContent(NavigationView navView) {

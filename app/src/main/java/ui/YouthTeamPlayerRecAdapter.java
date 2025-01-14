@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,7 @@ import util.UserApi;
 
 public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPlayerRecAdapter.ViewHolder> {
 
+    private static final String LOG_TAG = "RAFI|YouthTeamPlayerRecAdapter";
     private Context context;
     private List<YouthTeamPlayer> playerList;
     private long managerId;
@@ -319,6 +321,8 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
         }
 
         private void letPlayerLeave(final YouthTeamPlayer player) {
+            Log.d(LOG_TAG, "Attempting to let player leave: " + player.getFullName());
+
             ytPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
                     .get()
@@ -332,6 +336,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                     YouthTeamPlayer ytPlayer = ds.toObject(YouthTeamPlayer.class);
                                     if (ytPlayer.getId() == player.getId()) {
                                         documentReference = ytPlayersReference.document(ds.getId());
+                                        Log.d(LOG_TAG, "Found document for player: " + ytPlayer.getFullName());
                                     }
                                 }
                                 assert documentReference != null;
@@ -339,6 +344,8 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Successfully deleted player document: " + player.getFullName());
+
                                                 FormerPlayer fmPlayer = new FormerPlayer();
                                                 fmPlayer.setId(0);
                                                 fmPlayer.setFirstName(player.getFirstName());
@@ -360,6 +367,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                             @Override
                                                             public void onSuccess(DocumentReference documentReference) {
+                                                                Log.d(LOG_TAG, "FormerPlayer added successfully: " + player.getFullName());
                                                                 Toast.makeText(context, "Player transferred!", Toast.LENGTH_LONG)
                                                                         .show();
                                                             }
@@ -390,12 +398,15 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                         });
                                             }
                                         });
+                            } else {
+                                Log.e(LOG_TAG, "Failed to fetch player document: " + task.getException());
                             }
                         }
                     });
         }
 
         private void promotePlayer(final YouthTeamPlayer player) {
+            Log.d(LOG_TAG, "Attempting to promote player: " + player.getFullName());
 
             ytPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
@@ -410,6 +421,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                     YouthTeamPlayer ytPlayer = ds.toObject(YouthTeamPlayer.class);
                                     if (ytPlayer.getId() == player.getId()) {
                                         documentReference = ytPlayersReference.document(ds.getId());
+                                        Log.d(LOG_TAG, "Found document for player: " + ytPlayer.getFullName());
                                     }
                                 }
                                 assert documentReference != null;
@@ -417,6 +429,8 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Successfully deleted YouthTeamPlayer document: " + player.getFullName());
+
                                                 FirstTeamPlayer ftPlayer = new FirstTeamPlayer();
                                                 ftPlayer.setId(0);
                                                 ftPlayer.setFirstName(player.getFirstName());
@@ -439,6 +453,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                             @Override
                                                             public void onSuccess(DocumentReference documentReference) {
+                                                                Log.d(LOG_TAG, "FirstTeamPlayer added successfully: " + player.getFullName());
                                                                 Toast.makeText(context, "Player was promoted!", Toast.LENGTH_LONG)
                                                                         .show();
                                                             }
@@ -478,6 +493,8 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
         }
 
         private void deletePlayer(final YouthTeamPlayer player) {
+            Log.d(LOG_TAG, "Attempting to delete player: " + player.getFullName());
+
             ytPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("managerId", managerId)
                     .get()
@@ -491,6 +508,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                     YouthTeamPlayer ytPlayer = ds.toObject(YouthTeamPlayer.class);
                                     if (ytPlayer.getId() == player.getId()) {
                                         documentReference = ytPlayersReference.document(ds.getId());
+                                        Log.d(LOG_TAG, "Found document for player: " + ytPlayer.getFullName());
                                     }
                                 }
                                 assert documentReference != null;
@@ -498,6 +516,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Successfully deleted player: " + player.getFullName());
                                                 Toast.makeText(context, "Player deleted!", Toast.LENGTH_LONG)
                                                         .show();
                                                 ytPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
@@ -526,12 +545,16 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                         });
                                             }
                                         });
+                            } else {
+                                Log.e(LOG_TAG, "Failed to fetch player document: " + task.getException());
                             }
                         }
                     });
         }
 
         private void editPlayer(final YouthTeamPlayer player) {
+            Log.d(LOG_TAG, "Opening edit dialog for player: " + player.getFullName());
+
             builder = new AlertDialog.Builder(context);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.create_youth_team_player_popup, null);
@@ -587,6 +610,8 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
             savePlayerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.d(LOG_TAG, "Attempting to save changes for player: " + player.getFullName());
+
                     if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
                         !positionSpinner.getSelectedItem().toString().isEmpty() &&
@@ -605,6 +630,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                 YouthTeamPlayer ytplayer = ds.toObject(YouthTeamPlayer.class);
                                                 if (ytplayer.getId() == player.getId()) {
                                                     documentReference = ytPlayersReference.document(ds.getId());
+                                                    Log.d(LOG_TAG, "Document found for player: " + player.getFullName());
                                                 }
                                             }
                                             String no = number.getText().toString().trim();
@@ -624,6 +650,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
+                                                            Log.d(LOG_TAG, "Successfully updated player: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
                                                             dialog.dismiss();
                                                             Intent intent = new Intent(context, YouthTeamListActivity.class);
@@ -635,12 +662,15 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                             Toast.makeText(context, "Player updated!", Toast.LENGTH_LONG)
                                                                     .show();
                                                         }
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.e(LOG_TAG, "Failed to update player: " + e.getMessage());
                                                     });
-
                                         }
                                     }
                                 });
                     } else {
+                        Log.w(LOG_TAG, "Validation failed. Fields are missing for player: " + player.getFullName());
                         Toast.makeText(context, "Last Name/Nickname, Nationality, Position, Overall and Year Scouted are required", Toast.LENGTH_LONG)
                                 .show();
                     }

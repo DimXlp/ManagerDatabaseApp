@@ -47,6 +47,7 @@ import util.UserApi;
 
 public class LoanedOutPlayersActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "RAFI|LoanedOutPlayers";
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -79,15 +80,23 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loaned_out_players);
+        Log.i(LOG_TAG, "LoanedOutPlayersActivity launched.");
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
+        if (user != null) {
+            Log.d(LOG_TAG, "Authenticated user: " + user.getUid());
+        } else {
+            Log.w(LOG_TAG, "No authenticated user.");
+        }
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             managerId = extras.getLong("managerId");
             team = extras.getString("team");
-            Log.d("RAFI", "managerId = " + managerId + "\nteam = " + team);
+            Log.d(LOG_TAG, "Received extras: managerId=" + managerId + ", team=" + team);
+        } else {
+            Log.w(LOG_TAG, "No extras received in intent.");
         }
 
         playerList = new ArrayList<>();
@@ -115,11 +124,12 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         // Load Native Ad
         nativeAdView = findViewById(R.id.native_ad_view);
         loadNativeAd();
+        Log.d(LOG_TAG, "Native ad view set up.");
     }
 
     private void loadNativeAd() {
@@ -276,8 +286,14 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                 if (user != null && firebaseAuth != null) {
                     firebaseAuth.signOut();
                     startActivity(new Intent(LoanedOutPlayersActivity.this, MainActivity.class));
+                    Log.i(LOG_TAG, "User logged out successfully.");
                     finishAffinity();
+                } else {
+                    Log.w(LOG_TAG, "Logout attempt failed: currentUser or firebaseAuth is null.");
                 }
+                break;
+            default:
+                Log.w(LOG_TAG, "Unhandled drawer item selected: " + item.getTitle());
                 break;
         }
 
@@ -299,6 +315,7 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(LOG_TAG, "onStart called: Fetching player and manager data.");
 
         shpColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -308,6 +325,9 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             shPlayersExist = Objects.requireNonNull(task.getResult()).size() > 0;
+                            Log.d(LOG_TAG, "Shortlisted players existence: " + shPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching ShortlistedPlayers.", task.getException());
                         }
                     }
                 });
@@ -320,6 +340,9 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             ftPlayersExist = Objects.requireNonNull(task.getResult()).size() > 0;
+                            Log.d(LOG_TAG, "First Team players existence: " + ftPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching FirstTeamPlayers.", task.getException());
                         }
                     }
                 });
@@ -332,6 +355,9 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             ytPlayersExist = Objects.requireNonNull(task.getResult()).size() > 0;
+                            Log.d(LOG_TAG, "Youth Team players existence: " + ytPlayersExist);
+                        } else {
+                            Log.e(LOG_TAG, "Error fetching YouthTeamPlayers.", task.getException());
                         }
                     }
                 });
@@ -359,6 +385,9 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                             loanedOutPlayerRecAdapter = new LoanedOutPlayerRecAdapter(LoanedOutPlayersActivity.this, playerList, managerId, team);
                             recyclerView.setAdapter(loanedOutPlayerRecAdapter);
                             loanedOutPlayerRecAdapter.notifyDataSetChanged();
+                            Log.d(LOG_TAG, "Loaned out players listed successfully.");
+                        } else {
+                            Log.w(LOG_TAG, "No loaned out players found.");
                         }
                     }
                 });
@@ -378,9 +407,13 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());
                             teamHeader.setText(theManager.getTeam());
+                            Log.d(LOG_TAG, "Manager data loaded: " + theManager);
+                        } else {
+                            Log.w(LOG_TAG, "No manager data found.");
                         }
                     }
-                });
+                })
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching Manager data.", e));
     }
 
     private void findMaxPlayerId() {
@@ -390,6 +423,7 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                 maxId = player.getId();
             }
         }
+        Log.d(LOG_TAG, "Max player ID: " + maxId);
     }
 
     @Override
@@ -398,5 +432,6 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
             nativeAd.destroy();
         }
         super.onDestroy();
+        Log.d(LOG_TAG, "LoanedOutPlayersActivity destroyed.");
     }
 }

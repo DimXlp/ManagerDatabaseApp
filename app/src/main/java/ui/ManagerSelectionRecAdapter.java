@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,7 @@ import util.UserApi;
 
 public class ManagerSelectionRecAdapter extends RecyclerView.Adapter<ManagerSelectionRecAdapter.ViewHolder> {
 
+    private static final String LOG_TAG = "RAFI|ManagerSelectionRecAdapter";
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference managerColRef = db.collection("Managers");
 
@@ -86,6 +88,7 @@ public class ManagerSelectionRecAdapter extends RecyclerView.Adapter<ManagerSele
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.d(LOG_TAG, "Manager clicked at position: " + managerList.get(getAdapterPosition()));
                     Intent intent = new Intent(context, ManageTeamActivity.class);
                     intent.putExtra("managerId", managerList.get(getAdapterPosition()).getId());
                     intent.putExtra("team", managerList.get(getAdapterPosition()).getTeam());
@@ -96,6 +99,8 @@ public class ManagerSelectionRecAdapter extends RecyclerView.Adapter<ManagerSele
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.d(LOG_TAG, "Delete button clicked for manager: " + managerName.getText());
+
                     DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -105,7 +110,7 @@ public class ManagerSelectionRecAdapter extends RecyclerView.Adapter<ManagerSele
                                     break;
 
                                 case DialogInterface.BUTTON_NEGATIVE:
-                                    //No button clicked
+                                    Log.d(LOG_TAG, "Delete operation canceled.");
                                     break;
                             }
                         }
@@ -119,12 +124,16 @@ public class ManagerSelectionRecAdapter extends RecyclerView.Adapter<ManagerSele
         }
 
         private void deleteManager(final Manager manager) {
+            Log.d(LOG_TAG, "deleteManager called for manager: " + manager.getFullName());
+
             managerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
+                                Log.d(LOG_TAG, "Manager collection fetched successfully.");
+
                                 List<DocumentSnapshot> doc = task.getResult().getDocuments();
                                 DocumentReference documentReference = null;
                                 for (DocumentSnapshot ds : doc) {
@@ -138,12 +147,15 @@ public class ManagerSelectionRecAdapter extends RecyclerView.Adapter<ManagerSele
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
+                                                Log.d(LOG_TAG, "Manager successfully deleted: " + manager.getFullName());
                                                 Toast.makeText(context, "Manager deleted!", Toast.LENGTH_LONG)
                                                         .show();
                                                 context.startActivity(new Intent(context, SelectManagerActivity.class));
                                                 ((Activity)context).finish();
                                             }
                                         });
+                            } else {
+                                Log.e(LOG_TAG, "Error fetching Managers collection.", task.getException());
                             }
                         }
                     });
