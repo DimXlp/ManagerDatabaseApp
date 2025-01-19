@@ -373,6 +373,7 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                                 playerList.add(player);
                             }
                             findMaxPlayerId();
+                            playerList.clear();
                             for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                                 LoanedOutPlayer player = doc.toObject(LoanedOutPlayer.class);
                                 if (player.getId() == 0) {
@@ -380,6 +381,7 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                                     lopColRef.document(doc.getId()).update("id", player.getId());
                                     maxId++;
                                 }
+                                playerList.add(player);
                             }
                             loanedOutPlayerRecAdapter = new LoanedOutPlayerRecAdapter(LoanedOutPlayersActivity.this, playerList, managerId, team);
                             recyclerView.setAdapter(loanedOutPlayerRecAdapter);
