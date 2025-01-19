@@ -450,7 +450,7 @@ public class TransferDealsActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                                 Manager manager = doc.toObject(Manager.class);
                                 managerList.add(manager);
-                                Log.d(LOG_TAG, "Manager data fetched: " + manager);
+                                Log.d(LOG_TAG, "Manager data fetched: " + manager.getFullName());
                             }
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());

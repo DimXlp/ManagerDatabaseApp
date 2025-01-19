@@ -97,7 +97,6 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
     @NonNull
     @Override
     public FirstTeamPlayerRecAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d(LOG_TAG, "onCreateViewHolder called: Creating ViewHolder.");
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.ft_player_row, parent, false);
         return new ViewHolder(view, context);
@@ -105,7 +104,6 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
 
     @Override
     public void onBindViewHolder(@NonNull FirstTeamPlayerRecAdapter.ViewHolder holder, int position) {
-        Log.d(LOG_TAG, "onBindViewHolder called: Binding data for position " + position);
         FirstTeamPlayer player = playerList.get(position);
 
         holder.numberText.setText(String.valueOf(player.getNumber()));
@@ -125,7 +123,6 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         } else {
             holder.yearScoutedDateText.setText("????/??");
         }
-        Log.d(LOG_TAG, "Player data set: " + player.getFullName());
 
         if (!player.isLoanPlayer()) {
             holder.line5.setVisibility(View.GONE);
@@ -216,7 +213,6 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         public ViewHolder(@NonNull View itemView, final Context ctx) {
             super(itemView);
             context = ctx;
-            Log.d(LOG_TAG, "ViewHolder initialized.");
 
             numberText = itemView.findViewById(R.id.number_ftp);
             fullNameText = itemView.findViewById(R.id.full_name_ftp);
@@ -336,7 +332,6 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                         @Override
                                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                                                 hasExchangePlayer = isChecked;
-                                                Log.d("RAFI", "hasExchangePlayer: " + hasExchangePlayer);
                                         }
                                     });
 
@@ -848,7 +843,6 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 newTransfer.setComments((!coms.isEmpty()) ? coms : "");
                                                 newTransfer.setFormerPlayer(true);
                                                 newTransfer.setHasPlayerExchange(hasExchangePlayer);
-                                                Log.d("RAFI", "newTransfer.doesHavePlayerExchange: " + newTransfer.doesHavePlayerExchange());
                                                 newTransfer.setManagerId(managerId);
                                                 newTransfer.setUserId(UserApi.getInstance().getUserId());
                                                 newTransfer.setTimeAdded(new Timestamp(new Date()));
@@ -938,8 +932,6 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
 
             builder.setView(view);
             builder.setCancelable(false);
-
-            Log.d("RAFI", "EXCHANGE");
 
             TextView title = view.findViewById(R.id.create_ft_player);
             final EditText firstName = view.findViewById(R.id.first_name_ftp_create);
@@ -1228,7 +1220,6 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                             assert transfer != null;
                             if (transfer.getId() > maxTransferId) {
                                 maxTransferId = transfer.getId();
-                                Log.d("RAFI", "maxTransferId = " + maxTransferId);
                             }
                         }
                     } else {

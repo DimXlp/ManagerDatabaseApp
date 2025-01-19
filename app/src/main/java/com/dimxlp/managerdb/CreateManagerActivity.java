@@ -341,7 +341,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
             manager.setCurrency(currency);
             manager.setTimeAdded(new Timestamp(new Date()));
             manager.setUserId(currentUserId);
-            Log.d(LOG_TAG, "Manager object prepared: " + manager);
+            Log.d(LOG_TAG, "Manager object prepared: " + manager.getFullName());
 
             collectionReference.add(manager)
                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
