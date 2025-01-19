@@ -54,7 +54,6 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
     @NonNull
     @Override
     public ManagerRecyclerAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d(LOG_TAG, "onCreateViewHolder called.");
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.button_row, parent, false);
         return new ViewHolder(view, context);
@@ -62,7 +61,6 @@ public class ManagerRecyclerAdapter extends RecyclerView.Adapter<ManagerRecycler
 
     @Override
     public void onBindViewHolder(@NonNull ManagerRecyclerAdapter.ViewHolder holder, int position) {
-        Log.d(LOG_TAG, "onBindViewHolder called for position: " + position);
 
         switch (position) {
             case 0:

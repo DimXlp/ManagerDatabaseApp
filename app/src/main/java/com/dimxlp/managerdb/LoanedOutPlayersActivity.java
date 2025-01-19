@@ -145,7 +145,7 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                 .withAdListener(new com.google.android.gms.ads.AdListener() {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
-                        Log.e("RAFI", "Native ad failed to load: " + adError.getMessage());
+                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
                     }
                 })
                 .build();
@@ -154,7 +154,6 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        Log.d("RAFI", "Populating native ad view");
 
         // Set the views for the NativeAdView
         nativeAdView.setHeadlineView(nativeAdView.findViewById(R.id.ad_headline));
@@ -407,7 +406,7 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());
                             teamHeader.setText(theManager.getTeam());
-                            Log.d(LOG_TAG, "Manager data loaded: " + theManager);
+                            Log.d(LOG_TAG, "Manager data loaded: " + theManager.getFullName());
                         } else {
                             Log.w(LOG_TAG, "No manager data found.");
                         }

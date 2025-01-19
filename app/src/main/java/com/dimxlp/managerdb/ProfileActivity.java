@@ -293,7 +293,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 managerList.add(manager);
                             }
                             Manager theManager = managerList.get(0);
-                            Log.d(LOG_TAG, "Manager data fetched: " + theManager);
+                            Log.d(LOG_TAG, "Manager data fetched: " + theManager.getFullName());
 
                             firstNameEdit.setText(theManager.getFirstName());
                             lastNameEdit.setText(theManager.getLastName());
@@ -597,7 +597,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 managerList.add(manager);
                             }
                             Manager theManager = managerList.get(0);
-                            Log.d(LOG_TAG, "Manager data fetched: " + theManager);
+                            Log.d(LOG_TAG, "Manager data fetched: " + theManager.getFullName());
                             fullName.setText(theManager.getFullName());
                             teamText.setText(theManager.getTeam());
                             nationality.setText(theManager.getNationality());
@@ -651,7 +651,7 @@ public class ProfileActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                                 Manager manager = doc.toObject(Manager.class);
                                 managerList.add(manager);
-                                Log.d(LOG_TAG, "Header Manager data fetched: " + manager);
+                                Log.d(LOG_TAG, "Header Manager data fetched: " + manager.getFullName());
                             }
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());

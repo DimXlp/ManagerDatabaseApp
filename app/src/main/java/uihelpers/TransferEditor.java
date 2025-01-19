@@ -203,9 +203,7 @@ public class TransferEditor {
         contractYearsEdit.setText(String.valueOf(transfer.getContractYears()));
         yearEdit.setSelection(yearAdapter.getPosition(transfer.getYear()));
         commentsEdit.setText(transfer.getComments());
-        Log.d("RAFI", "transfer.getPlusPlayerName(): " + transfer.getPlusPlayerName());
         plusPlayerSpinnerEdit.setSelection(transferAdapter.getPosition(transfer.getPlusPlayerName()));
-        Log.d("RAFI", "transfer.getExchangePlayerName(): " + transfer.getExchangePlayerName());
         playerExchangeSwitch.setChecked(transfer.getExchangePlayerName()!=null);
         isExchangePlayer = transfer.getExchangePlayerName() != null;
         isPlusPlayer = transfer.getPlusPlayerName() != null;

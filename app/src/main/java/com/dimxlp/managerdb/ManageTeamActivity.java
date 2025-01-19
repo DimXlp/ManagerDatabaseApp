@@ -307,7 +307,8 @@ public class ManageTeamActivity extends AppCompatActivity {
                             for (DocumentSnapshot doc: documentSnapshotList) {
                                 Manager manager = doc.toObject(Manager.class);
                                 managerList.add(manager);
-                                Log.d(LOG_TAG, "Manager data fetched: " + manager);
+                                assert manager != null;
+                                Log.d(LOG_TAG, "Manager data fetched: " + manager.getFullName());
                             }
                             if (!managerList.isEmpty()) {
                                 teamName.setText(managerList.get(0).getTeam());
@@ -388,7 +389,7 @@ public class ManageTeamActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                                 Manager manager = doc.toObject(Manager.class);
                                 managerList.add(manager);
-                                Log.d(LOG_TAG, "Additional manager data fetched: " + manager);
+                                Log.d(LOG_TAG, "Additional manager data fetched: " + manager.getFullName());
                             }
                             if (!managerList.isEmpty()) {
                                 Manager theManager = managerList.get(0);

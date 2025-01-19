@@ -88,7 +88,7 @@ public class ManagerSelectionRecAdapter extends RecyclerView.Adapter<ManagerSele
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(LOG_TAG, "Manager clicked at position: " + managerList.get(getAdapterPosition()));
+                    Log.d(LOG_TAG, "Manager clicked at position: " + managerList.get(getAdapterPosition()).getFullName());
                     Intent intent = new Intent(context, ManageTeamActivity.class);
                     intent.putExtra("managerId", managerList.get(getAdapterPosition()).getId());
                     intent.putExtra("team", managerList.get(getAdapterPosition()).getTeam());

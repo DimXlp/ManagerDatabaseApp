@@ -515,7 +515,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                             Manager theManager = managerList.get(0);
                             managerNameHeader.setText(theManager.getFullName());
                             teamHeader.setText(theManager.getTeam());
-                            Log.d(LOG_TAG, "Manager data loaded: " + theManager);
+                            Log.d(LOG_TAG, "Manager data loaded: " + theManager.getFullName());
                         } else {
                             Log.w(LOG_TAG, "No manager data found.");
                         }
