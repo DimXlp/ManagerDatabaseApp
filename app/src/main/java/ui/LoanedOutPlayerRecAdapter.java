@@ -311,9 +311,16 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                     LoanedOutPlayer loPlayer = ds.toObject(LoanedOutPlayer.class);
                                     if (loPlayer.getId() == player.getId()) {
                                         documentReference = loPlayersColRef.document(ds.getId());
+                                        break;
                                     }
                                 }
-                                assert documentReference != null;
+
+                                if (documentReference == null) {
+                                    Log.e(LOG_TAG, "No matching document found for player ID: " + player.getId());
+                                    Toast.makeText(context, "Error: Player not found in the database.", Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+
                                 documentReference.delete()
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
