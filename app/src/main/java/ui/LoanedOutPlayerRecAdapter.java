@@ -505,7 +505,7 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                                             intent.putExtra("team", team);
                                                             context.startActivity(intent);
                                                             ((Activity) context).finish();
-                                                            Toast.makeText(context, "Player edited!", Toast.LENGTH_LONG)
+                                                            Toast.makeText(context, "Player edited! You should also edit the corresponding transfer deal!", Toast.LENGTH_LONG)
                                                                     .show();
 
                                                         }

@@ -80,6 +80,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
     private Animation slideLeft;
     private Animation slideRight;
     private long maxFTPlayerId;
+    private boolean needToChangeLoanedOutPlayer = false;
 
     public TransferDealsRecAdapter(Context context, List<Transfer> transferList, long managerId, String team, int buttonInt) {
         this.context = context;
@@ -500,22 +501,22 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                             if (transferEditor.isExchangePlayer()) {
                                                 Log.d(LOG_TAG, "Transfer involves exchange player.");
                                                 addExchangePlayer(documentReference);
-                                            } else if (wasExchangeTransfer) {
-                                                Log.d(LOG_TAG, "Transfer previously involved exchange player.");
-                                                if (transferEditor.isExchangePlayer()) {
-                                                    askToChangeExchangePlayer(documentReference, transfer);
-                                                } else {
-                                                    askToRemoveExchangePlayer(transfer, transferEditor);
-                                                }
-                                            } else if (wasPlusPlayerTransfer) {
-                                                Log.d(LOG_TAG, "Transfer previously involved plus player.");
-                                                if (transferEditor.isPlusPlayer()) {
-                                                    if (!initialPlusPlayerName.equals(transferEditor.getPlusPlayerName())) {
-                                                        askToChangePlusPlayer(transferEditor, initialPlusPlayerId, transfer);
-                                                    }
-                                                } else {
-                                                    askToRejoinPlusPlayer(initialPlusPlayerId, transfer, transferEditor);
-                                                }
+//                                            } else if (wasExchangeTransfer) {
+//                                                Log.d(LOG_TAG, "Transfer previously involved exchange player.");
+//                                                if (transferEditor.isExchangePlayer()) {
+//                                                    askToChangeExchangePlayer(documentReference, transfer);
+//                                                } else {
+//                                                    askToRemoveExchangePlayer(transfer, transferEditor);
+//                                                }
+//                                            } else if (wasPlusPlayerTransfer) {
+//                                                Log.d(LOG_TAG, "Transfer previously involved plus player.");
+//                                                if (transferEditor.isPlusPlayer()) {
+//                                                    if (!initialPlusPlayerName.equals(transferEditor.getPlusPlayerName())) {
+//                                                        askToChangePlusPlayer(transferEditor, initialPlusPlayerId, transfer);
+//                                                    }
+//                                                } else {
+//                                                    askToRejoinPlusPlayer(initialPlusPlayerId, transfer, transferEditor);
+//                                                }
                                             } else {
                                                 Log.d(LOG_TAG, "Finalizing transfer update.");
                                                 Intent intent = new Intent(context, TransferDealsActivity.class);
@@ -523,7 +524,12 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                                                 intent.putExtra("team", team);
                                                 context.startActivity(intent);
                                                 ((Activity) context).finish();
-                                                Toast.makeText(context, "Transfer updated!", Toast.LENGTH_LONG).show();
+
+                                                if (needToChangeLoanedOutPlayer) {
+                                                    Toast.makeText(context, "Transfer updated! You should also edit the LoanedOut player!", Toast.LENGTH_LONG).show();
+                                                } else {
+                                                    Toast.makeText(context, "Transfer updated!", Toast.LENGTH_LONG).show();
+                                                }
                                             }
                                         }
                                     }
@@ -1248,6 +1254,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
              contractYearsEdit = "0";
              if (team.equals(oldTeamEdit)) {
                  wageEdit = "0";
+                 needToChangeLoanedOutPlayer = true;
              }
         }
 
