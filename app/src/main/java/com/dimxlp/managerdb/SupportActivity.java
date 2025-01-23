@@ -134,7 +134,7 @@ public class SupportActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d(LOG_TAG, "Send Feedback button clicked.");
                 Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setData(Uri.parse("mailto:managerdb@gmail.com")); // Replace with your email
+                intent.setData(Uri.parse("mailto:managerdbapp@gmail.com")); // Replace with your email
                 intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback for ManagerDB");
                 if (intent.resolveActivity(getPackageManager()) != null) {
                     startActivity(intent);
