@@ -110,12 +110,12 @@ public class MainActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "Displaying feedback popup.");
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Got Feedback?");
-        builder.setMessage("Help us improve ManagerDB! Email us at managerdb@gmail.com.");
+        builder.setMessage("Help us improve ManagerDB! Email us at managerdbapp@gmail.com.");
         builder.setPositiveButton("Send Feedback", (dialog, which) -> {
             Log.d(LOG_TAG, "Feedback popup: Send Feedback clicked.");
             // Open email app
             Intent intent = new Intent(Intent.ACTION_SENDTO);
-            intent.setData(Uri.parse("mailto:managerdb@gmail.com"));
+            intent.setData(Uri.parse("mailto:managerdbapp@gmail.com"));
             intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback for ManagerDB");
             if (intent.resolveActivity(getPackageManager()) != null) {
                 startActivity(intent);
