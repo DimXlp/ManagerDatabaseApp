@@ -21,9 +21,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -100,6 +104,8 @@ public class YouthTeamListActivity extends AppCompatActivity {
     private TextView teamHeader;
     private String minYearText;
     private String barYear;
+    private NativeAd nativeAdBottom;
+    private NativeAdView nativeAdViewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,9 +166,12 @@ public class YouthTeamListActivity extends AppCompatActivity {
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         // Load Banner Ads
-        AdView youthTeamListBanner = findViewById(R.id.youth_team_list_banner);
-        AdRequest adBannerRequest = new AdRequest.Builder().build();
-        youthTeamListBanner.loadAd(adBannerRequest);
+//        AdView youthTeamListBanner = findViewById(R.id.youth_team_list_banner);
+//        AdRequest adBannerRequest = new AdRequest.Builder().build();
+//        youthTeamListBanner.loadAd(adBannerRequest);
+
+        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        loadNativeAd("ca-app-pub-8349697523222717/1751725087", nativeAdViewBottom);
 
         View.OnClickListener prevYearListener = new View.OnClickListener() {
             @Override
@@ -206,6 +215,63 @@ public class YouthTeamListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rec_view_ytp);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+                .forNativeAd(ad -> {
+                    if (isDestroyed()) {
+                        ad.destroy();
+                        return;
+                    }
+                    nativeAdBottom = ad;
+                    populateNativeAdView(ad, nativeAdView);
+                    Log.d(LOG_TAG, "Native ad loaded successfully.");
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
+                    }
+                })
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+        Log.d(LOG_TAG, "Populating native ad view.");
+        // Dynamically assign IDs
+        int headlineId = R.id.ad_headline_bottom;
+        int bodyId = R.id.ad_body_bottom;
+        int callToActionId = R.id.ad_call_to_action_bottom;
+
+        // Set views for the NativeAdView
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
+        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+
+        // Populate the Headline
+        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
+
+        // Populate the Body
+        if (nativeAd.getBody() != null) {
+            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
+            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getBodyView().setVisibility(View.GONE);
+        }
+
+        // Populate the Call-to-Action
+        if (nativeAd.getCallToAction() != null) {
+            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
+            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getCallToActionView().setVisibility(View.GONE);
+        }
+
+        // Bind the NativeAd object to the NativeAdView
+        nativeAdView.setNativeAd(nativeAd);
     }
 
     private static void animateYearButtons(View v) {
@@ -662,5 +728,12 @@ public class YouthTeamListActivity extends AppCompatActivity {
         super.onResume();
         Log.d(LOG_TAG, "onResume called: Clearing player list.");
         playerList.clear();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (nativeAdBottom != null) nativeAdBottom.destroy();
+        Log.i(LOG_TAG, "YouthTeamListActivity destroyed.");
+        super.onDestroy();
     }
 }
