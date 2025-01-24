@@ -118,7 +118,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);  // Replace with bottom Ad Unit ID
+        loadNativeAd("ca-app-pub-8349697523222717/4244653333", nativeAdViewBottom);
 
         List<String> currencies = Arrays.stream(CurrencyEnum.values())
                 .map(CurrencyEnum::getSymbol)

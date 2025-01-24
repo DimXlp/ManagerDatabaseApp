@@ -9,14 +9,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.CollectionReference;
@@ -43,8 +48,11 @@ public class SelectManagerActivity extends AppCompatActivity {
     private List<Manager> managerList;
     private ManagerSelectionRecAdapter managerSelectionRecAdapter;
     private FloatingActionButton addManagerFab;
-    private AdView selectManagerBanner;
-    private AdRequest adBannerRequest;
+//    private AdView selectManagerBanner;
+//    private AdRequest adBannerRequest;
+    private NativeAd nativeAdBottom;
+    private NativeAdView nativeAdViewBottom;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +79,69 @@ public class SelectManagerActivity extends AppCompatActivity {
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         // Load Banner Ad
-        selectManagerBanner = findViewById(R.id.select_manager_banner);
-        adBannerRequest = new AdRequest.Builder().build();
-        selectManagerBanner.loadAd(adBannerRequest);
+//        selectManagerBanner = findViewById(R.id.select_manager_banner);
+//        adBannerRequest = new AdRequest.Builder().build();
+//        selectManagerBanner.loadAd(adBannerRequest);
+
+        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        loadNativeAd("ca-app-pub-8349697523222717/7582135251", nativeAdViewBottom);
+    }
+
+    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+                .forNativeAd(ad -> {
+                    if (isDestroyed()) {
+                        ad.destroy();
+                        return;
+                    }
+                    nativeAdBottom = ad;
+                    populateNativeAdView(ad, nativeAdView);
+                    Log.d(LOG_TAG, "Native ad loaded successfully.");
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
+                    }
+                })
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+        Log.d(LOG_TAG, "Populating native ad view.");
+        // Dynamically assign IDs
+        int headlineId = R.id.ad_headline_bottom;
+        int bodyId = R.id.ad_body_bottom;
+        int callToActionId = R.id.ad_call_to_action_bottom;
+
+        // Set views for the NativeAdView
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
+        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+
+        // Populate the Headline
+        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
+
+        // Populate the Body
+        if (nativeAd.getBody() != null) {
+            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
+            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getBodyView().setVisibility(View.GONE);
+        }
+
+        // Populate the Call-to-Action
+        if (nativeAd.getCallToAction() != null) {
+            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
+            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getCallToActionView().setVisibility(View.GONE);
+        }
+
+        // Bind the NativeAd object to the NativeAdView
+        nativeAdView.setNativeAd(nativeAd);
     }
 
     @Override
@@ -112,12 +180,7 @@ public class SelectManagerActivity extends AppCompatActivity {
     protected void onDestroy() {
         Log.d(LOG_TAG, "onDestroy called: Cleaning up resources.");
 
-        // Destroy AdView to prevent memory leaks
-        if (selectManagerBanner != null) {
-            selectManagerBanner.destroy();
-            Log.d(LOG_TAG, "Banner ad destroyed.");
-        }
-
+        if (nativeAdBottom != null) nativeAdBottom.destroy();
         super.onDestroy();
         Log.d(LOG_TAG, "SelectManagerActivity destroyed.");
     }

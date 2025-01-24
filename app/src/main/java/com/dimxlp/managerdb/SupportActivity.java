@@ -111,10 +111,10 @@ public class SupportActivity extends AppCompatActivity {
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);  // Replace with bottom ad unit ID
+        loadNativeAd("ca-app-pub-8349697523222717/2314594181", nativeAdViewBottom);
 
         // Load Interstitial Ad
-        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+        InterstitialAd.load(this, "ca-app-pub-8349697523222717/2712951956", new AdRequest.Builder().build(),
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {

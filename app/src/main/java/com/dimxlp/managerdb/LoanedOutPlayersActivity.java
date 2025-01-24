@@ -133,7 +133,7 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
     }
 
     private void loadNativeAd() {
-        AdLoader adLoader = new AdLoader.Builder(this, "ca-app-pub-3940256099942544/2247696110") // Replace with your Native Ad Unit ID
+        AdLoader adLoader = new AdLoader.Builder(this, "ca-app-pub-8349697523222717/6227292184") // Replace with your Native Ad Unit ID
                 .forNativeAd(ad -> {
                     if (isDestroyed()) {
                         ad.destroy();
