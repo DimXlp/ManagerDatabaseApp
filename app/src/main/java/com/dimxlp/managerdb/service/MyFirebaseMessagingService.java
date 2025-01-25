@@ -1,4 +1,4 @@
-package service;
+package com.dimxlp.managerdb.service;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;

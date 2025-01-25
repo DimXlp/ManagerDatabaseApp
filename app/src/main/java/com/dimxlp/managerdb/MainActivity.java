@@ -16,8 +16,10 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.onesignal.OneSignal;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FirebaseApp.initializeApp(this);
         setContentView(R.layout.activity_main);
         Log.i(LOG_TAG, "MainActivity launched.");
 
@@ -47,16 +50,18 @@ public class MainActivity extends AppCompatActivity {
 
         // Check for a stored message in SharedPreferences
         SharedPreferences preferences = getSharedPreferences("AppMessages", MODE_PRIVATE);
-        String title = preferences.getString("title", null);
-        String message = preferences.getString("message", null);
 
-        if (title != null && message != null) {
-            Log.d(LOG_TAG, "Update dialog title and message retrieved from SharedPreferences.");
-            showUpdateDialog(title, message);
+        boolean isFirstLaunch = preferences.getBoolean("isFirstLaunch", false);
+        Log.d(LOG_TAG, "isFirstLaunch: " + isFirstLaunch);
 
-            // Clear the message after displaying it
-            preferences.edit().clear().apply();
-            Log.d(LOG_TAG, "Cleared update dialog message from SharedPreferences.");
+        if (isFirstLaunch) {
+            // Tag the user as a first-time launcher
+            OneSignal.sendTag("first_launch", "true");
+
+            // Update SharedPreferences to mark the first launch as complete
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("isFirstLaunch", false);
+            editor.apply();
         }
 
         // Initialize Mobile Ads SDK
