@@ -11,11 +11,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -25,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "RAFI|Main";
     private Button getStartedButton;
+    private NativeAd nativeAdTop, nativeAdBottom;
+    private NativeAdView nativeAdViewTop, nativeAdViewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,14 +74,11 @@ public class MainActivity extends AppCompatActivity {
         // Initialize Mobile Ads SDK
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
-        // Load Banner Ad
-        AdView mainBanner1 = findViewById(R.id.main_banner_1);
-        AdRequest adBannerRequest1 = new AdRequest.Builder().build();
-        mainBanner1.loadAd(adBannerRequest1);
-
-        AdView mainBanner2 = findViewById(R.id.main_banner_2);
-        AdRequest adBannerRequest2 = new AdRequest.Builder().build();
-        mainBanner2.loadAd(adBannerRequest2);
+        // Load Native Ads
+        nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        loadNativeAd("ca-app-pub-8349697523222717/4110897751", nativeAdViewTop);
+        loadNativeAd("ca-app-pub-8349697523222717/6858713549", nativeAdViewBottom);
 
         getStartedButton = findViewById(R.id.get_started_button);
         getStartedButton.setOnClickListener(new View.OnClickListener() {
@@ -87,6 +91,71 @@ public class MainActivity extends AppCompatActivity {
         
         // Check and show feedback popup if needed
         checkAndShowFeedbackPopup();
+    }
+
+    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+                .forNativeAd(ad -> {
+                    if (isDestroyed()) {
+                        ad.destroy();
+                        return;
+                    }
+                    if (nativeAdView == nativeAdViewTop) {
+                        nativeAdTop = ad;
+                    } else {
+                        nativeAdBottom = ad;
+                    }
+                    populateNativeAdView(ad, nativeAdView);
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+
+                    }
+                })
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+
+        // Dynamically identify view IDs based on the nativeAdView
+        int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
+        int bodyId = nativeAdView == nativeAdViewTop ? R.id.ad_body_top : R.id.ad_body_bottom;
+        int callToActionId = nativeAdView == nativeAdViewTop ? R.id.ad_call_to_action_top : R.id.ad_call_to_action_bottom;
+
+        // Set the views for the NativeAdView
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
+        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+
+        // Populate the Headline
+        if (nativeAd.getHeadline() != null) {
+            ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
+            nativeAdView.getHeadlineView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getHeadlineView().setVisibility(View.GONE);
+        }
+
+        // Populate the Body
+        if (nativeAd.getBody() != null) {
+            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
+            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getBodyView().setVisibility(View.GONE);
+        }
+
+        // Populate the Call-to-Action
+        if (nativeAd.getCallToAction() != null) {
+            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
+            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
+        } else {
+            nativeAdView.getCallToActionView().setVisibility(View.GONE);
+        }
+
+        // Bind the NativeAd object to the NativeAdView
+        nativeAdView.setNativeAd(nativeAd);
     }
 
     private void checkAndShowFeedbackPopup() {
@@ -148,5 +217,17 @@ public class MainActivity extends AppCompatActivity {
                     dialog.dismiss();
                 })                .create()
                 .show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (nativeAdTop != null) {
+            nativeAdTop.destroy();
+        }
+        if (nativeAdBottom != null) {
+            nativeAdBottom.destroy();
+        }
+        super.onDestroy();
+        Log.d(LOG_TAG, "MainActivity destroyed.");
     }
 }

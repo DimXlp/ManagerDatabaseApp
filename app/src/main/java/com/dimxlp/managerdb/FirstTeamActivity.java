@@ -162,8 +162,8 @@ public class FirstTeamActivity extends AppCompatActivity {
         // Load Native Ads
         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-8349697523222717/2824594602", nativeAdViewTop);  // Replace with top ad unit ID
-        loadNativeAd("ca-app-pub-8349697523222717/2438120793", nativeAdViewBottom);  // Replace with bottom ad unit ID
+        loadNativeAd("ca-app-pub-8349697523222717/2824594602", nativeAdViewTop);
+        loadNativeAd("ca-app-pub-8349697523222717/2438120793", nativeAdViewBottom);
 
         // Load Interstitial Ad
         InterstitialAd.load(this, "ca-app-pub-8349697523222717/3810373216", new AdRequest.Builder().build(),
