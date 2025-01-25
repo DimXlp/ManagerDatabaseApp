@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    private static final String TAG = "FCMService";
+    private static final String LOG_TAG = "RAFI|FCMService";
 
     // This method is triggered whenever a new message is received
     @Override
@@ -27,14 +27,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         super.onMessageReceived(remoteMessage);
 
         // Log the message details
-        Log.d(TAG, "From: " + remoteMessage.getFrom());
+        Log.d(LOG_TAG, "From: " + remoteMessage.getFrom());
 
         // Check if the message contains a notification payload
         if (remoteMessage.getNotification() != null) {
             String title = remoteMessage.getNotification().getTitle();
             String body = remoteMessage.getNotification().getBody();
 
-            Log.d(TAG, "Notification - Title: " + title + ", Body: " + body);
+            Log.d(LOG_TAG, "Notification - Title: " + title + ", Body: " + body);
             // Call a method to display the notification (we'll define it in the next step)
             showNotification(title, body);
         }
@@ -44,7 +44,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             String title = remoteMessage.getData().get("title");
             String message = remoteMessage.getData().get("message");
 
-            Log.d(TAG, "Data Payload - Title: " + title + ", Message: " + message);
+            Log.d(LOG_TAG, "Data Payload - Title: " + title + ", Message: " + message);
 
             // Save the message to SharedPreferences
             saveMessageToPreferences(title, message);
@@ -58,7 +58,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String token) {
         super.onNewToken(token);
-        Log.d(TAG, "New FCM Token: " + token);
+        Log.d(LOG_TAG, "New FCM Token: " + token);
 
         // Send the token to your server
 //        sendTokenToServer(token);

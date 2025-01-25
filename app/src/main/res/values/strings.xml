@@ -74,7 +74,7 @@
     <string name="select_manager">Select Manager</string>
     <string name="logout">Logout</string>
     <string name="support_info"><![CDATA[Support & Info]]></string>
-    <string name="credits">Developed by <b>DimXLP</b>.\nTools used: Android Studio, Firebase, and more.\nThis app was created by a single developer out of his passion for FIFA (now EA FC) games and Manager Career mode. If you have any suggestions to improve the app, please reach out to the developer using the <b>Send Feedback</b> button below.
+    <string name="credits">Developed by: <b>DimXLP</b>.\nTools used: Android Studio, Firebase, and more.\nThis app was created by a single developer out of his passion for FIFA (now EA FC) games and Manager Career mode. If you have any suggestions to improve the app, please reach out to the developer using the <b>Send Feedback</b> button below.
 </string>
     <string name="feedback">Your feedback helps this app improve! Share your thoughts, ideas for enhancements, or report any bugs or crashes you encounter.</string>
     <string name="how_to">Learn how to use the app. Guides, tips etc.</string>
