@@ -292,7 +292,23 @@ public class CreateAccountActivity extends AppCompatActivity {
     }
 
     private boolean isValidEmailDomain(String email) {
-        String[] validDomains = {"gmail.com", "yahoo.com", "outlook.com", "hotmail.com"};
+        String[] validDomains = {
+                "gmail.com",
+                "yahoo.com",
+                "outlook.com",
+                "hotmail.com",
+                "icloud.com",
+                "aol.com",
+                "protonmail.com",
+                "zoho.com",
+                "mail.com",
+                "yandex.com",
+                "gmx.com",
+                "me.com",
+                "live.com",
+                "att.net",
+                "fastmail.com"
+        };
         String domain = email.substring(email.indexOf("@") + 1);
         boolean isValid = Arrays.stream(validDomains).anyMatch(domain::equalsIgnoreCase);
         Log.d(LOG_TAG, "Email domain validation for " + email + ": " + isValid);
