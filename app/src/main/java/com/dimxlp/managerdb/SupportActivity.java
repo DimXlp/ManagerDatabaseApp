@@ -1,5 +1,6 @@
 package com.dimxlp.managerdb;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,11 +28,13 @@ import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -48,10 +51,15 @@ public class SupportActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference usersCollection = db.collection("Users");
     private CollectionReference managersCollection = db.collection("Managers");
     private CollectionReference firstTeamPlayersCollection = db.collection("FirstTeamPlayers");
     private CollectionReference youthTeamPlayersCollection = db.collection("YouthTeamPlayers");
     private CollectionReference shortlistedPlayersCollection = db.collection("ShortlistedPlayers");
+    private CollectionReference formerPlayersCollection = db.collection("FormerPlayers");
+    private CollectionReference loanedOutPlayersCollection = db.collection("LoanedOutPlayers");
+    private CollectionReference transferDealsCollection = db.collection("Transfers");
+
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private NavigationView navView;
@@ -154,6 +162,84 @@ public class SupportActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, "App Guides button clicked.");
                 Toast.makeText(SupportActivity.this, "App guides are not supported yet.", Toast.LENGTH_SHORT).show();
             }
+        });
+
+        // Delete Account Button
+        Button deleteAccountButton = findViewById(R.id.delete_account_button);
+        deleteAccountButton.setOnClickListener(v -> showDeleteConfirmationDialog());
+    }
+
+    private void showDeleteConfirmationDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Account")
+                .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> deleteUserAccount())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteUserAccount() {
+        if (user == null) {
+            Log.w(LOG_TAG, "No authenticated user found.");
+            Toast.makeText(this, "No authenticated user.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Delete all user data
+        deleteUserData(user.getUid(), new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    // Delete Firebase Authentication account
+                    user.delete()
+                            .addOnCompleteListener(task1 -> {
+                                if (task1.isSuccessful()) {
+                                    Log.d(LOG_TAG, "User account deleted.");
+                                    Toast.makeText(SupportActivity.this, "Account deleted successfully.", Toast.LENGTH_LONG).show();
+
+                                    // Redirect to login
+                                    Intent intent = new Intent(SupportActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                    finishAffinity();
+                                } else {
+                                    Log.e(LOG_TAG, "Error deleting Firebase Auth account.", task1.getException());
+                                    Toast.makeText(SupportActivity.this, "Error deleting account.", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                } else {
+                    Log.e(LOG_TAG, "Error deleting user data.", task.getException());
+                    Toast.makeText(SupportActivity.this, "Error deleting account data.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    private void deleteUserData(String userId, OnCompleteListener<Void> onCompleteListener) {
+        Log.d(LOG_TAG, "Deleting user data for userId: " + userId);
+
+        Task<Void> deleteUser = deleteCollection(usersCollection.whereEqualTo("userId", userId));
+        Task<Void> deleteManagers = deleteCollection(managersCollection.whereEqualTo("userId", userId));
+        Task<Void> deleteFirstTeam = deleteCollection(firstTeamPlayersCollection.whereEqualTo("userId", userId));
+        Task<Void> deleteYouthTeam = deleteCollection(youthTeamPlayersCollection.whereEqualTo("userId", userId));
+        Task<Void> deleteShortlisted = deleteCollection(shortlistedPlayersCollection.whereEqualTo("userId", userId));
+        Task<Void> deleteFormerPlayer = deleteCollection(formerPlayersCollection.whereEqualTo("userId", userId));
+        Task<Void> deleteLoanedOutPlayer = deleteCollection(loanedOutPlayersCollection.whereEqualTo("userId", userId));
+        Task<Void> deleteTransferDeals = deleteCollection(transferDealsCollection.whereEqualTo("userId", userId));
+
+        Tasks.whenAll(deleteUser, deleteManagers, deleteFirstTeam, deleteYouthTeam, deleteShortlisted, deleteFormerPlayer, deleteLoanedOutPlayer, deleteTransferDeals)
+                .addOnCompleteListener(onCompleteListener);
+    }
+
+    private Task<Void> deleteCollection(Query query) {
+        return query.get().continueWithTask(task -> {
+            if (!task.isSuccessful() || task.getResult() == null) {
+                return Tasks.forException(task.getException());
+            }
+            List<Task<Void>> deleteTasks = new ArrayList<>();
+            for (QueryDocumentSnapshot document : task.getResult()) {
+                deleteTasks.add(document.getReference().delete());
+            }
+            return Tasks.whenAll(deleteTasks);
         });
     }
 
