@@ -22,64 +22,86 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".TransferDealsActivity"
+            android:exported="false"
             android:label="Transfer Deals"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".SelectManagerActivity"
+            android:exported="false"
             android:label="Select Manager"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".LoanedOutPlayersActivity"
+            android:exported="false"
             android:label="Loaned Out Players"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ShortlistPlayersActivity"
+            android:exported="false"
             android:label="Shortlist"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ShortlistActivity"
+            android:exported="false"
             android:label="Shortlist"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".FormerPlayersListActivity"
+            android:exported="false"
             android:label="Former Players"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".YouthTeamListActivity"
+            android:exported="false"
             android:label="Youth Team"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".YouthTeamActivity"
+            android:exported="false"
             android:label="Youth Team"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".FirstTeamListActivity"
+            android:exported="false"
             android:label="First Team"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".FirstTeamActivity"
+            android:exported="false"
             android:label="First Team"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ComparisonActivity"
+            android:exported="false"
             android:label="Compare Players"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".SupportActivity"
+            android:exported="false"
             android:label="Support &amp; Info"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ProfileActivity"
+            android:exported="false"
             android:label="@string/title_activity_profile"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ManageTeamActivity" />
+        <activity
+            android:name=".ManageTeamActivity"
+            android:exported="false"/>
         <activity
             android:name=".CreateManagerActivity"
+            android:exported="false"
             android:label="Create Manager"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".CreateAccountActivity" />
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".CreateAccountActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
