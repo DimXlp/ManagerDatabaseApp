@@ -21,6 +21,8 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
+import com.google.android.ump.ConsentRequestParameters;
+import com.google.android.ump.UserMessagingPlatform;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -71,6 +73,18 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
         }
 
+        ConsentRequestParameters params = new ConsentRequestParameters.Builder().build();
+        var consentInformation = UserMessagingPlatform.getConsentInformation(this);
+        consentInformation.requestConsentInfoUpdate(this, params,
+                () -> {
+                    if (consentInformation.isConsentFormAvailable()) {
+                        loadConsentForm();
+                    }
+                },
+                formError -> {
+                    Log.d(LOG_TAG, "Error: " + formError.getMessage());
+                });
+
         // Initialize Mobile Ads SDK
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
@@ -91,6 +105,16 @@ public class MainActivity extends AppCompatActivity {
         
         // Check and show feedback popup if needed
         checkAndShowFeedbackPopup();
+    }
+
+    private void loadConsentForm() {
+        UserMessagingPlatform.loadAndShowConsentFormIfRequired(this,
+                formError -> {
+                    if (formError != null) {
+                        System.out.println("Error loading form: " + formError.getMessage());
+                    }
+                }
+        );
     }
 
     private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
