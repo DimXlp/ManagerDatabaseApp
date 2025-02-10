@@ -213,6 +213,23 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
     }
 
+    private void sendPasswordResetEmail(String email) {
+        if (TextUtils.isEmpty(email)) {
+            Toast.makeText(LoginActivity.this, "Please enter your email", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        firebaseAuth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(LoginActivity.this, "Password reset email sent. Check your inbox.", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Error: Unable to send reset email.", Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+
     private void checkAccountStatusAndLogin() {
         SharedPreferences sharedPreferences = getSharedPreferences("com.dimxlp.managerdb", MODE_PRIVATE);
         boolean hasAccount = sharedPreferences.getBoolean("hasAccount", false);
