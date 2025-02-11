@@ -1,0 +1,325 @@
+Subject: [PATCH] test_ad_ids
+---
+Index: app/src/main/java/com/dimxlp/managerdb/ShortlistPlayersActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/ShortlistPlayersActivity.java b/app/src/main/java/com/dimxlp/managerdb/ShortlistPlayersActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/ShortlistPlayersActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/ShortlistPlayersActivity.java	(date 1738694679003)
+@@ -183,7 +183,7 @@
+ //        shortlistBanner.loadAd(adBannerRequest);
+ 
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/2033460956", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         addPlayerFab.setOnClickListener(new View.OnClickListener() {
+             @Override
+Index: app/src/main/res/layout/activity_first_team_list.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_first_team_list.xml b/app/src/main/res/layout/activity_first_team_list.xml
+--- a/app/src/main/res/layout/activity_first_team_list.xml	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/res/layout/activity_first_team_list.xml	(date 1738694747060)
+@@ -114,7 +114,7 @@
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             app:adSize="BANNER"
+-            app:adUnitId="ca-app-pub-8349697523222717/7948665447" />
++            app:adUnitId="ca-app-pub-3940256099942544/6300978111" />
+ 
+     </LinearLayout>
+ 
+Index: app/src/main/java/com/dimxlp/managerdb/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/MainActivity.java b/app/src/main/java/com/dimxlp/managerdb/MainActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/MainActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/MainActivity.java	(date 1738694679040)
+@@ -91,8 +91,8 @@
+         // Load Native Ads
+         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/4110897751", nativeAdViewTop);
+-        loadNativeAd("ca-app-pub-8349697523222717/6858713549", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         getStartedButton = findViewById(R.id.get_started_button);
+         getStartedButton.setOnClickListener(new View.OnClickListener() {
+Index: app/src/main/java/com/dimxlp/managerdb/SupportActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/SupportActivity.java b/app/src/main/java/com/dimxlp/managerdb/SupportActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/SupportActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/SupportActivity.java	(date 1738694679046)
+@@ -119,10 +119,10 @@
+         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
+ 
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/2314594181", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         // Load Interstitial Ad
+-        InterstitialAd.load(this, "ca-app-pub-8349697523222717/2712951956", new AdRequest.Builder().build(),
++        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+                 new InterstitialAdLoadCallback() {
+                     @Override
+                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+Index: app/src/main/java/com/dimxlp/managerdb/SelectManagerActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/SelectManagerActivity.java b/app/src/main/java/com/dimxlp/managerdb/SelectManagerActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/SelectManagerActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/SelectManagerActivity.java	(date 1738694679031)
+@@ -84,7 +84,7 @@
+ //        selectManagerBanner.loadAd(adBannerRequest);
+ 
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/7582135251", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+     }
+ 
+     private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+Index: app/src/main/java/com/dimxlp/managerdb/YouthTeamListActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/YouthTeamListActivity.java b/app/src/main/java/com/dimxlp/managerdb/YouthTeamListActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/YouthTeamListActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/YouthTeamListActivity.java	(date 1738694679020)
+@@ -171,7 +171,7 @@
+ //        youthTeamListBanner.loadAd(adBannerRequest);
+ 
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/1751725087", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         View.OnClickListener prevYearListener = new View.OnClickListener() {
+             @Override
+Index: app/src/main/java/com/dimxlp/managerdb/YouthTeamActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/YouthTeamActivity.java b/app/src/main/java/com/dimxlp/managerdb/YouthTeamActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/YouthTeamActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/YouthTeamActivity.java	(date 1738694679075)
+@@ -148,11 +148,11 @@
+         // Load Native Ads
+         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/8871128208", nativeAdViewTop);
+-        loadNativeAd("ca-app-pub-8349697523222717/6868320390", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         // Load Interstitial Ad
+-        InterstitialAd.load(this, "ca-app-pub-8349697523222717/3946104585", new AdRequest.Builder().build(),
++        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+                 new InterstitialAdLoadCallback() {
+                     @Override
+                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+Index: app/src/main/java/com/dimxlp/managerdb/ManageTeamActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/ManageTeamActivity.java b/app/src/main/java/com/dimxlp/managerdb/ManageTeamActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/ManageTeamActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/ManageTeamActivity.java	(date 1738694515463)
+@@ -138,7 +138,7 @@
+         manageBanner.loadAd(adBannerRequest);
+ 
+         // Load Interstitial Ad
+-        InterstitialAd.load(this, "ca-app-pub-8349697523222717/9777554763", new AdRequest.Builder().build(),
++        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+                 new InterstitialAdLoadCallback() {
+                     @Override
+                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+Index: app/src/main/java/com/dimxlp/managerdb/FormerPlayersListActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/FormerPlayersListActivity.java b/app/src/main/java/com/dimxlp/managerdb/FormerPlayersListActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/FormerPlayersListActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/FormerPlayersListActivity.java	(date 1738694679061)
+@@ -148,7 +148,7 @@
+ //        Log.d(LOG_TAG, "Banner ad loaded.");
+ 
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/8495460359", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         View.OnClickListener prevYearListener = new View.OnClickListener() {
+             @Override
+Index: app/src/main/java/com/dimxlp/managerdb/FirstTeamActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/FirstTeamActivity.java b/app/src/main/java/com/dimxlp/managerdb/FirstTeamActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/FirstTeamActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/FirstTeamActivity.java	(date 1738694679065)
+@@ -162,11 +162,11 @@
+         // Load Native Ads
+         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/2824594602", nativeAdViewTop);
+-        loadNativeAd("ca-app-pub-8349697523222717/2438120793", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         // Load Interstitial Ad
+-        InterstitialAd.load(this, "ca-app-pub-8349697523222717/3810373216", new AdRequest.Builder().build(),
++        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+                 new InterstitialAdLoadCallback() {
+                     @Override
+                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+Index: app/src/main/res/layout/activity_transfer_deals.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_transfer_deals.xml b/app/src/main/res/layout/activity_transfer_deals.xml
+--- a/app/src/main/res/layout/activity_transfer_deals.xml	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/res/layout/activity_transfer_deals.xml	(date 1738694747065)
+@@ -100,7 +100,7 @@
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             app:adSize="BANNER"
+-            app:adUnitId="ca-app-pub-8349697523222717/6253839193" />
++            app:adUnitId="ca-app-pub-3940256099942544/6300978111" />
+ 
+     </LinearLayout>
+ 
+Index: app/src/main/res/layout/activity_manage_team.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_manage_team.xml b/app/src/main/res/layout/activity_manage_team.xml
+--- a/app/src/main/res/layout/activity_manage_team.xml	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/res/layout/activity_manage_team.xml	(date 1738694747054)
+@@ -80,7 +80,7 @@
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             app:adSize="BANNER"
+-            app:adUnitId="ca-app-pub-8349697523222717/3626540385" />
++            app:adUnitId="ca-app-pub-3940256099942544/6300978111" />
+     </LinearLayout>
+ 
+     <!-- Navigation Drawer -->
+Index: app/src/main/java/com/dimxlp/managerdb/CreateManagerActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/CreateManagerActivity.java b/app/src/main/java/com/dimxlp/managerdb/CreateManagerActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/CreateManagerActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/CreateManagerActivity.java	(date 1738694679079)
+@@ -118,7 +118,7 @@
+         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
+ 
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/4244653333", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         List<String> currencies = Arrays.stream(CurrencyEnum.values())
+                 .map(CurrencyEnum::getSymbol)
+Index: app/src/main/java/com/dimxlp/managerdb/ShortlistActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/ShortlistActivity.java b/app/src/main/java/com/dimxlp/managerdb/ShortlistActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/ShortlistActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/ShortlistActivity.java	(date 1738694679056)
+@@ -160,11 +160,11 @@
+         // Load Native Ads
+         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/1448472755", nativeAdViewTop);
+-        loadNativeAd("ca-app-pub-8349697523222717/2446456127", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         // Load Interstitial Ad
+-        InterstitialAd.load(this, "ca-app-pub-8349697523222717/1133374452", new AdRequest.Builder().build(),
++        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+                 new InterstitialAdLoadCallback() {
+                     @Override
+                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+Index: app/src/main/java/com/dimxlp/managerdb/CreateAccountActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/CreateAccountActivity.java b/app/src/main/java/com/dimxlp/managerdb/CreateAccountActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/CreateAccountActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/CreateAccountActivity.java	(date 1738694679083)
+@@ -82,8 +82,8 @@
+         // Load Native Ads
+         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/8527018433", nativeAdViewTop);
+-        loadNativeAd("ca-app-pub-8349697523222717/8307526584", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         authStateListener = new FirebaseAuth.AuthStateListener() {
+             @Override
+Index: app/src/main/java/com/dimxlp/managerdb/ProfileActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/ProfileActivity.java b/app/src/main/java/com/dimxlp/managerdb/ProfileActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/ProfileActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/ProfileActivity.java	(date 1738694679051)
+@@ -136,11 +136,11 @@
+         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+ 
+-        loadNativeAd("ca-app-pub-8349697523222717/7015121055", nativeAdViewTop);
+-        loadNativeAd("ca-app-pub-8349697523222717/8391518574", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         // Load Interstitial Ad
+-        InterstitialAd.load(this, "ca-app-pub-8349697523222717/3460366928", new AdRequest.Builder().build(),
++        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+                 new InterstitialAdLoadCallback() {
+                     @Override
+                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+Index: app/src/main/java/com/dimxlp/managerdb/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/dimxlp/managerdb/LoginActivity.java b/app/src/main/java/com/dimxlp/managerdb/LoginActivity.java
+--- a/app/src/main/java/com/dimxlp/managerdb/LoginActivity.java	(revision cbf23c3362fec74887a20c1def2b586f4661a648)
++++ b/app/src/main/java/com/dimxlp/managerdb/LoginActivity.java	(date 1738694679069)
+@@ -87,8 +87,8 @@
+         // Load Native Ads
+         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+-        loadNativeAd("ca-app-pub-8349697523222717/1143352431", nativeAdViewTop);
+-        loadNativeAd("ca-app-pub-8349697523222717/3330532077", nativeAdViewBottom);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
++        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+ 
+         createAccountButton.setOnClickListener(new View.OnClickListener() {
+             @Override
