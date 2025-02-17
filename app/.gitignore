@@ -9,6 +9,9 @@ gradle/
 # Local configuration file
 local.properties
 
+# Ignore local gradle properties
+gradle.properties
+
 # IDE settings
 .idea/
 *.iml
