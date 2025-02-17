@@ -1,14 +1,67 @@
+# ========== ANDROID SPECIFIC IGNORE ==========
+
+# Gradle files
+.gradle/
+.idea/
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+local.properties
+gradle.properties  # Ensure API keys are not pushed
+/captures/
+
+# ========== BUILD FILES ==========
+/build/
+**/build/
+*/out/
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+*.jar
+*.war
+*.ear
+
+# ========== LOGS ==========
+*.log
+logs/
+crashlytics/
+fabric/
+*.swp
+*.swo
+*.swn
+
+# ========== ANDROID STUDIO FILES ==========
+/.navigation/
+*.jks  # Ignore keystore files
+/.cxx/
+.externalNativeBuild/
+
+# ========== FIREBASE ==========
+/app/google-services.json
+app/src/google-services.json
+firebase/
+firebase-debug.log
+
+# ========== OTHER ==========
+/coverage/
+*.generated/
+*.orig
+*.bak
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+Thumbs.db
+
+# ========== LINT & TEST FILES ==========
+/lint/
+/lint-results.xml
+/lint-results.html
+/lint-results.txt
+/test-results/
+**/test-results/
+
+# ========== SYSTEM FILES ==========
+.vscode/
+*.sublime-workspace
+*.sublime-project
+*.project
+*.classpath
+*.settings/
