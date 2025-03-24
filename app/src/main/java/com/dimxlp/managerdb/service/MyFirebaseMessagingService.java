@@ -97,7 +97,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // Create an intent to open the app when the user taps the notification
         Intent intent = new Intent(this, MainActivity.class); // Replace MainActivity with your main activity
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)

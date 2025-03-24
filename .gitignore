@@ -5,7 +5,6 @@
 .idea/
 *.iml
 local.properties
-gradle.properties  # Ensure API keys are not pushed
 /captures/
 
 # ========== BUILD FILES ==========

@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -91,6 +92,13 @@ public class ComparisonActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comparison);
         Log.i(LOG_TAG, "ComparisonActivity launched.");
+
+        // Ensure Firebase uses default configuration (default_restricted_api_key)
+        if (FirebaseApp.getApps(this).isEmpty()) {
+            FirebaseApp.initializeApp(this);
+        }
+
+        db = FirebaseFirestore.getInstance();
 
         if (UserApi.getInstance() != null) {
             currentUserId = UserApi.getInstance().getUserId();

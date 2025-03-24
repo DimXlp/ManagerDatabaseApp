@@ -24,6 +24,8 @@ import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -59,6 +61,19 @@ public class SelectManagerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_manager);
         Log.i(LOG_TAG, "SelectManagerActivity launched.");
+
+//        FirebaseOptions options = new FirebaseOptions.Builder()
+//                .setApplicationId(FirebaseApp.getInstance().getOptions().getApplicationId())
+//                .setApiKey(BuildConfig.DEFAULT_RESTRICTED_API_KEY)  // Reset to restricted API key
+//                .setProjectId(FirebaseApp.getInstance().getOptions().getProjectId())
+//                .build();
+//
+//        if (FirebaseApp.getApps(this).isEmpty()) {
+//            FirebaseApp.initializeApp(this, options);
+//        }
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Log.d(LOG_TAG, "Firestore initialized with default API Key: " + FirebaseApp.getInstance().getOptions().getApiKey());
 
         managerList = new ArrayList<>();
 
@@ -148,6 +163,7 @@ public class SelectManagerActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         Log.d(LOG_TAG, "onStart called: Fetching manager data.");
+        Log.d(LOG_TAG, "userId: " + UserApi.getInstance().getUserId());
 
         managerList.clear();
         managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
@@ -158,6 +174,7 @@ public class SelectManagerActivity extends AppCompatActivity {
                         for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
                             Manager manager = doc.toObject(Manager.class);
                             managerList.add(manager);
+                            Log.d(LOG_TAG, "Manager: " + manager.getFullName());
                         }
                         managerSelectionRecAdapter = new ManagerSelectionRecAdapter(SelectManagerActivity.this, managerList);
                         recyclerView.setAdapter(managerSelectionRecAdapter);

@@ -24,7 +24,11 @@ import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.ump.ConsentRequestParameters;
 import com.google.android.ump.UserMessagingPlatform;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.appcheck.FirebaseAppCheck;
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory;
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.onesignal.OneSignal;
 
@@ -38,9 +42,31 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FirebaseApp.initializeApp(this);
         setContentView(R.layout.activity_main);
         Log.i(LOG_TAG, "MainActivity launched.");
+
+        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
+        firebaseAppCheck.installAppCheckProviderFactory(
+                PlayIntegrityAppCheckProviderFactory.getInstance()
+        );
+
+        // Install App Check Debug Token Provider
+//        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
+//        firebaseAppCheck.installAppCheckProviderFactory(
+//                DebugAppCheckProviderFactory.getInstance()
+//        );
+//        Log.d(LOG_TAG, "Debug Token: " + DebugAppCheckProviderFactory);
+
+        if (FirebaseApp.getApps(this).isEmpty()) {
+            FirebaseApp.initializeApp(this);  // Default instance uses restricted API key
+        }
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();  // Firestore uses restricted API key
+        Log.d(LOG_TAG, "Firestore initialized with default API Key: " + FirebaseApp.getInstance().getOptions().getApiKey());
+
+        FirebaseAppCheck.getInstance().getAppCheckToken(false)
+                .addOnSuccessListener(tokenResult -> Log.d(LOG_TAG, "App Check Token: " + tokenResult.getToken()))
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Failed to get App Check token", e));
 
         // Subscribe to app_updates topic
         FirebaseMessaging.getInstance().subscribeToTopic("app_updates")

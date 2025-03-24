@@ -27,6 +27,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.recaptcha.Recaptcha;
+import com.google.android.recaptcha.RecaptchaAction;
+import com.google.android.recaptcha.RecaptchaTasksClient;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -60,6 +65,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     private boolean isBiometricsSupported = false;
     private NativeAd nativeAdTop, nativeAdBottom;
     private NativeAdView nativeAdViewTop, nativeAdViewBottom;
+    private RecaptchaTasksClient recaptchaClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,13 +74,35 @@ public class CreateAccountActivity extends AppCompatActivity {
 
         Log.i(LOG_TAG, "CreateAccountActivity launched.");
 
+//        // Force Firebase to use the unrestricted API key for authentication
+//        FirebaseOptions options = new FirebaseOptions.Builder()
+//                .setApplicationId(FirebaseApp.getInstance().getOptions().getApplicationId())
+//                .setApiKey(BuildConfig.FIREBASE_AUTH_API_KEY)  // Force correct API Key
+//                .setProjectId(FirebaseApp.getInstance().getOptions().getProjectId())
+//                .build();
+//
+//        FirebaseApp authApp;
+//        try {
+//            authApp = FirebaseApp.getInstance("authApp");
+//        } catch (IllegalStateException e) {
+//            authApp = FirebaseApp.initializeApp(this, options, "authApp");
+//        }
+//
+//        firebaseAuth = FirebaseAuth.getInstance(authApp);
+
         firebaseAuth = FirebaseAuth.getInstance();
 
+        Log.d(LOG_TAG, "Using Firebase Authentication API Key: " + firebaseAuth.getApp().getOptions().getApiKey());
+        
         usernameText = findViewById(R.id.username_register);
         emailText = findViewById(R.id.email_register);
         passwordText = findViewById(R.id.password_register);
         create_account_button = findViewById(R.id.create_button_register);
         progressBar = findViewById(R.id.create_progress_bar);
+
+        Recaptcha.getTasksClient(getApplication(), BuildConfig.RECAPTCHA_API_KEY)
+                .addOnSuccessListener(client -> recaptchaClient = client)
+                .addOnFailureListener(e -> Log.e(LOG_TAG, "Failed to initialize reCAPTCHA.", e));
 
         // Initialize Mobile Ads SDK
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
@@ -124,7 +152,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                     String email = emailValue.trim();
                     String password = passwordValue.trim();
 
-                    createUserEmailAccount(username, email, password);
+                    verifyRecaptchaAndCreateAccount(username, email, password);
 
                     FirebaseUser user = firebaseAuth.getCurrentUser();
                     if (user != null) {
@@ -215,11 +243,33 @@ public class CreateAccountActivity extends AppCompatActivity {
         nativeAdView.setNativeAd(nativeAd);
     }
 
-    private void createUserEmailAccount(final String username, String email, String password) {
+    private void verifyRecaptchaAndCreateAccount(final String username, String email, String password) {
 
         Log.d(LOG_TAG, "Starting account creation process.");
         progressBar.setVisibility(View.VISIBLE);
 
+        if (recaptchaClient == null) {
+            Log.e(LOG_TAG, "reCAPTCHA Client is not initialized.");
+            Toast.makeText(CreateAccountActivity.this, "Error: reCAPTCHA not initialized.", Toast.LENGTH_LONG).show();
+            progressBar.setVisibility(View.INVISIBLE);
+            return;
+        }
+
+        // **Execute reCAPTCHA with "signup_attempt" action**
+        recaptchaClient.executeTask(RecaptchaAction.SIGNUP)
+                .addOnSuccessListener(token -> {
+                    Log.d(LOG_TAG, "reCAPTCHA verified successfully. Token: " + token);
+                    createUserEmailAccount(username, email, password);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(LOG_TAG, "reCAPTCHA failed.", e);
+                    Toast.makeText(CreateAccountActivity.this, "reCAPTCHA verification failed. Try again.", Toast.LENGTH_LONG).show();
+                    progressBar.setVisibility(View.INVISIBLE);
+                });
+
+    }
+
+    private void createUserEmailAccount(final String username, String email, String password) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
@@ -228,10 +278,28 @@ public class CreateAccountActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
 
                             Log.i(LOG_TAG, "Account creation successful for email: " + email);
-                            currentUser = firebaseAuth.getCurrentUser();
 
+                            currentUser = firebaseAuth.getCurrentUser();
                             assert currentUser != null;
                             final String currentUserId = currentUser.getUid();
+
+                            currentUser.sendEmailVerification()
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> emailTask) {
+                                            if (emailTask.isSuccessful()) {
+                                                Log.i(LOG_TAG, "Verification email sent to " + email);
+                                                Toast.makeText(CreateAccountActivity.this,
+                                                        "Verification email sent. Please check your inbox.",
+                                                        Toast.LENGTH_LONG).show();
+                                            } else {
+                                                Log.e(LOG_TAG, "Failed to send verification email.", emailTask.getException());
+                                                Toast.makeText(CreateAccountActivity.this,
+                                                        "Failed to send verification email. Try again later.",
+                                                        Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+                                    });
 
                             Map<String, String> userObj = new HashMap<>();
                             userObj.put("userId", currentUserId);
@@ -268,7 +336,6 @@ public class CreateAccountActivity extends AppCompatActivity {
 
                                                         }
                                                     });
-
                                         }
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
@@ -278,8 +345,6 @@ public class CreateAccountActivity extends AppCompatActivity {
                                         }
                                     });
                         }
-
-
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -288,7 +353,6 @@ public class CreateAccountActivity extends AppCompatActivity {
 
                     }
                 });
-
     }
 
     private boolean isValidEmailDomain(String email) {

@@ -35,6 +35,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -99,6 +101,20 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         setContentView(R.layout.activity_create_manager);
 
         Log.i(LOG_TAG, "CreateManagerActivity launched.");
+
+//        FirebaseOptions options = new FirebaseOptions.Builder()
+//                .setApplicationId(FirebaseApp.getInstance().getOptions().getApplicationId())
+//                .setApiKey(BuildConfig.DEFAULT_RESTRICTED_API_KEY)  // Switch back to restricted API key
+//                .setProjectId(FirebaseApp.getInstance().getOptions().getProjectId())
+//                .build();
+//
+//        // Ensure Firestore and Storage use the correct API Key
+//        if (FirebaseApp.getApps(this).isEmpty()) {
+//            FirebaseApp.initializeApp(this, options);
+//        }
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();  // Initialize Firestore
+        Log.d(LOG_TAG, "Firestore initialized with default API Key: " + FirebaseApp.getInstance().getOptions().getApiKey());
 
         storageReference = FirebaseStorage.getInstance().getReference();
 
