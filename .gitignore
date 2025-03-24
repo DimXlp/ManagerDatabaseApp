@@ -5,6 +5,7 @@
 .idea/
 *.iml
 local.properties
+gradle.properties
 /captures/
 
 # ========== BUILD FILES ==========
