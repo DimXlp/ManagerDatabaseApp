@@ -46,16 +46,18 @@ public class MainActivity extends AppCompatActivity {
         Log.i(LOG_TAG, "MainActivity launched.");
 
         FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
-        firebaseAppCheck.installAppCheckProviderFactory(
-                PlayIntegrityAppCheckProviderFactory.getInstance()
-        );
+        if (BuildConfig.DEBUG) {
+            Log.i(LOG_TAG, "DEBUG");
+            firebaseAppCheck.installAppCheckProviderFactory(
+                    DebugAppCheckProviderFactory.getInstance()
+            );
+        } else {
+            Log.i(LOG_TAG, "PLAY INTEGRITY");
+            firebaseAppCheck.installAppCheckProviderFactory(
+                    PlayIntegrityAppCheckProviderFactory.getInstance()
+            );
+        }
 
-        // Install App Check Debug Token Provider
-//        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
-//        firebaseAppCheck.installAppCheckProviderFactory(
-//                DebugAppCheckProviderFactory.getInstance()
-//        );
-//        Log.d(LOG_TAG, "Debug Token: " + DebugAppCheckProviderFactory);
 
         if (FirebaseApp.getApps(this).isEmpty()) {
             FirebaseApp.initializeApp(this);  // Default instance uses restricted API key
