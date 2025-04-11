@@ -98,7 +98,7 @@ public class SelectManagerActivity extends AppCompatActivity {
 //        adBannerRequest = new AdRequest.Builder().build();
 //        selectManagerBanner.loadAd(adBannerRequest);
 
-        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        nativeAdViewBottom = findViewById(R.id.native_ad_view_top);
         loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
     }
 
@@ -125,37 +125,21 @@ public class SelectManagerActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        Log.d(LOG_TAG, "Populating native ad view.");
-        // Dynamically assign IDs
-        int headlineId = R.id.ad_headline_bottom;
-        int bodyId = R.id.ad_body_bottom;
-        int callToActionId = R.id.ad_call_to_action_bottom;
-
-        // Set views for the NativeAdView
+        int headlineId =  R.id.ad_headline_top;
         nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
-        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
 
-        // Populate the Headline
-        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
-
-        // Populate the Body
-        if (nativeAd.getBody() != null) {
-            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
-            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        if (nativeAd.getHeadline() != null) {
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
         } else {
-            nativeAdView.getBodyView().setVisibility(View.GONE);
+            headlineView.setVisibility(View.GONE);
         }
 
-        // Populate the Call-to-Action
-        if (nativeAd.getCallToAction() != null) {
-            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
-            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getCallToActionView().setVisibility(View.GONE);
-        }
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
 
-        // Bind the NativeAd object to the NativeAdView
         nativeAdView.setNativeAd(nativeAd);
     }
 
