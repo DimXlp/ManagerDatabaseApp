@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/colorPrimary"
-    android:paddingHorizontal="16dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".LoginActivity">
@@ -22,36 +21,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="1dp">
+            android:background="@drawable/ad_border"
+            android:padding="6dp">
+
+            <!-- Ad Label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ad"
+                android:textStyle="bold"
+                android:textColor="#D32F2F"
+                android:textSize="12sp"
+                android:paddingBottom="2dp"/>
 
             <!-- Ad Headline -->
             <TextView
                 android:id="@+id/ad_headline_top"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/darker_gray" />
-
-            <!-- Ad Body -->
-            <TextView
-                android:id="@+id/ad_body_top"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
                 android:textSize="14sp"
-                android:textColor="@android:color/darker_gray" />
-
-            <!-- Call-to-Action Button -->
-            <Button
-                android:id="@+id/ad_call_to_action_top"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:textColor="@color/colorAccent"
-                android:padding="1dp"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary" />
         </LinearLayout>
     </com.google.android.gms.ads.nativead.NativeAdView>
 
@@ -62,6 +52,7 @@
         android:gravity="center"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:paddingHorizontal="16dp"
         app:layout_constraintTop_toBottomOf="@id/native_ad_view_top"
         app:layout_constraintBottom_toTopOf="@id/native_ad_view_bottom"
         app:layout_constraintStart_toStartOf="parent"
@@ -97,7 +88,9 @@
             android:id="@+id/password_til_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColorHint="@color/colorPrimaryDark">
+            android:textColorHint="@color/colorPrimaryDark"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/colorAccent">
 
             <EditText
                 android:id="@+id/password_login"
@@ -108,7 +101,7 @@
                 android:inputType="textPassword"
                 android:textColor="@android:color/white"
                 android:maxLines="1"
-                android:backgroundTint="@color/colorPrimaryDark"/>
+                android:backgroundTint="@color/colorPrimaryDark" />
 
             <TextView
                 android:id="@+id/forgot_password_text"
@@ -117,48 +110,57 @@
                 android:text="Forgot Password?"
                 android:textSize="16sp"
                 android:textColor="@color/colorAccent"
-                android:paddingTop="8dp"
                 android:textStyle="bold"
+                android:layout_marginTop="16dp"
                 android:clickable="true"
                 android:focusable="true"
                 app:layout_constraintTop_toBottomOf="@id/password_til_login"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
-
         </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
-            android:id="@+id/login_button"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:fontFamily="@font/chivo"
-            android:text="@string/login_text"
-            android:textColor="@color/colorAccent"
-            android:textStyle="bold" />
-
-        <TextView
-            android:text="OR"
-            android:textColor="@android:color/white"
+            android:orientation="horizontal"
             android:gravity="center"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="16dp"
+            android:weightSum="2">
 
-        <Button
-            android:id="@+id/create_account_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/round_button"
-            android:fontFamily="@font/chivo"
-            android:text="@string/create_account_text"
-            android:textColor="@color/colorPrimary"
-            android:paddingHorizontal="18dp"
-            android:layout_marginTop="14dp"
-            android:textStyle="bold" />
+            <Button
+                android:id="@+id/login_button"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/round_button"
+                android:text="@string/login_text"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold"
+                android:fontFamily="@font/chivo" />
+
+            <!-- Visual separator -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="4dp"
+                android:background="#80FFFFFF" />
+
+            <Button
+                android:id="@+id/create_account_button"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/outlined_button"
+                android:text="@string/create_account_text"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold"
+                android:fontFamily="@font/chivo" />
+        </LinearLayout>
+
     </LinearLayout>
 
     <!-- Bottom Native Ad -->
@@ -175,36 +177,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="1dp">
+            android:background="@drawable/ad_border"
+            android:padding="6dp">
+
+            <!-- Ad Label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ad"
+                android:textStyle="bold"
+                android:textColor="#D32F2F"
+                android:textSize="12sp"
+                android:paddingBottom="2dp"/>
 
             <!-- Ad Headline -->
             <TextView
                 android:id="@+id/ad_headline_bottom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/darker_gray" />
-
-            <!-- Ad Body -->
-            <TextView
-                android:id="@+id/ad_body_bottom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
                 android:textSize="14sp"
-                android:textColor="@android:color/darker_gray" />
-
-            <!-- Call-to-Action Button -->
-            <Button
-                android:id="@+id/ad_call_to_action_bottom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:textColor="@color/colorAccent"
-                android:padding="1dp"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary" />
         </LinearLayout>
     </com.google.android.gms.ads.nativead.NativeAdView>
 
