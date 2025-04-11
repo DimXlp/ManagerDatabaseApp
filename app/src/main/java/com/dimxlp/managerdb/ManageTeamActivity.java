@@ -138,7 +138,7 @@ public class ManageTeamActivity extends AppCompatActivity {
         manageBanner.loadAd(adBannerRequest);
 
         // Load Interstitial Ad
-        InterstitialAd.load(this, "ca-app-pub-8349697523222717/9777554763", new AdRequest.Builder().build(),
+        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {

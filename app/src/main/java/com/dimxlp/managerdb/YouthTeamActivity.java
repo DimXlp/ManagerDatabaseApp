@@ -148,11 +148,11 @@ public class YouthTeamActivity extends AppCompatActivity {
         // Load Native Ads
         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-8349697523222717/8871128208", nativeAdViewTop);
-        loadNativeAd("ca-app-pub-8349697523222717/6868320390", nativeAdViewBottom);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         // Load Interstitial Ad
-        InterstitialAd.load(this, "ca-app-pub-8349697523222717/3946104585", new AdRequest.Builder().build(),
+        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {

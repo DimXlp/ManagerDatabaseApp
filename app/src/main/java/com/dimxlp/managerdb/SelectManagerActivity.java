@@ -99,7 +99,7 @@ public class SelectManagerActivity extends AppCompatActivity {
 //        selectManagerBanner.loadAd(adBannerRequest);
 
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-8349697523222717/7582135251", nativeAdViewBottom);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
     }
 
     private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {

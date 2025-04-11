@@ -148,7 +148,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
 //        Log.d(LOG_TAG, "Banner ad loaded.");
 
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-8349697523222717/8495460359", nativeAdViewBottom);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         View.OnClickListener prevYearListener = new View.OnClickListener() {
             @Override

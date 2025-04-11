@@ -183,7 +183,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
 //        shortlistBanner.loadAd(adBannerRequest);
 
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-8349697523222717/2033460956", nativeAdViewBottom);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         addPlayerFab.setOnClickListener(new View.OnClickListener() {
             @Override

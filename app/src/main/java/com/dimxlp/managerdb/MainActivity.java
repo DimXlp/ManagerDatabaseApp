@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.i(LOG_TAG, "MainActivity launched.");
+
+        findViewById(R.id.content_container).startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
 
         FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
         if (BuildConfig.DEBUG) {
@@ -119,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
         // Load Native Ads
         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-8349697523222717/4110897751", nativeAdViewTop);
-        loadNativeAd("ca-app-pub-8349697523222717/6858713549", nativeAdViewBottom);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         getStartedButton = findViewById(R.id.get_started_button);
         getStartedButton.setOnClickListener(new View.OnClickListener() {
@@ -171,42 +174,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-
-        // Dynamically identify view IDs based on the nativeAdView
         int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
-        int bodyId = nativeAdView == nativeAdViewTop ? R.id.ad_body_top : R.id.ad_body_bottom;
-        int callToActionId = nativeAdView == nativeAdViewTop ? R.id.ad_call_to_action_top : R.id.ad_call_to_action_bottom;
-
-        // Set the views for the NativeAdView
         nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
-        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
 
-        // Populate the Headline
         if (nativeAd.getHeadline() != null) {
-            ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
-            nativeAdView.getHeadlineView().setVisibility(View.VISIBLE);
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
         } else {
-            nativeAdView.getHeadlineView().setVisibility(View.GONE);
+            headlineView.setVisibility(View.GONE);
         }
 
-        // Populate the Body
-        if (nativeAd.getBody() != null) {
-            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
-            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getBodyView().setVisibility(View.GONE);
-        }
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
 
-        // Populate the Call-to-Action
-        if (nativeAd.getCallToAction() != null) {
-            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
-            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getCallToActionView().setVisibility(View.GONE);
-        }
-
-        // Bind the NativeAd object to the NativeAdView
         nativeAdView.setNativeAd(nativeAd);
     }
 

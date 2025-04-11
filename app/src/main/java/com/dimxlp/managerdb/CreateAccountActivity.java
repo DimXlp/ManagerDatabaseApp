@@ -110,8 +110,8 @@ public class CreateAccountActivity extends AppCompatActivity {
         // Load Native Ads
         nativeAdViewTop = findViewById(R.id.native_ad_view_top);
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-8349697523222717/8527018433", nativeAdViewTop);
-        loadNativeAd("ca-app-pub-8349697523222717/8307526584", nativeAdViewBottom);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
