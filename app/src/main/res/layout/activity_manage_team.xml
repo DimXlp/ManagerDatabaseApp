@@ -27,34 +27,37 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center"
-            android:paddingTop="32dp"
-            android:paddingBottom="16dp"
-            android:layout_marginBottom="8dp">
+            android:background="@drawable/card_background"
+            android:elevation="4dp"
+            android:padding="20dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_horizontal">
 
-            <!-- Manager Name -->
             <TextView
                 android:id="@+id/manager_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
-                android:textColor="@color/colorAccent"
-                android:textSize="30sp"
+                android:textSize="26sp"
                 android:textStyle="bold"
-                android:textAlignment="center"
+                android:textColor="@color/colorAccent"
+                android:fontFamily="@font/chivo"
+                android:drawablePadding="6dp"
+                android:gravity="center"
                 tools:text="Manager Name" />
 
-            <!-- Team Name -->
             <TextView
                 android:id="@+id/team_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
+                android:textSize="18sp"
                 android:textColor="@color/colorAccent"
-                android:textSize="20sp"
-                android:textAlignment="center"
+                android:fontFamily="@font/chivo"
+                android:gravity="center"
+                android:layout_marginTop="4dp"
                 tools:text="Team Name" />
         </LinearLayout>
+
 
         <!-- RecyclerView for Team Players -->
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -73,14 +76,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <!-- Bottom Banner Ad -->
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/manage_banner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:adSize="BANNER"
-            app:adUnitId="ca-app-pub-3940256099942544/6300978111" />
     </LinearLayout>
 
     <!-- Navigation Drawer -->

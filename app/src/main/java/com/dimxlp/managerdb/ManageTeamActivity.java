@@ -132,11 +132,6 @@ public class ManageTeamActivity extends AppCompatActivity {
         // Initialize Mobile Ads SDK
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
-        // Load Banner Ad
-        AdView manageBanner = findViewById(R.id.manage_banner);
-        AdRequest adBannerRequest = new AdRequest.Builder().build();
-        manageBanner.loadAd(adBannerRequest);
-
         // Load Interstitial Ad
         InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
                 new InterstitialAdLoadCallback() {
