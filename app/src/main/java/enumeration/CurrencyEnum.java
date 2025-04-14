@@ -2,14 +2,16 @@ package enumeration;
 
 public enum CurrencyEnum {
 
-    EUROS("€"),
-    DOLLARS("$"),
-    POUNDS("£");
+    EUROS("€", "€ - Euros"),
+    DOLLARS("$", "$ - Dollars"),
+    POUNDS("£", "£ - Pounds");
 
     private String symbol;
+    private String description;
 
-    CurrencyEnum(String symbol) {
+    CurrencyEnum(String symbol, String description) {
         this.symbol = symbol;
+        this.description = description;
     }
 
     public String getSymbol() {
@@ -18,5 +20,13 @@ public enum CurrencyEnum {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
