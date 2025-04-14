@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -82,7 +83,7 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView fullName;
     private TextView teamText;
     private TextView nationality;
-    private FloatingActionButton editFab;
+    private Button editButton;
 
     private Uri imageUri;
 
@@ -96,7 +97,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Spinner currencySpinnerEdit;
     private Button saveManagerButton;
     private Uri teamBadgeUriEdit;
-    private CardView selectManagerCard;
+    private LinearLayout selectManagerButton;
     private AlertDialog.Builder builder;
     private AlertDialog dialog;
 
@@ -176,20 +177,20 @@ public class ProfileActivity extends AppCompatActivity {
         fullName = findViewById(R.id.full_name_profile);
         teamText = findViewById(R.id.team_profile);
         nationality = findViewById(R.id.nationality_profile);
-        editFab = findViewById(R.id.edit_button_profile);
+        editButton = findViewById(R.id.edit_button_profile);
         Log.d(LOG_TAG, "Profile fields initialized.");
 
-        editFab.setOnClickListener(new View.OnClickListener() {
+        editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(LOG_TAG, "Edit FAB clicked.");
+                Log.d(LOG_TAG, "Edit Profile button clicked.");
                 createPopupDialog();
             }
         });
 
-        selectManagerCard = findViewById(R.id.select_manager_card);
-        selectManagerCard.setOnClickListener(v -> {
-            Log.d(LOG_TAG, "Select Manager Card clicked.");
+        selectManagerButton = findViewById(R.id.select_manager_section);
+        selectManagerButton.setOnClickListener(v -> {
+            Log.d(LOG_TAG, "Select Manager Button clicked.");
             Intent intent = new Intent(ProfileActivity.this, SelectManagerActivity.class);
             startActivity(intent);
         });
@@ -221,36 +222,21 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        // Dynamically assign IDs based on the nativeAdView
         int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
-        int bodyId = nativeAdView == nativeAdViewTop ? R.id.ad_body_top : R.id.ad_body_bottom;
-        int callToActionId = nativeAdView == nativeAdViewTop ? R.id.ad_call_to_action_top : R.id.ad_call_to_action_bottom;
-
-        // Set views for the NativeAdView
         nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
-        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
 
-        // Populate the Headline
-        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
-
-        // Populate the Body
-        if (nativeAd.getBody() != null) {
-            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
-            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        if (nativeAd.getHeadline() != null) {
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
         } else {
-            nativeAdView.getBodyView().setVisibility(View.GONE);
+            headlineView.setVisibility(View.GONE);
         }
 
-        // Populate the Call-to-Action
-        if (nativeAd.getCallToAction() != null) {
-            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
-            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getCallToActionView().setVisibility(View.GONE);
-        }
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
 
-        // Bind native ad to the view
         nativeAdView.setNativeAd(nativeAd);
     }
 
