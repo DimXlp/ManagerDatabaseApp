@@ -15,12 +15,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -75,6 +78,8 @@ public class ManageTeamActivity extends AppCompatActivity {
 
     private TextView managerNameHeader;
     private TextView teamHeader;
+    private NativeAd nativeAdTop;
+    private NativeAdView nativeAdViewTop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +103,8 @@ public class ManageTeamActivity extends AppCompatActivity {
         } else {
             Log.w(LOG_TAG, "No user authenticated.");
         }
+
+        loadTopNativeAd();
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -148,6 +155,37 @@ public class ManageTeamActivity extends AppCompatActivity {
                 });
 
     }
+
+    private void loadTopNativeAd() {
+        NativeAdView nativeAdView = findViewById(R.id.native_ad_view_top);
+        AdLoader adLoader = new AdLoader.Builder(this, "ca-app-pub-3940256099942544/2247696110")
+                .forNativeAd(nativeAd -> {
+                    if (isDestroyed()) {
+                        nativeAd.destroy();
+                        return;
+                    }
+                    TextView headlineView = nativeAdView.findViewById(R.id.ad_headline_top);
+                    if (headlineView != null && nativeAd.getHeadline() != null) {
+                        headlineView.setText(nativeAd.getHeadline());
+                        headlineView.setVisibility(View.VISIBLE);
+                        nativeAdView.setHeadlineView(headlineView);
+                    }
+
+                    nativeAdView.setBodyView(null);
+                    nativeAdView.setCallToActionView(null);
+                    nativeAdView.setNativeAd(nativeAd);
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError adError) {
+                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
+                    }
+                })
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
 
     private void setUpDrawerContent(NavigationView navView) {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
