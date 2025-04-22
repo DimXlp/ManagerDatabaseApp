@@ -71,15 +71,27 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <Spinner
-                android:id="@+id/position_spinner_ytp_create"
-                android:layout_below="@+id/last_name_til_ytp_create"
-                android:layout_marginTop="16dp"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="120dp"
                 android:layout_height="wrap_content"
-                android:paddingVertical="8dp"
-                android:entries="@array/position_array"
-                android:backgroundTint="#616161"/>
+                android:layout_below="@+id/last_name_til_ytp_create"
+                android:layout_marginTop="8dp"
+                android:hint="Position"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/position_picker_ytp_create"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:inputType="none"
+                    android:drawableEnd="@drawable/ic_arrow_drop_down"
+                    android:gravity="center_vertical"
+                    android:fontFamily="@font/chivo"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/number_til_ytp_create"
@@ -179,7 +191,7 @@
                 app:boxStrokeWidth="2dp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/potential_high__ytp_create"
+                    android:id="@+id/potential_high_ytp_create"
                     android:layout_below="@+id/nationality_ytp_create"
                     android:layout_toEndOf="@+id/potential_low_ytp_create"
                     android:layout_width="80dp"
@@ -191,31 +203,34 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
-                android:id="@+id/year_scouted_text_ytp_create"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/year_scouted_picker_til_ytp_create"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Year Scouted: "
-                android:fontFamily="@font/chivo"
-                android:textSize="16sp"
-                android:textColor="#616161"
-                android:layout_below="@+id/overall_til_ytp_create"/>
-
-            <Spinner
-                android:id="@+id/year_scouted_spinner_ytp_create"
                 android:layout_below="@+id/overall_til_ytp_create"
-                android:layout_toEndOf="@id/year_scouted_text_ytp_create"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:entries="@array/years_array"/>
+                android:layout_marginTop="8dp"
+                android:hint="Year Scouted"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/year_scouted_picker_ytp_create"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:inputType="none"
+                    android:drawableEnd="@drawable/ic_arrow_drop_down"
+                    android:gravity="center_vertical"
+                    android:fontFamily="@font/chivo"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/create_yt_player_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/year_scouted_text_ytp_create"
+                android:layout_below="@id/year_scouted_picker_til_ytp_create"
                 android:layout_marginTop="24dp"
                 android:background="@drawable/round_button"
                 android:backgroundTint="#D4AF37"

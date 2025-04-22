@@ -119,6 +119,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         if (player.getPotentialLow() != 0 && player.getPotentialHigh() != 0) {
             basic.append(" · ").append(player.getPotentialLow()).append("–").append(player.getPotentialHigh());
         }
+        holder.basicInfo.setText(basic);
 
         String nationality = player.getNationality();
         String iso = NationalityFlagUtil.getNationalityToIsoMap().getOrDefault(nationality, "UN");

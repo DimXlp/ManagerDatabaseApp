@@ -17,29 +17,33 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/year_signed_text_ytp_promote"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/year_signed_til_ytp_promote"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Year Signed: "
-                android:fontFamily="@font/chivo"
-                android:textSize="16sp"
-                android:textColor="#616161"/>
+                android:hint="Year Signed"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
-            <Spinner
-                android:id="@+id/year_signed_spinner_ytp_promote"
-                android:layout_toEndOf="@id/year_signed_text_ytp_promote"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:entries="@array/years_array"/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/year_signed_picker_ytp_promote"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:inputType="none"
+                    android:drawableEnd="@drawable/ic_arrow_drop_down"
+                    android:gravity="center_vertical"
+                    android:fontFamily="@font/chivo"
+                    android:textColor="@android:color/black" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/promote_button_year_signed"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/year_signed_text_ytp_promote"
+                android:layout_below="@id/year_signed_til_ytp_promote"
                 android:layout_marginTop="24dp"
                 android:background="@drawable/round_button"
                 android:backgroundTint="#D4AF37"

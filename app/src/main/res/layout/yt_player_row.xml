@@ -1,264 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="8dp"
+    app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
-    app:cardCornerRadius="10dp"
-    android:foreground="?attr/selectableItemBackground">
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:animateLayoutChanges="true">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <!-- Top Section (Player Information) -->
-        <RelativeLayout
+        <!-- Top Row: Jersey Number + Full Name + 3-dot menu -->
+        <LinearLayout
+            android:id="@+id/player_top_bar_ytp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryDark"
-            android:padding="12dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="@color/colorPrimaryDark">
 
-            <!-- Player Number -->
             <TextView
-                android:id="@+id/number_ytp"
-                android:layout_width="30dp"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
-                android:text="99"
-                android:textAlignment="viewEnd"
-                android:textColor="@android:color/white"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:layout_alignParentStart="true"
-                android:gravity="center"
-                tools:ignore="RtlCompat" />
-
-            <ImageView
-                android:id="@+id/line_ytp_1"
-                android:layout_width="1dp"
-                android:layout_height="20dp"
-                android:layout_marginStart="43dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/colorPrimaryDark"/>
-
-            <!-- Player Name -->
-            <TextView
-                android:id="@+id/full_name_ytp"
+                android:id="@+id/player_number_ytp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
-                android:text="First Last"
+                android:text="10"
                 android:textColor="@android:color/white"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_toEndOf="@id/line_ytp_1"
-                android:layout_centerVertical="true"/>
-
-            <ImageView
-                android:id="@+id/position_oval_ytp"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/position_oval"
-                android:layout_toStartOf="@+id/position_ytp"/>
+                android:fontFamily="@font/chivo" />
 
             <TextView
-                android:id="@+id/position_ytp"
-                android:layout_width="55dp"
+                android:id="@+id/player_full_name_ytp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="POS"
-                android:textAlignment="viewStart"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="Lionel Messi"
                 android:textColor="@android:color/white"
-                android:textSize="20sp" />
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/chivo" />
 
-        </RelativeLayout>
+            <ImageView
+                android:id="@+id/player_action_menu_ytp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_three_dots"
+                android:contentDescription="Actions"
+                app:tint="@color/white" />
+        </LinearLayout>
 
-        <RelativeLayout
-            android:id="@+id/details_ytp"
+        <!-- Expandable Section (initially hidden) -->
+        <LinearLayout
+            android:id="@+id/expandable_section_ytp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
             android:background="@color/lighterGray"
-            android:paddingHorizontal="8dp"
-            android:paddingBottom="8dp">
+            android:visibility="gone">
 
-            <TextView
-                android:id="@+id/overall_text_ytp"
+            <LinearLayout
+                android:id="@+id/player_basic_info_container_ytp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="OVR"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/overall_ytp"
+                <TextView
+                    android:id="@+id/player_basic_text_ytp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ST · 91 · 87–94"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo" />
+
+                <TextView
+                    android:id="@+id/player_flag_ytp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" 🇦🇷"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/player_nationality_ytp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Argentina"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/player_year_info_container_ytp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="99"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/overall_text_ytp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
 
-            <ImageView
-                android:id="@+id/line_ytp_2"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_toEndOf="@+id/overall_text_ytp"/>
+                <ImageView
+                    android:id="@+id/year_scouted_icon_ytp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_year_scouted"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@android:color/white" />
 
-            <TextView
-                android:id="@+id/potential_text_ytp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="POT"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_toEndOf="@id/line_ytp_2"/>
-
-            <TextView
-                android:id="@+id/potential_ytp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="99-99"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/potential_text_ytp"
-                android:layout_toEndOf="@+id/line_ytp_2"/>
-
-            <ImageView
-                android:id="@+id/line_ytp_3"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_toEndOf="@+id/potential_ytp"/>
-
-            <TextView
-                android:id="@+id/nationality_text_ytp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="NATL"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_toEndOf="@id/line_ytp_3"/>
-
-            <TextView
-                android:id="@+id/nationality_ytp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="Country"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/nationality_text_ytp"
-                android:layout_toEndOf="@+id/line_ytp_3"/>
-
-            <TextView
-                android:id="@+id/year_scouted_text_ytp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="YR SCT"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_below="@+id/overall_ytp" />
-
-            <TextView
-                android:id="@+id/year_scouted_ytp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="1993"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/year_scouted_text_ytp"/>
-
-            <Button
-                android:id="@+id/edit_button_ytp"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/edit_outline_64"
-                android:backgroundTint="@color/white"
-                android:layout_below="@+id/year_scouted_ytp"/>
-
-            <Button
-                android:id="@+id/depart_button_ytp"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/goodbye_outline_64"
-                android:backgroundTint="@color/white"
-                android:layout_below="@+id/year_scouted_ytp"
-                android:layout_toEndOf="@+id/edit_button_ytp"/>
-
-            <Button
-                android:id="@+id/promote_button_ytp"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/promote_outline_64"
-                android:backgroundTint="@color/white"
-                android:layout_below="@+id/year_scouted_ytp"
-                android:layout_toEndOf="@+id/depart_button_ytp"/>
-
-            <Button
-                android:id="@+id/delete_button_ytp"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@android:drawable/ic_delete"
-                android:backgroundTint="@color/colorAccent"
-                android:layout_below="@+id/year_scouted_ytp"
-                android:layout_toEndOf="@+id/promote_button_ytp"/>
-
-
-        </RelativeLayout>
-
+                <TextView
+                    android:id="@+id/year_scouted_text_ytp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2021/22"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical" />
+            </LinearLayout>
+        </LinearLayout>
 
     </LinearLayout>
-
-
 </androidx.cardview.widget.CardView>

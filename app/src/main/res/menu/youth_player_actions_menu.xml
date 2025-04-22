@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_edit_ytp"
+        android:title="Edit Player"
+        android:icon="@drawable/edit_outline_64" />
+    <item
+        android:id="@+id/action_depart_ytp"
+        android:title="Depart Player"
+        android:icon="@drawable/goodbye_outline_64" />
+    <item
+        android:id="@+id/action_promote_ytp"
+        android:title="Promote Player"
+        android:icon="@drawable/promote_outline_64" />
+    <item
+        android:id="@+id/action_delete_ytp"
+        android:title="Delete Player"
+        android:icon="@android:drawable/ic_delete" />
+</menu>

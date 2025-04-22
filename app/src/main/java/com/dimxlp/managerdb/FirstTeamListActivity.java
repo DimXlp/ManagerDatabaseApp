@@ -32,6 +32,7 @@ import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.Timestamp;
@@ -83,7 +84,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
     private Button addPlayerButton;
 
     private AlertDialog.Builder builder;
-    private AlertDialog dialog;
+    private BottomSheetDialog dialog;
 
     private EditText firstName;
     private EditText lastName;
@@ -341,7 +342,6 @@ public class FirstTeamListActivity extends AppCompatActivity {
                             firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, currentYear, buttonInt, maxId);
                             recyclerView.setAdapter(firstTeamPlayerRecAdapter);
                             firstTeamPlayerRecAdapter.notifyDataSetChanged();
-                            yearText.setText(currentYear);
                             yearPlayerCount.setText(playerList.size() + " players");
                         }
                     }
@@ -349,8 +349,9 @@ public class FirstTeamListActivity extends AppCompatActivity {
     }
 
     private void createPopupDialog() {
-        builder = new AlertDialog.Builder(this);
+        dialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.create_first_team_player_popup, null);
+        dialog.setContentView(view);
 
         firstName = view.findViewById(R.id.first_name_ftp_create);
         lastName = view.findViewById(R.id.last_name_ftp_create);
@@ -405,8 +406,6 @@ public class FirstTeamListActivity extends AppCompatActivity {
             }
         });
 
-        builder.setView(view);
-        dialog = builder.create();
         dialog.show();
     }
 
@@ -683,7 +682,6 @@ public class FirstTeamListActivity extends AppCompatActivity {
                                 firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, minYearText, 0, maxId);
                                 recyclerView.setAdapter(firstTeamPlayerRecAdapter);
                                 firstTeamPlayerRecAdapter.notifyDataSetChanged();
-                                yearText.setText(currentYear);
                                 yearPlayerCount.setText(playerList.size() + " players");
                             } else {
                                 yearText.setText(barYear);

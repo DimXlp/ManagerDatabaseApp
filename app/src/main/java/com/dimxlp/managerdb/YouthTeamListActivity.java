@@ -32,6 +32,7 @@ import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.Timestamp;
@@ -75,17 +76,17 @@ public class YouthTeamListActivity extends AppCompatActivity {
     private Button addPlayerButton;
 
     private AlertDialog.Builder builder;
-    private AlertDialog dialog;
+    private BottomSheetDialog dialog;
 
     private EditText firstName;
     private EditText lastName;
-    private Spinner positionSpinner;
+    private TextView positionPicker;
     private EditText number;
     private EditText nationality;
     private EditText overall;
     private EditText potentialLow;
     private EditText potentialHigh;
-    private Spinner yearScouted;
+    private TextView yearScouted;
     private Button createPlayerButton;
 
     private String currentUserId;
@@ -337,6 +338,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
                             youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(YouthTeamListActivity.this, playerList, managerId, team, currentYear, buttonInt);
                             recyclerView.setAdapter(youthTeamPlayerRecAdapter);
                             youthTeamPlayerRecAdapter.notifyDataSetChanged();
+                            yearPlayerCount.setText(playerList.size() + " players");
                         } else {
                             Log.w(LOG_TAG, "No players found for year: " + currentYear);
                         }
@@ -348,27 +350,37 @@ public class YouthTeamListActivity extends AppCompatActivity {
     private void createPopupDialog() {
         Log.d(LOG_TAG, "Creating popup dialog to add a youth team player.");
 
-        builder = new AlertDialog.Builder(this);
+        dialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.create_youth_team_player_popup, null);
+        dialog.setContentView(view);
 
         firstName = view.findViewById(R.id.first_name_ytp_create);
         lastName = view.findViewById(R.id.last_name_ytp_create);
-        positionSpinner = view.findViewById(R.id.position_spinner_ytp_create);
+        positionPicker = view.findViewById(R.id.position_picker_ytp_create);
         number = view.findViewById(R.id.number_ytp_create);
         nationality = view.findViewById(R.id.nationality_ytp_create);
         overall = view.findViewById(R.id.overall_ytp_create);
         potentialLow = view.findViewById(R.id.potential_low_ytp_create);
-        potentialHigh = view.findViewById(R.id.potential_high__ytp_create);
-        yearScouted = view.findViewById(R.id.year_scouted_spinner_ytp_create);
+        potentialHigh = view.findViewById(R.id.potential_high_ytp_create);
+        yearScouted = view.findViewById(R.id.year_scouted_picker_ytp_create);
         createPlayerButton = view.findViewById(R.id.create_yt_player_button);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.position_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        positionSpinner.setAdapter(adapter);
+        String[] positions = this.getResources().getStringArray(R.array.position_array);
+        String[] years = this.getResources().getStringArray(R.array.years_array);
 
-        ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(this, R.array.years_array, android.R.layout.simple_spinner_item);
-        yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        yearScouted.setAdapter(yearAdapter);
+        positionPicker.setOnClickListener(v -> {
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("Select Position")
+                    .setItems(positions, (pickerDialog, which) -> positionPicker.setText(positions[which]))
+                    .show();
+        });
+
+        yearScouted.setOnClickListener(v -> {
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("Select Year Scouted")
+                    .setItems(years, (pickerDialog, which) -> yearScouted.setText(years[which]))
+                    .show();
+        });
 
         createPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -376,9 +388,9 @@ public class YouthTeamListActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, "Create player button clicked.");
                 if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
-                        !positionSpinner.getSelectedItem().toString().isEmpty() &&
+                        !positionPicker.getText().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty() &&
-                        !yearScouted.getSelectedItem().toString().equals("0")) {
+                        !yearScouted.getText().toString().isEmpty()) {
                     Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
                     createPlayer();
                 } else {
@@ -389,8 +401,6 @@ public class YouthTeamListActivity extends AppCompatActivity {
             }
         });
 
-        builder.setView(view);
-        dialog = builder.create();
         dialog.show();
     }
 
@@ -405,13 +415,13 @@ public class YouthTeamListActivity extends AppCompatActivity {
         } else {
             fullNamePlayer = lastNamePlayer;
         }
-        String positionPlayer = positionSpinner.getSelectedItem().toString().trim();
+        String positionPlayer = positionPicker.getText().toString().trim();
         String numberPlayer = number.getText().toString().trim();
         String nationalityPlayer = nationality.getText().toString().trim();
         String overallPlayer = overall.getText().toString().trim();
         String potentialLowPlayer = potentialLow.getText().toString().trim();
         String potentialHiPlayer = potentialHigh.getText().toString().trim();
-        final String yScoutedPlayer = yearScouted.getSelectedItem().toString().trim();
+        final String yScoutedPlayer = yearScouted.getText().toString().trim();
         Log.d(LOG_TAG, "Player details: Full Name = " + fullNamePlayer + ", Position = " + positionPlayer);
 
         final YouthTeamPlayer player = new YouthTeamPlayer();
@@ -677,6 +687,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
                                 youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(YouthTeamListActivity.this, playerList, managerId, team, minYearText, 0);
                                 recyclerView.setAdapter(youthTeamPlayerRecAdapter);
                                 youthTeamPlayerRecAdapter.notifyDataSetChanged();
+                                yearPlayerCount.setText(playerList.size() + " players");
                             } else {
                                 yearText.setText(barYear);
                                 youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(YouthTeamListActivity.this, playerList, managerId, team, barYear, 0);
