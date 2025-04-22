@@ -1,0 +1,22 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_edit"
+        android:title="Edit Player"
+        android:icon="@drawable/edit_outline_64" />
+    <item
+        android:id="@+id/action_depart"
+        android:title="Depart Player"
+        android:icon="@drawable/goodbye_outline_64" />
+    <item
+        android:id="@+id/action_loan"
+        android:title="Loan Player"
+        android:icon="@drawable/loan_outline_64" />
+    <item
+        android:id="@+id/action_terminate_loan"
+        android:title="Terminate Loan"
+        android:icon="@drawable/terminate_outline_64" />
+    <item
+        android:id="@+id/action_delete"
+        android:title="Delete Player"
+        android:icon="@android:drawable/ic_delete" />
+</menu>

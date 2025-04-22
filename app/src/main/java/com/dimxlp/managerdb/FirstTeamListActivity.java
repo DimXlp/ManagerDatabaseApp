@@ -19,17 +19,19 @@ import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.Timestamp;
@@ -56,6 +58,7 @@ import util.UserApi;
 
 public class FirstTeamListActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "RAFI|FirstTeamList";
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener authStateListener;
     private FirebaseUser user;
@@ -75,22 +78,23 @@ public class FirstTeamListActivity extends AppCompatActivity {
 
     private Button prevYearButton;
     private Button nextYearButton;
-    private TextView year;
-    private FloatingActionButton addPlayerFab;
+    private TextView yearText;
+    private TextView yearPlayerCount;
+    private Button addPlayerButton;
 
     private AlertDialog.Builder builder;
     private AlertDialog dialog;
 
     private EditText firstName;
     private EditText lastName;
-    private Spinner positionSpinner;
+    private TextView positionPicker;
     private EditText number;
     private EditText nationality;
     private EditText overall;
     private EditText potentialLow;
     private EditText potentialHigh;
-    private Spinner yearSigned;
-    private Spinner yearScouted;
+    private TextView yearSigned;
+    private TextView yearScouted;
     private SwitchMaterial loanSwitch;
     private Button createPlayerButton;
     private String currentYear;
@@ -111,6 +115,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
 
     private Animation slideLeft;
     private Animation slideRight;
+    private NativeAdView nativeAdViewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,8 +150,42 @@ public class FirstTeamListActivity extends AppCompatActivity {
 
         prevYearButton = findViewById(R.id.prev_year_button_ftp);
         nextYearButton = findViewById(R.id.next_year_button_ftp);
-        year = findViewById(R.id.year_text_ftp);
-        addPlayerFab = findViewById(R.id.add_new_player_button);
+
+        LinearLayout yearPickerLayout = findViewById(R.id.year_picker_container);
+        yearText = findViewById(R.id.year_text_ftp);
+        yearPlayerCount = findViewById(R.id.year_player_count);
+
+        List<String> availableYears = new ArrayList<>();
+
+        collectionReference.whereEqualTo("userId", currentUserId)
+                .whereEqualTo("managerId", managerId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                            FirstTeamPlayer player = doc.toObject(FirstTeamPlayer.class);
+                            if (player != null && player.getYearSigned() != null) {
+                                String y = player.getYearSigned();
+                                if (!availableYears.contains(y)) {
+                                    availableYears.add(y);
+                                }
+                            }
+                        }
+                        Collections.sort(availableYears);
+                    }
+                });
+
+        yearPickerLayout.setOnClickListener(v -> {
+            if (!availableYears.isEmpty()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Select Year");
+                builder.setItems(availableYears.toArray(new String[0]), (dialog, which) -> {
+                    currentYear = availableYears.get(which);
+                    listPlayers(0);
+                });
+                builder.show();
+            }
+        });
 
         View headerLayout = null;
         if (navView.getHeaderCount() > 0) {
@@ -156,12 +195,10 @@ public class FirstTeamListActivity extends AppCompatActivity {
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> {});
+        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
-        // Load Banner Ads
-        AdView firstTeamListBanner = findViewById(R.id.first_team_list_banner);
-        AdRequest adBannerRequest = new AdRequest.Builder().build();
-        firstTeamListBanner.loadAd(adBannerRequest);
+        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         slideLeft = AnimationUtils.loadAnimation(FirstTeamListActivity.this, R.anim.slide_left);
         slideRight = AnimationUtils.loadAnimation(FirstTeamListActivity.this, R.anim.slide_right);
@@ -197,7 +234,9 @@ public class FirstTeamListActivity extends AppCompatActivity {
         prevYearButton.setOnClickListener(prevYearListener);
         nextYearButton.setOnClickListener(nextYearListener);
 
-        addPlayerFab.setOnClickListener(new View.OnClickListener() {
+        addPlayerButton = findViewById(R.id.add_player_button);
+
+        addPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 createPopupDialog();
@@ -208,6 +247,46 @@ public class FirstTeamListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rec_view_ftp);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+                .forNativeAd(ad -> {
+                    if (isDestroyed()) {
+                        ad.destroy();
+                        return;
+                    }
+                    populateNativeAdView(ad, nativeAdView);
+                    Log.d(LOG_TAG, "Native ad loaded successfully.");
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
+                    }
+                })
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+        int headlineId =  R.id.ad_headline_bottom;
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
+
+        if (nativeAd.getHeadline() != null) {
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
+        } else {
+            headlineView.setVisibility(View.GONE);
+        }
+
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
+
+        nativeAdView.setNativeAd(nativeAd);
     }
 
     private static void animateYearButtons(View v) {
@@ -258,10 +337,12 @@ public class FirstTeamListActivity extends AppCompatActivity {
                                     return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                 }
                             });
-                            year.setText(currentYear);
+                            yearText.setText(currentYear);
                             firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, currentYear, buttonInt, maxId);
                             recyclerView.setAdapter(firstTeamPlayerRecAdapter);
                             firstTeamPlayerRecAdapter.notifyDataSetChanged();
+                            yearText.setText(currentYear);
+                            yearPlayerCount.setText(playerList.size() + " players");
                         }
                     }
                 });
@@ -273,34 +354,49 @@ public class FirstTeamListActivity extends AppCompatActivity {
 
         firstName = view.findViewById(R.id.first_name_ftp_create);
         lastName = view.findViewById(R.id.last_name_ftp_create);
-        positionSpinner = view.findViewById(R.id.position_spinner_ftp_create);
+        positionPicker = view.findViewById(R.id.position_picker_ftp_create);
         number = view.findViewById(R.id.number_ftp_create);
         nationality = view.findViewById(R.id.nationality_ftp_create);
         overall = view.findViewById(R.id.overall_ftp_create);
         potentialLow = view.findViewById(R.id.potential_low_ftp_create);
         potentialHigh = view.findViewById(R.id.potential_high_ftp_create);
-        yearSigned = view.findViewById(R.id.year_signed_spinner_ftp_create);
-        yearScouted = view.findViewById(R.id.year_scouted_spinner_ftp_create);
+        yearSigned = view.findViewById(R.id.year_signed_picker_ftp_create);
+        yearScouted = view.findViewById(R.id.year_scouted_picker_ftp_create);
         loanSwitch = view.findViewById(R.id.loan_player_switch_ftp_create);
         createPlayerButton = view.findViewById(R.id.create_ft_player_button);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.position_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        positionSpinner.setAdapter(adapter);
+        String[] positions = this.getResources().getStringArray(R.array.position_array);
+        String[] years = this.getResources().getStringArray(R.array.years_array);
 
-        ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(this, R.array.years_array, android.R.layout.simple_spinner_item);
-        yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        yearSigned.setAdapter(yearAdapter);
-        yearScouted.setAdapter(yearAdapter);
+        positionPicker.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Select Position")
+                    .setItems(positions, (pickerDialog, which) -> positionPicker.setText(positions[which]))
+                    .show();
+        });
+
+        yearSigned.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Select Year Signed")
+                    .setItems(years, (pickerDialog, which) -> yearSigned.setText(years[which]))
+                    .show();
+        });
+
+        yearScouted.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Select Year Scouted")
+                    .setItems(years, (pickerDialog, which) -> yearScouted.setText(years[which]))
+                    .show();
+        });
 
         createPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
-                        !positionSpinner.getSelectedItem().toString().isEmpty() &&
+                        !positionPicker.getText().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty() &&
-                        !yearSigned.getSelectedItem().toString().equals("0")) {
+                        !yearSigned.getText().toString().isEmpty()) {
                     createPlayer();
                 } else {
                     Toast.makeText(FirstTeamListActivity.this, "Last Name/Nickname, Nationality, Position, Overall and Year Signed are required", Toast.LENGTH_LONG)
@@ -315,7 +411,6 @@ public class FirstTeamListActivity extends AppCompatActivity {
     }
 
     private void createPlayer() {
-
         String firstNamePlayer = firstName.getText().toString().trim();
         String lastNamePlayer = lastName.getText().toString().trim();
         String fullNamePlayer;
@@ -324,14 +419,14 @@ public class FirstTeamListActivity extends AppCompatActivity {
         } else {
             fullNamePlayer = lastNamePlayer;
         }
-        String positionPlayer = positionSpinner.getSelectedItem().toString().trim();
+        String positionPlayer = positionPicker.getText().toString().trim();
         String numberPlayer = number.getText().toString().trim();
         String nationalityPlayer = nationality.getText().toString().trim();
         String overallPlayer = overall.getText().toString().trim();
         String potentialLowPlayer = potentialLow.getText().toString().trim();
         String potentialHiPlayer = potentialHigh.getText().toString().trim();
-        final String ySignedPlayer = yearSigned.getSelectedItem().toString().trim();
-        String yScoutedPlayer = yearScouted.getSelectedItem().toString().trim();
+        final String ySignedPlayer = yearSigned.getText().toString().trim();
+        String yScoutedPlayer = yearScouted.getText().toString().trim();
 
         final FirstTeamPlayer player = new FirstTeamPlayer();
 
@@ -584,12 +679,14 @@ public class FirstTeamListActivity extends AppCompatActivity {
                                 }
                             });
                             if (barYear == null) {
-                                year.setText(minYearText);
+                                yearText.setText(minYearText);
                                 firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, minYearText, 0, maxId);
                                 recyclerView.setAdapter(firstTeamPlayerRecAdapter);
                                 firstTeamPlayerRecAdapter.notifyDataSetChanged();
+                                yearText.setText(currentYear);
+                                yearPlayerCount.setText(playerList.size() + " players");
                             } else {
-                                year.setText(barYear);
+                                yearText.setText(barYear);
                                 firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, barYear, 0, maxId);
                                 recyclerView.setAdapter(firstTeamPlayerRecAdapter);
                                 firstTeamPlayerRecAdapter.notifyDataSetChanged();

@@ -1,6 +1,5 @@
 package com.dimxlp.managerdb;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -9,35 +8,25 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import model.Manager;
-import ui.FirstTeamPlayerRecAdapter;
 import ui.ManagerSelectionRecAdapter;
-import util.ManagerSelectionButton;
 import util.UserApi;
 
 public class SelectManagerActivity extends AppCompatActivity {
@@ -52,8 +41,8 @@ public class SelectManagerActivity extends AppCompatActivity {
     private FloatingActionButton addManagerFab;
 //    private AdView selectManagerBanner;
 //    private AdRequest adBannerRequest;
-    private NativeAd nativeAdBottom;
-    private NativeAdView nativeAdViewBottom;
+    private NativeAd nativeAdTop;
+    private NativeAdView nativeAdViewTop;
 
 
     @Override
@@ -93,13 +82,8 @@ public class SelectManagerActivity extends AppCompatActivity {
         // Initialize Mobile Ads SDK
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
-        // Load Banner Ad
-//        selectManagerBanner = findViewById(R.id.select_manager_banner);
-//        adBannerRequest = new AdRequest.Builder().build();
-//        selectManagerBanner.loadAd(adBannerRequest);
-
-        nativeAdViewBottom = findViewById(R.id.native_ad_view_top);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+        nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
     }
 
     private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
@@ -109,7 +93,7 @@ public class SelectManagerActivity extends AppCompatActivity {
                         ad.destroy();
                         return;
                     }
-                    nativeAdBottom = ad;
+                    nativeAdTop = ad;
                     populateNativeAdView(ad, nativeAdView);
                     Log.d(LOG_TAG, "Native ad loaded successfully.");
                 })
@@ -181,7 +165,7 @@ public class SelectManagerActivity extends AppCompatActivity {
     protected void onDestroy() {
         Log.d(LOG_TAG, "onDestroy called: Cleaning up resources.");
 
-        if (nativeAdBottom != null) nativeAdBottom.destroy();
+        if (nativeAdTop != null) nativeAdTop.destroy();
         super.onDestroy();
         Log.d(LOG_TAG, "SelectManagerActivity destroyed.");
     }

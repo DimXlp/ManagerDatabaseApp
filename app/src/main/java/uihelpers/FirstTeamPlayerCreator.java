@@ -14,15 +14,14 @@ public class FirstTeamPlayerCreator {
     private TextView title;
     private EditText firstName;
     private EditText lastName;
-    private Spinner positionSpinner;
+    private TextView position;
     private EditText number;
     private EditText nationality;
     private EditText overall;
     private EditText potentialLow;
     private EditText potentialHigh;
-    private Spinner yearSigned;
-    private TextView yearScoutedText;
-    private Spinner yearScouted;
+    private TextView yearSigned;
+    private TextView yearScouted;
     private SwitchMaterial loanSwitch;
     private Button savePlayerButton;
 
@@ -30,15 +29,14 @@ public class FirstTeamPlayerCreator {
         this.title = view.findViewById(R.id.create_ft_player);
         this.firstName = view.findViewById(R.id.first_name_ftp_create);
         this.lastName = view.findViewById(R.id.last_name_ftp_create);
-        this.positionSpinner = view.findViewById(R.id.position_spinner_ftp_create);
+        this.position = view.findViewById(R.id.position_picker_ftp_create);
         this.number = view.findViewById(R.id.number_ftp_create);
         this.nationality = view.findViewById(R.id.nationality_ftp_create);
         this.overall = view.findViewById(R.id.overall_ftp_create);
         this.potentialLow = view.findViewById(R.id.potential_low_ftp_create);
         this.potentialHigh = view.findViewById(R.id.potential_high_ftp_create);
-        this.yearSigned = view.findViewById(R.id.year_signed_spinner_ftp_create);
-        this.yearScoutedText = view.findViewById(R.id.year_scouted_text_ftp_create);
-        this.yearScouted = view.findViewById(R.id.year_scouted_spinner_ftp_create);
+        this.yearSigned = view.findViewById(R.id.year_signed_picker_ftp_create);
+        this.yearScouted = view.findViewById(R.id.year_scouted_picker_ftp_create);
         this.loanSwitch = view.findViewById(R.id.loan_player_switch_ftp_create);
         this.savePlayerButton = view.findViewById(R.id.create_ft_player_button);
     }
@@ -67,12 +65,12 @@ public class FirstTeamPlayerCreator {
         this.lastName = lastName;
     }
 
-    public Spinner getPositionSpinner() {
-        return positionSpinner;
+    public TextView getPosition() {
+        return position;
     }
 
-    public void setPositionSpinner(Spinner positionSpinner) {
-        this.positionSpinner = positionSpinner;
+    public void setPosition(TextView position) {
+        this.position = position;
     }
 
     public EditText getNumber() {
@@ -115,27 +113,19 @@ public class FirstTeamPlayerCreator {
         this.potentialHigh = potentialHigh;
     }
 
-    public Spinner getYearSigned() {
+    public TextView getYearSigned() {
         return yearSigned;
     }
 
-    public void setYearSigned(Spinner yearSigned) {
+    public void setYearSigned(TextView yearSigned) {
         this.yearSigned = yearSigned;
     }
 
-    public TextView getYearScoutedText() {
-        return yearScoutedText;
-    }
-
-    public void setYearScoutedText(TextView yearScoutedText) {
-        this.yearScoutedText = yearScoutedText;
-    }
-
-    public Spinner getYearScouted() {
+    public TextView getYearScouted() {
         return yearScouted;
     }
 
-    public void setYearScouted(Spinner yearScouted) {
+    public void setYearScouted(TextView yearScouted) {
         this.yearScouted = yearScouted;
     }
 
@@ -159,7 +149,6 @@ public class FirstTeamPlayerCreator {
         title.setText("Add Exchange Player");
         savePlayerButton.setText(R.string.save_player);
         loanSwitch.setVisibility(View.GONE);
-        yearScoutedText.setVisibility(View.GONE);
         yearScouted.setVisibility(View.GONE);
     }
 }

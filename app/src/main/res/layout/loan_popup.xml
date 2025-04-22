@@ -1,118 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/edit_manager_popup"
+    android:id="@+id/loan_player_popup"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:padding="24dp">
 
-    <androidx.cardview.widget.CardView
+    <TextView
+        android:id="@+id/loan_details_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        app:cardBackgroundColor="#F7F8FA">
+        android:layout_gravity="center_horizontal"
+        android:fontFamily="@font/chivo"
+        android:text="Loan Details"
+        android:textSize="20sp"
+        android:textColor="#1F1F20"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
 
-        <RelativeLayout
-            android:padding="24dp"
+    <!-- Type of Loan Picker -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/type_of_loan_til"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Type of Loan"
+        app:boxStrokeColor="#D4AF37"
+        app:boxStrokeWidth="2dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/type_of_loan_picker"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="true"
+            android:inputType="none"
+            android:text="Short-Term Loan"
+            android:drawableEnd="@drawable/ic_arrow_drop_down"
+            android:gravity="center_vertical"
+            android:fontFamily="@font/chivo"
+            android:textColor="@android:color/black" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
-                android:id="@+id/loan_details_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:fontFamily="@font/chivo"
-                android:text="Loan Details"
-                android:textSize="20sp"
-                android:textColor="#1F1F20"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"/>
+    <!-- Team -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/team_loan_til"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Team"
+        app:boxStrokeColor="#D4AF37"
+        app:boxStrokeWidth="2dp">
 
-            <Spinner
-                android:id="@+id/type_of_loan_spinner"
-                android:layout_below="@+id/loan_details_title"
-                android:layout_marginTop="16dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/team_loan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/chivo"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:textColor="@android:color/black" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/team_loan_til"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/type_of_loan_spinner"
-                android:layout_marginTop="8dp"
-                android:hint="Team"
-                app:boxStrokeColor="#D4AF37"
-                app:boxStrokeWidth="2dp" >
+    <!-- Year Loaned Picker -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/year_loaned_til"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Year Loaned"
+        app:boxStrokeColor="#D4AF37"
+        app:boxStrokeWidth="2dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/team_loan"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/chivo"
-                    android:inputType="textPersonName"
-                    android:maxLines="1"
-                    android:textColor="@android:color/black" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/year_loaned_picker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="true"
+            android:inputType="none"
+            android:drawableEnd="@drawable/ic_arrow_drop_down"
+            android:gravity="center_vertical"
+            android:fontFamily="@font/chivo"
+            android:textColor="@android:color/black" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            </com.google.android.material.textfield.TextInputLayout>
+    <!-- Comments -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/comments_til_loan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Comments"
+        app:boxStrokeColor="#D4AF37"
+        app:boxStrokeWidth="2dp">
 
-            <TextView
-                android:id="@+id/year_loaned_text_loan"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Year Loaned: "
-                android:fontFamily="@font/chivo"
-                android:textSize="16sp"
-                android:textColor="#616161"
-                android:layout_below="@+id/team_loan_til"/>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/comments_loan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/chivo"
+            android:inputType="textMultiLine"
+            android:lines="3"
+            android:minLines="2"
+            android:maxLines="10"
+            android:gravity="top|start"
+            android:textColor="@android:color/black" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <Spinner
-                android:id="@+id/year_loaned_spinner_loan"
-                android:layout_below="@+id/team_loan_til"
-                android:layout_toEndOf="@id/year_loaned_text_loan"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:entries="@array/years_array"/>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/comments_til_loan"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/year_loaned_spinner_loan"
-                android:layout_marginTop="8dp"
-                android:hint="@string/comments"
-                app:boxStrokeColor="#D4AF37"
-                app:boxStrokeWidth="2dp">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/comments_loan"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/chivo"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:textColor="@android:color/black" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <Button
-                android:id="@+id/loan_player_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/comments_til_loan"
-                android:layout_marginTop="24dp"
-                android:background="@drawable/round_button"
-                android:backgroundTint="#D4AF37"
-                android:fontFamily="@font/chivo"
-                android:text="Loan Player"
-                android:textColor="@android:color/white"
-                android:textStyle="bold" />
-
-        </RelativeLayout>
-
-    </androidx.cardview.widget.CardView>
+    <!-- Loan Button -->
+    <Button
+        android:id="@+id/loan_player_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/round_button"
+        android:backgroundTint="#D4AF37"
+        android:fontFamily="@font/chivo"
+        android:text="Loan Player"
+        android:textColor="@android:color/white"
+        android:textStyle="bold" />
 
 </LinearLayout>

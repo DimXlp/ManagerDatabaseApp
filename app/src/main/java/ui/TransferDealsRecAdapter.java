@@ -861,9 +861,13 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
         firstTeamPlayerCreator.changePropertiesForExchange();
 
-        ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(context, R.array.years_array, android.R.layout.simple_spinner_item);
-        yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        firstTeamPlayerCreator.getYearSigned().setAdapter(yearAdapter);
+        String[] years = context.getResources().getStringArray(R.array.years_array);
+        firstTeamPlayerCreator.getYearSigned().setOnClickListener(v -> {
+            new AlertDialog.Builder(context)
+                    .setTitle("Select Year Signed")
+                    .setItems(years, (dialog, which) -> firstTeamPlayerCreator.getYearSigned().setText(years[which]))
+                    .show();
+        });
 
         firstTeamPlayerCreator.getSavePlayerButton().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -872,9 +876,9 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
                 if (!firstTeamPlayerCreator.getLastName().getText().toString().isEmpty()
                         && !firstTeamPlayerCreator.getNationality().getText().toString().isEmpty()
-                        && !firstTeamPlayerCreator.getPositionSpinner().getSelectedItem().toString().isEmpty()
+                        && !firstTeamPlayerCreator.getPosition().getText().toString().isEmpty()
                         && !firstTeamPlayerCreator.getOverall().getText().toString().isEmpty()
-                        && !firstTeamPlayerCreator.getYearSigned().getSelectedItem().toString().equals("0")) {
+                        && !firstTeamPlayerCreator.getYearSigned().getText().toString().isEmpty()) {
                     createNewExchangePlayer(firstTeamPlayerCreator, transferDocRef);
                 } else {
                     Log.w(LOG_TAG, "Validation failed. Required fields are missing.");
@@ -901,13 +905,13 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
         } else {
             fullNamePlayer = lastNamePlayer;
         }
-        String positionPlayer = firstTeamPlayerCreator.getPositionSpinner().getSelectedItem().toString().trim();
+        String positionPlayer = firstTeamPlayerCreator.getPosition().getText().toString().trim();
         String numberPlayer = firstTeamPlayerCreator.getNumber().getText().toString().trim();
         String nationalityPlayer = firstTeamPlayerCreator.getNationality().getText().toString().trim();
         String overallPlayer = firstTeamPlayerCreator.getOverall().getText().toString().trim();
         String potentialLowPlayer = firstTeamPlayerCreator.getPotentialLow().getText().toString().trim();
         String potentialHiPlayer = firstTeamPlayerCreator.getPotentialHigh().getText().toString().trim();
-        final String ySignedPlayer = firstTeamPlayerCreator.getYearSigned().getSelectedItem().toString().trim();
+        final String ySignedPlayer = firstTeamPlayerCreator.getYearSigned().getText().toString().trim();
 
         FirstTeamPlayer player = new FirstTeamPlayer();
 
@@ -1093,9 +1097,13 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
         firstTeamPlayerCreator.changePropertiesForExchange();
 
-        ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(context, R.array.years_array, android.R.layout.simple_spinner_item);
-        yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        firstTeamPlayerCreator.getYearSigned().setAdapter(yearAdapter);
+        String[] years = context.getResources().getStringArray(R.array.years_array);
+        firstTeamPlayerCreator.getYearSigned().setOnClickListener(v -> {
+            new AlertDialog.Builder(context)
+                    .setTitle("Select Year Signed")
+                    .setItems(years, (dialog, which) -> firstTeamPlayerCreator.getYearSigned().setText(years[which]))
+                    .show();
+        });
 
         firstTeamPlayerCreator.getSavePlayerButton().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1104,9 +1112,9 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
 
                 if (!firstTeamPlayerCreator.getLastName().getText().toString().isEmpty()
                     && !firstTeamPlayerCreator.getNationality().getText().toString().isEmpty()
-                    && !firstTeamPlayerCreator.getPositionSpinner().getSelectedItem().toString().isEmpty()
+                    && !firstTeamPlayerCreator.getPosition().getText().toString().isEmpty()
                     && !firstTeamPlayerCreator.getOverall().getText().toString().isEmpty()
-                    && !firstTeamPlayerCreator.getYearSigned().getSelectedItem().toString().equals("0")) {
+                    && !firstTeamPlayerCreator.getYearSigned().getText().toString().isEmpty()) {
                     createPlayer(firstTeamPlayerCreator, documentReference);
                 } else {
                     Log.w(LOG_TAG, "Validation failed for exchange player. Required fields missing.");
@@ -1133,13 +1141,13 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
         } else {
             fullNamePlayer = lastNamePlayer;
         }
-        String positionPlayer = firstTeamPlayerCreator.getPositionSpinner().getSelectedItem().toString().trim();
+        String positionPlayer = firstTeamPlayerCreator.getPosition().getText().toString().trim();
         String numberPlayer = firstTeamPlayerCreator.getNumber().getText().toString().trim();
         String nationalityPlayer = firstTeamPlayerCreator.getNationality().getText().toString().trim();
         String overallPlayer = firstTeamPlayerCreator.getOverall().getText().toString().trim();
         String potentialLowPlayer = firstTeamPlayerCreator.getPotentialLow().getText().toString().trim();
         String potentialHiPlayer = firstTeamPlayerCreator.getPotentialHigh().getText().toString().trim();
-        final String ySignedPlayer = firstTeamPlayerCreator.getYearSigned().getSelectedItem().toString().trim();
+        final String ySignedPlayer = firstTeamPlayerCreator.getYearSigned().getText().toString().trim();
 
         FirstTeamPlayer player = new FirstTeamPlayer();
 

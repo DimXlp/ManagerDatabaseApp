@@ -252,7 +252,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                     aBuilder = new AlertDialog.Builder(context);
                                     View view = LayoutInflater.from(context).inflate(R.layout.year_left_popup, null);
 
-                                    yearLeft = view.findViewById(R.id.year_left_spinner_left);
+                                    yearLeft = view.findViewById(R.id.year_left_picker_left);
                                     saveButton = view.findViewById(R.id.set_year_left_button);
 
                                     ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(context, R.array.years_array, android.R.layout.simple_spinner_item);

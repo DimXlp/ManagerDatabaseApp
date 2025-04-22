@@ -15,13 +15,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
@@ -67,14 +65,14 @@ public class FirstTeamActivity extends AppCompatActivity {
 
     private EditText firstName;
     private EditText lastName;
-    private Spinner positionSpinner;
+    private TextView positionPicker;
     private EditText number;
     private EditText nationality;
     private EditText overall;
     private EditText potentialLow;
     private EditText potentialHigh;
-    private Spinner yearSigned;
-    private Spinner yearScouted;
+    private TextView yearSigned;
+    private TextView yearScouted;
     private SwitchMaterial loanSwitch;
     private Button createPlayerButton;
 
@@ -231,25 +229,40 @@ public class FirstTeamActivity extends AppCompatActivity {
 
         firstName = view.findViewById(R.id.first_name_ftp_create);
         lastName = view.findViewById(R.id.last_name_ftp_create);
-        positionSpinner = view.findViewById(R.id.position_spinner_ftp_create);
+        positionPicker = view.findViewById(R.id.position_picker_ftp_create);
         number = view.findViewById(R.id.number_ftp_create);
         nationality = view.findViewById(R.id.nationality_ftp_create);
         overall = view.findViewById(R.id.overall_ftp_create);
         potentialLow = view.findViewById(R.id.potential_low_ftp_create);
         potentialHigh = view.findViewById(R.id.potential_high_ftp_create);
-        yearSigned = view.findViewById(R.id.year_signed_spinner_ftp_create);
-        yearScouted = view.findViewById(R.id.year_scouted_spinner_ftp_create);
+        yearSigned = view.findViewById(R.id.year_signed_picker_ftp_create);
+        yearScouted = view.findViewById(R.id.year_scouted_picker_ftp_create);
         loanSwitch = view.findViewById(R.id.loan_player_switch_ftp_create);
         createPlayerButton = view.findViewById(R.id.create_ft_player_button);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.position_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        positionSpinner.setAdapter(adapter);
+        String[] positions = this.getResources().getStringArray(R.array.position_array);
+        String[] years = this.getResources().getStringArray(R.array.years_array);
 
-        ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(this, R.array.years_array, android.R.layout.simple_spinner_item);
-        yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        yearSigned.setAdapter(yearAdapter);
-        yearScouted.setAdapter(yearAdapter);
+        positionPicker.setOnClickListener(v -> {
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("Select Position")
+                    .setItems(positions, (pickerDialog, which) -> positionPicker.setText(positions[which]))
+                    .show();
+        });
+
+        yearSigned.setOnClickListener(v -> {
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("Select Year Signed")
+                    .setItems(years, (pickerDialog, which) -> yearSigned.setText(years[which]))
+                    .show();
+        });
+
+        yearScouted.setOnClickListener(v -> {
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("Select Year Scouted")
+                    .setItems(years, (pickerDialog, which) -> yearScouted.setText(years[which]))
+                    .show();
+        });
 
         createPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -257,9 +270,9 @@ public class FirstTeamActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, "Create player button clicked in popup dialog.");
                 if (!lastName.getText().toString().isEmpty() &&
                     !nationality.getText().toString().isEmpty() &&
-                    !positionSpinner.getSelectedItem().toString().isEmpty() &&
+                    !positionPicker.getText().toString().isEmpty() &&
                     !overall.getText().toString().isEmpty() &&
-                    !yearSigned.getSelectedItem().toString().equals("0")) {
+                    !yearSigned.getText().toString().isEmpty()) {
                     createPlayer();
                 } else {
                     Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
@@ -284,14 +297,14 @@ public class FirstTeamActivity extends AppCompatActivity {
         } else {
             fullNamePlayer = lastNamePlayer;
         }
-        String positionPlayer = positionSpinner.getSelectedItem().toString().trim();
+        String positionPlayer = positionPicker.getText().toString().trim();
         String numberPlayer = number.getText().toString().trim();
         String nationalityPlayer = nationality.getText().toString().trim();
         String overallPlayer = overall.getText().toString().trim();
         String potentialLowPlayer = potentialLow.getText().toString().trim();
         String potentialHiPlayer = potentialHigh.getText().toString().trim();
-        final String ySignedPlayer = yearSigned.getSelectedItem().toString().trim();
-        String yScoutedPlayer = yearScouted.getSelectedItem().toString().trim();
+        final String ySignedPlayer = yearSigned.getText().toString().trim();
+        String yScoutedPlayer = yearScouted.getText().toString().trim();
 
         FirstTeamPlayer player = new FirstTeamPlayer();
 
