@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,6 +51,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import model.FirstTeamPlayer;
 import model.Manager;
 import model.YouthTeamPlayer;
 import ui.YouthTeamPlayerRecAdapter;
@@ -68,9 +70,9 @@ public class YouthTeamListActivity extends AppCompatActivity {
 
     private Button prevYearButton;
     private Button nextYearButton;
-    private TextView year;
-    private FloatingActionButton addPlayerFab;
-    private TextView addPlayerText;
+    private TextView yearText;
+    private TextView yearPlayerCount;
+    private Button addPlayerButton;
 
     private AlertDialog.Builder builder;
     private AlertDialog dialog;
@@ -159,16 +161,53 @@ public class YouthTeamListActivity extends AppCompatActivity {
 
         prevYearButton = findViewById(R.id.prev_year_button_ytp);
         nextYearButton = findViewById(R.id.next_year_button_ytp);
-        year = findViewById(R.id.year_text_ytp);
-        addPlayerFab = findViewById(R.id.add_new_player_button_ytp);
 
+        LinearLayout yearPickerLayout = findViewById(R.id.year_picker_container_ytp);
+        yearText = findViewById(R.id.year_text_ytp);
+        yearPlayerCount = findViewById(R.id.year_player_count_ytp);
+
+        List<String> availableYears = new ArrayList<>();
+
+        collectionReference.whereEqualTo("userId", currentUserId)
+                .whereEqualTo("managerId", managerId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                            YouthTeamPlayer player = doc.toObject(YouthTeamPlayer.class);
+                            if (player != null && player.getYearScouted() != null) {
+                                String y = player.getYearScouted();
+                                if (!availableYears.contains(y)) {
+                                    availableYears.add(y);
+                                }
+                            }
+                        }
+                        Collections.sort(availableYears);
+                    }
+                });
+
+        yearPickerLayout.setOnClickListener(v -> {
+            if (!availableYears.isEmpty()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Select Year");
+                builder.setItems(availableYears.toArray(new String[0]), (dialog, which) -> {
+                    currentYear = availableYears.get(which);
+                    listPlayers(0);
+                });
+                builder.show();
+            }
+        });
+
+        addPlayerButton = findViewById(R.id.add_player_button_ytp);
+
+        addPlayerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createPopupDialog();
+            }
+        });
         // Initialize Mobile Ads SDK
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
-
-        // Load Banner Ads
-//        AdView youthTeamListBanner = findViewById(R.id.youth_team_list_banner);
-//        AdRequest adBannerRequest = new AdRequest.Builder().build();
-//        youthTeamListBanner.loadAd(adBannerRequest);
 
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
         loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
@@ -204,13 +243,6 @@ public class YouthTeamListActivity extends AppCompatActivity {
         prevYearButton.setOnClickListener(prevYearListener);
         nextYearButton.setOnClickListener(nextYearListener);
 
-        addPlayerFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                createPopupDialog();
-            }
-        });
-
         playerList = new ArrayList<>();
         recyclerView = findViewById(R.id.rec_view_ytp);
         recyclerView.setHasFixedSize(true);
@@ -224,7 +256,6 @@ public class YouthTeamListActivity extends AppCompatActivity {
                         ad.destroy();
                         return;
                     }
-                    nativeAdBottom = ad;
                     populateNativeAdView(ad, nativeAdView);
                     Log.d(LOG_TAG, "Native ad loaded successfully.");
                 })
@@ -240,37 +271,21 @@ public class YouthTeamListActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        Log.d(LOG_TAG, "Populating native ad view.");
-        // Dynamically assign IDs
-        int headlineId = R.id.ad_headline_bottom;
-        int bodyId = R.id.ad_body_bottom;
-        int callToActionId = R.id.ad_call_to_action_bottom;
-
-        // Set views for the NativeAdView
+        int headlineId =  R.id.ad_headline_bottom;
         nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
-        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
 
-        // Populate the Headline
-        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
-
-        // Populate the Body
-        if (nativeAd.getBody() != null) {
-            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
-            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        if (nativeAd.getHeadline() != null) {
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
         } else {
-            nativeAdView.getBodyView().setVisibility(View.GONE);
+            headlineView.setVisibility(View.GONE);
         }
 
-        // Populate the Call-to-Action
-        if (nativeAd.getCallToAction() != null) {
-            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
-            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getCallToActionView().setVisibility(View.GONE);
-        }
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
 
-        // Bind the NativeAd object to the NativeAdView
         nativeAdView.setNativeAd(nativeAd);
     }
 
@@ -318,7 +333,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
                             });
                             Log.d(LOG_TAG, "Player list sorted by time added.");
 
-                            year.setText(currentYear);
+                            yearText.setText(currentYear);
                             youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(YouthTeamListActivity.this, playerList, managerId, team, currentYear, buttonInt);
                             recyclerView.setAdapter(youthTeamPlayerRecAdapter);
                             youthTeamPlayerRecAdapter.notifyDataSetChanged();
@@ -658,12 +673,12 @@ public class YouthTeamListActivity extends AppCompatActivity {
                                 }
                             });
                             if (barYear == null || barYear.equals(minYearText)) {
-                                year.setText(minYearText);
+                                yearText.setText(minYearText);
                                 youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(YouthTeamListActivity.this, playerList, managerId, team, minYearText, 0);
                                 recyclerView.setAdapter(youthTeamPlayerRecAdapter);
                                 youthTeamPlayerRecAdapter.notifyDataSetChanged();
                             } else {
-                                year.setText(barYear);
+                                yearText.setText(barYear);
                                 youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(YouthTeamListActivity.this, playerList, managerId, team, barYear, 0);
                                 recyclerView.setAdapter(youthTeamPlayerRecAdapter);
                                 youthTeamPlayerRecAdapter.notifyDataSetChanged();
