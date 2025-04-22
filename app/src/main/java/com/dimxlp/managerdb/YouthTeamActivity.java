@@ -166,11 +166,11 @@ public class YouthTeamActivity extends AppCompatActivity {
                 });
 
         addPlayerFab = findViewById(R.id.add_player_button_yt);
-        addPlayerText = findViewById(R.id.add_player_text_yt);
 
         addPlayerFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(LOG_TAG, "Add player button clicked.");
                 createPopupDialog();
             }
         });
@@ -202,37 +202,23 @@ public class YouthTeamActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        // Check which NativeAdView is being populated
-        boolean isTopAd = nativeAdView == nativeAdViewTop;
+        int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
 
-        // Dynamically set the correct child IDs
-        nativeAdView.setHeadlineView(nativeAdView.findViewById(isTopAd ? R.id.ad_headline_top : R.id.ad_headline_bottom));
-        nativeAdView.setBodyView(nativeAdView.findViewById(isTopAd ? R.id.ad_body_top : R.id.ad_body_bottom));
-        nativeAdView.setCallToActionView(nativeAdView.findViewById(isTopAd ? R.id.ad_call_to_action_top : R.id.ad_call_to_action_bottom));
-
-        // Populate the Headline
-        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
-
-        // Populate the Body
-        if (nativeAd.getBody() != null) {
-            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
-            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        if (nativeAd.getHeadline() != null) {
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
         } else {
-            nativeAdView.getBodyView().setVisibility(View.GONE);
+            headlineView.setVisibility(View.GONE);
         }
 
-        // Populate the Call-to-Action
-        if (nativeAd.getCallToAction() != null) {
-            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
-            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getCallToActionView().setVisibility(View.GONE);
-        }
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
 
-        // Bind the Native Ad object to the NativeAdView
         nativeAdView.setNativeAd(nativeAd);
     }
-
 
     private void createPopupDialog() {
         Log.d(LOG_TAG, "Creating popup dialog for adding a youth team player.");
