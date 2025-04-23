@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -22,62 +21,72 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
+        android:layout_marginBottom="32dp"
         android:animateLayoutChanges="true">
 
-      <androidx.cardview.widget.CardView
-          android:id="@+id/cardView_fpl"
+      <LinearLayout
+          android:id="@+id/team_navigation_container_fpl"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:layout_margin="16dp"
-          app:cardElevation="4dp"
-          app:cardCornerRadius="8dp"
-          tools:ignore="MissingConstraints">
+          android:padding="12dp"
+          android:orientation="horizontal"
+          android:gravity="center"
+          android:background="@drawable/flat_background_rounded"
+          app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/prev_button_fpl"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/ic_baseline_keyboard_arrow_left_24"
+            android:backgroundTint="@color/colorAccent" />
+
+        <LinearLayout
+            android:id="@+id/team_picker_container_fpl"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:background="@color/lighterGray">
-
-          <Button
-              android:id="@+id/prev_button_fpl"
-              android:layout_width="30dp"
-              android:layout_height="30dp"
-              android:background="@drawable/ic_baseline_keyboard_arrow_left_24"
-              android:backgroundTint="@color/colorAccent"
-              app:layout_constraintStart_toStartOf="parent"
-              app:layout_constraintTop_toTopOf="parent"
-              app:layout_constraintBottom_toBottomOf="parent"/>
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingHorizontal="12dp">
 
           <TextView
               android:id="@+id/team_text_fpl"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:fontFamily="@font/chivo"
-              android:text="First Team"
+              android:text="2020 / 21"
               android:textColor="@color/colorAccent"
               android:textSize="20sp"
-              android:textStyle="bold"
-              app:layout_constraintBottom_toBottomOf="parent"
-              app:layout_constraintEnd_toStartOf="@+id/next_button_fpl"
-              app:layout_constraintStart_toEndOf="@+id/prev_button_fpl"
-              app:layout_constraintTop_toTopOf="parent" />
+              android:textStyle="bold" />
 
-          <Button
-              android:id="@+id/next_button_fpl"
-              android:layout_width="30dp"
-              android:layout_height="30dp"
-              android:background="@drawable/ic_baseline_keyboard_arrow_right_24"
-              android:backgroundTint="@color/colorAccent"
-              app:layout_constraintEnd_toEndOf="parent"
-              app:layout_constraintTop_toTopOf="parent"
-              app:layout_constraintBottom_toBottomOf="parent"/>
+          <TextView
+              android:id="@+id/team_player_count_fpl"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="17 players"
+              android:textColor="#B3FFFFFF"
+              android:textSize="14sp"
+              android:fontFamily="@font/chivo"
+              android:layout_marginTop="2dp" />
+        </LinearLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/next_button_fpl"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/ic_baseline_keyboard_arrow_right_24"
+            android:backgroundTint="@color/colorAccent" />
+      </LinearLayout>
 
-      </androidx.cardview.widget.CardView>
+      <View
+          android:id="@+id/divider_fpl"
+          android:layout_width="match_parent"
+          android:layout_height="1dp"
+          android:background="@color/lighterGray"
+          android:layout_marginHorizontal="16dp"
+          app:layout_constraintTop_toBottomOf="@+id/team_navigation_container_fpl"/>
 
       <androidx.recyclerview.widget.RecyclerView
           android:id="@+id/rec_view_fpl"
@@ -88,7 +97,7 @@
           app:layout_constraintBottom_toBottomOf="parent"
           app:layout_constraintEnd_toEndOf="parent"
           app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintTop_toBottomOf="@+id/cardView_fpl"
+          app:layout_constraintTop_toBottomOf="@+id/divider_fpl"
           app:layout_constraintVertical_bias="0.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -98,45 +107,33 @@
         android:id="@+id/native_ad_view_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="6dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_marginHorizontal="6dp">
 
       <LinearLayout
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:orientation="vertical"
-          android:padding="1dp">
+          android:background="@drawable/ad_border"
+          android:padding="6dp">
+
+        <!-- Ad Label -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ad"
+            android:textStyle="bold"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:paddingBottom="2dp"/>
 
         <!-- Ad Headline -->
         <TextView
             android:id="@+id/ad_headline_bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/darker_gray" />
-
-        <!-- Ad Body -->
-        <TextView
-            android:id="@+id/ad_body_bottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
             android:textSize="14sp"
-            android:textColor="@android:color/darker_gray" />
-
-        <!-- Call-to-Action Button -->
-        <Button
-            android:id="@+id/ad_call_to_action_bottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:textColor="@color/colorAccent"
-            android:padding="1dp"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary" />
       </LinearLayout>
     </com.google.android.gms.ads.nativead.NativeAdView>
 

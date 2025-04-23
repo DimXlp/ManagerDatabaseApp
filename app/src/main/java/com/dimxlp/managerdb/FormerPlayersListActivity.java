@@ -1,6 +1,7 @@
 package com.dimxlp.managerdb;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -14,11 +15,11 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.nativead.NativeAd;
@@ -70,6 +71,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
     private Button prevButton;
     private Button nextButton;
     private TextView teamText;
+    private TextView teamPlayerCount;
     private boolean ftPlayersExist;
     private boolean ytPlayersExist;
     private List<FormerPlayer> formerPlayerList;
@@ -129,7 +131,32 @@ public class FormerPlayersListActivity extends AppCompatActivity {
 
         prevButton = findViewById(R.id.prev_button_fpl);
         nextButton = findViewById(R.id.next_button_fpl);
+
+        LinearLayout teamPickerLayout = findViewById(R.id.team_picker_container_fpl);
         teamText = findViewById(R.id.team_text_fpl);
+        teamPlayerCount = findViewById(R.id.team_player_count_fpl);
+
+        List<String> teamOptions = new ArrayList<>();
+        teamOptions.add("First Team");
+        teamOptions.add("Youth Team");
+
+        teamPickerLayout.setOnClickListener(v -> {
+            if (!teamOptions.isEmpty()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Select Team");
+                builder.setItems(teamOptions.toArray(new String[0]), (dialog, which) -> {
+                    team = teamOptions.get(which);
+                    teamText.setText(team);
+
+                    if (team.equals("First Team")) {
+                        listFormerFirstTeamPlayers(0);
+                    } else {
+                        listFormerYouthTeamPlayers(0);
+                    }
+                });
+                builder.show();
+            }
+        });
 
         View headerLayout = null;
         if (navView.getHeaderCount() > 0) {
@@ -140,12 +167,6 @@ public class FormerPlayersListActivity extends AppCompatActivity {
 
         // Initialize Mobile Ads SDK
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
-
-        // Load Banner Ads
-//        AdView formerPlayersListBanner = findViewById(R.id.former_players_list_banner);
-//        AdRequest adBannerRequest = new AdRequest.Builder().build();
-//        formerPlayersListBanner.loadAd(adBannerRequest);
-//        Log.d(LOG_TAG, "Banner ad loaded.");
 
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
         loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
@@ -184,7 +205,6 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                         ad.destroy();
                         return;
                     }
-                    nativeAdBottom = ad;
                     populateNativeAdView(ad, nativeAdView);
                     Log.d(LOG_TAG, "Native ad loaded successfully.");
                 })
@@ -200,37 +220,21 @@ public class FormerPlayersListActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        Log.d(LOG_TAG, "Populating native ad view.");
-        // Dynamically assign IDs
-        int headlineId = R.id.ad_headline_bottom;
-        int bodyId = R.id.ad_body_bottom;
-        int callToActionId = R.id.ad_call_to_action_bottom;
-
-        // Set views for the NativeAdView
+        int headlineId =  R.id.ad_headline_bottom;
         nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
-        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
 
-        // Populate the Headline
-        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
-
-        // Populate the Body
-        if (nativeAd.getBody() != null) {
-            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
-            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        if (nativeAd.getHeadline() != null) {
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
         } else {
-            nativeAdView.getBodyView().setVisibility(View.GONE);
+            headlineView.setVisibility(View.GONE);
         }
 
-        // Populate the Call-to-Action
-        if (nativeAd.getCallToAction() != null) {
-            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
-            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getCallToActionView().setVisibility(View.GONE);
-        }
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
 
-        // Bind the NativeAd object to the NativeAdView
         nativeAdView.setNativeAd(nativeAd);
     }
 
@@ -283,6 +287,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                             formerPlayerRecAdapter = new FormerPlayerRecAdapter(FormerPlayersListActivity.this, ytPlayerList, managerId, team, "Youth Team", buttonInt);
                             recyclerView.setAdapter(formerPlayerRecAdapter);
                             formerPlayerRecAdapter.notifyDataSetChanged();
+                            teamPlayerCount.setText(ytPlayerList.size() + " players");
                             Log.d(LOG_TAG, "Former Youth Team players listed successfully.");
                         } else {
                             Log.w(LOG_TAG, "No former Youth Team players found.");
@@ -318,6 +323,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                             formerPlayerRecAdapter = new FormerPlayerRecAdapter(FormerPlayersListActivity.this, ftPlayerList, managerId, team, "First Team", buttonInt);
                             recyclerView.setAdapter(formerPlayerRecAdapter);
                             formerPlayerRecAdapter.notifyDataSetChanged();
+                            teamPlayerCount.setText(ftPlayerList.size() + " players");
                             Log.d(LOG_TAG, "Former First Team players listed successfully.");
                         } else {
                             Log.w(LOG_TAG, "No former First Team players found.");
@@ -548,6 +554,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                                 formerPlayerRecAdapter = new FormerPlayerRecAdapter(FormerPlayersListActivity.this, ftPlayerList, managerId, team, "First Team", 0);
                                 recyclerView.setAdapter(formerPlayerRecAdapter);
                                 formerPlayerRecAdapter.notifyDataSetChanged();
+                                teamPlayerCount.setText(ftPlayerList.size() + " players");
                             } else {
                                 Collections.sort(ytPlayerList, new Comparator<FormerPlayer>() {
                                     @Override
@@ -558,6 +565,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                                 formerPlayerRecAdapter = new FormerPlayerRecAdapter(FormerPlayersListActivity.this, ytPlayerList, managerId, team, "Youth Team", 0);
                                 recyclerView.setAdapter(formerPlayerRecAdapter);
                                 formerPlayerRecAdapter.notifyDataSetChanged();
+                                teamPlayerCount.setText(ytPlayerList.size() + " players");
                             }
                         } else {
                             Log.w(LOG_TAG, "No former players found.");
