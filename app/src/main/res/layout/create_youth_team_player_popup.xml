@@ -125,14 +125,13 @@
                 app:boxStrokeColor="#D4AF37"
                 app:boxStrokeWidth="2dp">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <AutoCompleteTextView
                     android:id="@+id/nationality_ytp_create"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/chivo"
-                    android:inputType="textPersonName"
+                    android:inputType="text"
                     android:textColor="@android:color/black"
-                    android:maxLines="1"/>
+                    android:fontFamily="@font/chivo"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 

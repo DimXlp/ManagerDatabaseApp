@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -46,16 +47,19 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import model.FirstTeamPlayer;
 import model.Manager;
 import model.YouthTeamPlayer;
 import ui.YouthTeamPlayerRecAdapter;
+import util.NationalityFlagUtil;
 import util.UserApi;
 
 public class YouthTeamListActivity extends AppCompatActivity {
@@ -82,7 +86,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
     private EditText lastName;
     private TextView positionPicker;
     private EditText number;
-    private EditText nationality;
+    private AutoCompleteTextView nationality;
     private EditText overall;
     private EditText potentialLow;
     private EditText potentialHigh;
@@ -365,6 +369,17 @@ public class YouthTeamListActivity extends AppCompatActivity {
         yearScouted = view.findViewById(R.id.year_scouted_picker_ytp_create);
         createPlayerButton = view.findViewById(R.id.create_yt_player_button);
 
+        String[] countrySuggestions = getResources().getStringArray(R.array.nationalities);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, countrySuggestions);
+
+        nationality.setAdapter(adapter);
+
+        nationality.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) nationality.showDropDown();
+        });
+
         String[] positions = this.getResources().getStringArray(R.array.position_array);
         String[] years = this.getResources().getStringArray(R.array.years_array);
 
@@ -418,6 +433,9 @@ public class YouthTeamListActivity extends AppCompatActivity {
         String positionPlayer = positionPicker.getText().toString().trim();
         String numberPlayer = number.getText().toString().trim();
         String nationalityPlayer = nationality.getText().toString().trim();
+        Map<String, String> variantMap = NationalityFlagUtil.getVariantToStandardMap();
+        String nationalityInput = variantMap.getOrDefault(nationalityPlayer, nationalityPlayer);
+
         String overallPlayer = overall.getText().toString().trim();
         String potentialLowPlayer = potentialLow.getText().toString().trim();
         String potentialHiPlayer = potentialHigh.getText().toString().trim();
@@ -436,7 +454,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
             player.setNumber(99);
         }
         player.setTeam(team);
-        player.setNationality(nationalityPlayer);
+        player.setNationality(nationalityInput);
         player.setOverall(Integer.parseInt(overallPlayer));
         if (!potentialLowPlayer.isEmpty()) {
             player.setPotentialLow(Integer.parseInt(potentialLowPlayer));
@@ -693,6 +711,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
                                 youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(YouthTeamListActivity.this, playerList, managerId, team, barYear, 0);
                                 recyclerView.setAdapter(youthTeamPlayerRecAdapter);
                                 youthTeamPlayerRecAdapter.notifyDataSetChanged();
+                                yearPlayerCount.setText(playerList.size() + " players");
                             }
 
                         } else {

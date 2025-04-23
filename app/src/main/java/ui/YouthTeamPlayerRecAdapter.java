@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -41,6 +42,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import model.FirstTeamPlayer;
 import model.FormerPlayer;
@@ -104,12 +106,14 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
         if (player.getPotentialLow() != 0 && player.getPotentialHigh() != 0) {
             basic.append(" · ").append(player.getPotentialLow()).append("–").append(player.getPotentialHigh());
         }
+        basic.append(" · ");
         holder.basicInfo.setText(basic);
 
         String nationality = player.getNationality();
-        String iso = NationalityFlagUtil.getNationalityToIsoMap().getOrDefault(nationality, "UN");
-        String flag = NationalityFlagUtil.getCountryFlag(iso);
-        holder.playerFlag.setText(" · " + flag);
+        String iso = NationalityFlagUtil.getNationalityToIsoMap().getOrDefault(nationality, "un");
+        int flagResId = NationalityFlagUtil.getFlagResId(context, iso);
+
+        holder.playerFlag.setImageResource(flagResId);
         holder.playerNationality.setText(nationality);
 
         boolean hasScouted = player.getYearScouted() != null && !player.getYearScouted().equals("0");
@@ -143,7 +147,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
         private TextView numberText;
         private TextView fullNameText;
         private TextView basicInfo;
-        private TextView playerFlag;
+        private ImageView playerFlag;
         private TextView playerNationality;
         private TextView scoutedText;
         private View scoutedIcon;
@@ -576,13 +580,24 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
             final EditText lastName = view.findViewById(R.id.last_name_ytp_create);
             final TextView positionPicker = view.findViewById(R.id.position_picker_ytp_create);
             final EditText number = view.findViewById(R.id.number_ytp_create);
-            final EditText nationality = view.findViewById(R.id.nationality_ytp_create);
+            final AutoCompleteTextView nationality = view.findViewById(R.id.nationality_ytp_create);
             final EditText overall = view.findViewById(R.id.overall_ytp_create);
             final EditText potentialLow = view.findViewById(R.id.potential_low_ytp_create);
             final EditText potentialHigh = view.findViewById(R.id.potential_high_ytp_create);
             final TextView yearScoutedPicker = view.findViewById(R.id.year_scouted_picker_ytp_create);
             Button savePlayerButton = view.findViewById(R.id.create_yt_player_button);
             savePlayerButton.setText(R.string.save_player);
+
+            String[] countrySuggestions = context.getResources().getStringArray(R.array.nationalities);
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                    context, android.R.layout.simple_dropdown_item_1line, countrySuggestions);
+
+            nationality.setAdapter(adapter);
+
+            nationality.setOnFocusChangeListener((v, hasFocus) -> {
+                if (hasFocus) nationality.showDropDown();
+            });
 
             String[] positions = context.getResources().getStringArray(R.array.position_array);
             String[] years = context.getResources().getStringArray(R.array.years_array);
@@ -640,6 +655,10 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                 }
                                             }
                                             String no = number.getText().toString().trim();
+                                            String nationalityPlayer = nationality.getText().toString().trim();
+                                            Map<String, String> variantMap = NationalityFlagUtil.getVariantToStandardMap();
+                                            String nationalityInput = variantMap.getOrDefault(nationalityPlayer, nationalityPlayer);
+
                                             String ptlLow = potentialLow.getText().toString().trim();
                                             String ptlHi = potentialHigh.getText().toString().trim();
                                             assert documentReference != null;
@@ -648,7 +667,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                     "fullName", firstName.getText().toString().trim() + " " + lastName.getText().toString().trim(),
                                                     "position", positionPicker.getText().toString().trim(),
                                                     "number", (!no.isEmpty()) ? Integer.parseInt(no) : 99,
-                                                    "nationality", nationality.getText().toString().trim(),
+                                                    "nationality", nationalityInput,
                                                     "overall", Integer.parseInt(overall.getText().toString().trim()),
                                                     "potentialLow", (!ptlLow.isEmpty()) ? Integer.parseInt(ptlLow) : 0,
                                                     "potentialHigh", (!ptlHi.isEmpty()) ? Integer.parseInt(ptlHi) : 0,

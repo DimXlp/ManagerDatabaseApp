@@ -1,17 +1,14 @@
 package util;
 
+import android.content.Context;
+
+import com.dimxlp.managerdb.R;
+
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class NationalityFlagUtil {
-
-    public static String getCountryFlag(String isoCode) {
-        if (isoCode == null || isoCode.length() != 2) return "🏳️";
-        int OFFSET = 0x1F1E6 - 'A';
-        char first = (char) (Character.toUpperCase(isoCode.charAt(0)) + OFFSET);
-        char second = (char) (Character.toUpperCase(isoCode.charAt(1)) + OFFSET);
-        return new StringBuilder().append(first).append(second).toString();
-    }
 
     public static Map<String, String> getNationalityToIsoMap() {
         Map<String, String> map = new HashMap<>();
@@ -23,7 +20,7 @@ public class NationalityFlagUtil {
         map.put("Italy", "IT");
         map.put("Spain", "ES");
         map.put("Portugal", "PT");
-        map.put("England", "GB");
+        map.put("England", "ENG");
         map.put("United States", "US");
         map.put("Canada", "CA");
         map.put("Mexico", "MX");
@@ -42,7 +39,7 @@ public class NationalityFlagUtil {
         map.put("Switzerland", "CH");
         map.put("Austria", "AT");
         map.put("Poland", "PL");
-        map.put("Czech Republic", "CZ");
+        map.put("Czechia", "CZ");
         map.put("Russia", "RU");
         map.put("Turkey", "TR");
         map.put("Croatia", "HR");
@@ -74,7 +71,7 @@ public class NationalityFlagUtil {
         map.put("Costa Rica", "CR");
         map.put("Panama", "PA");
         map.put("Jamaica", "JM");
-        map.put("Trinidad & Tobago", "TT");
+        map.put("Trinidad and Tobago", "TT");
         map.put("Guyana", "GY");
         map.put("Suriname", "SR");
         map.put("Malta", "MT");
@@ -83,7 +80,7 @@ public class NationalityFlagUtil {
         map.put("Gibraltar", "GI");
         map.put("Cyprus", "CY");
         map.put("North Macedonia", "MK");
-        map.put("Bosnia", "BA");
+        map.put("Bosnia and Herzegovina", "BA");
         map.put("Montenegro", "ME");
         map.put("Kosovo", "XK");
         map.put("Uzbekistan", "UZ");
@@ -145,7 +142,74 @@ public class NationalityFlagUtil {
         map.put("Tonga", "TO");
         map.put("Vanuatu", "VU");
         map.put("Solomon Islands", "SB");
+        map.put("Albania", "AL");
+        map.put("Algeria", "DZ");
+        map.put("Armenia", "AM");
+        map.put("Azerbaijan", "AZ");
+        map.put("Bahamas", "BS");
+        map.put("Barbados", "BB");
+        map.put("Belarus", "BY");
+        map.put("Bolivia", "BO");
+        map.put("Bulgaria", "BG");
+        map.put("Ivory Coast", "CI");
+        map.put("Estonia", "EE");
+        map.put("Georgia", "GE");
+        map.put("Hungary", "HU");
+        map.put("Iceland", "IS");
+        map.put("Ireland", "IE");
+        map.put("Israel", "IL");
+        map.put("North Korea", "KP");
+        map.put("Latvia", "LV");
+        map.put("Liechtenstein", "LI");
+        map.put("Lithuania", "LT");
+        map.put("Luxembourg", "LU");
+        map.put("Moldova", "MD");
+        map.put("Northern Ireland", "NIR");
+        map.put("Palestine", "PS");
+        map.put("Puerto Rico", "PR");
+        map.put("Scotland", "SCT");
+        map.put("Seychelles", "SC");
+        map.put("Slovakia", "SK");
+        map.put("Slovenia", "SI");
+        map.put("Wales", "WLS");
 
         return map;
     }
+
+    public static int getFlagResId(Context context, String isoCode) {
+        if (isoCode == null) return R.drawable.flag_unknown;
+        String resName = "flag_" + isoCode.toLowerCase(Locale.ROOT);
+        int resId = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+        return resId == 0 ? R.drawable.flag_unknown : resId;
+    }
+
+    public static Map<String, String> getVariantToStandardMap() {
+        Map<String, String> map = new HashMap<>();
+        map.put("USA", "United States");
+        map.put("U.S.A.", "United States");
+        map.put("United States of America", "United States");
+        map.put("UAE", "United Arab Emirates");
+        map.put("U.A.E.", "United Arab Emirates");
+        map.put("UK", "England");
+        map.put("U.K.", "England");
+        map.put("Great Britain", "England");
+        map.put("Turkiye", "Turkey");
+        map.put("Türkiye", "Turkey");
+        map.put("Republic of Korea", "South Korea");
+        map.put("Korea Republic", "South Korea");
+        map.put("DPRK", "North Korea");
+        map.put("Democratic People's Republic of Korea", "North Korea");
+        map.put("Côte d'Ivoire", "Ivory Coast");
+        map.put("Cote d'Ivoire", "Ivory Coast");
+        map.put("Russian Federation", "Russia");
+        map.put("Islamic Republic of Iran", "Iran");
+        map.put("Syrian Arab Republic", "Syria");
+        map.put("State of Palestine", "Palestine");
+        map.put("Republic of Moldova", "Moldova");
+        map.put("Bolivarian Republic of Venezuela", "Venezuela");
+        map.put("Lao People's Democratic Republic", "Laos");
+        map.put("Czech Republic", "Czechia");
+        return map;
+    }
+
 }

@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -46,15 +47,18 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import model.FirstTeamPlayer;
 import model.Manager;
 import ui.FirstTeamPlayerRecAdapter;
+import util.NationalityFlagUtil;
 import util.UserApi;
 
 public class FirstTeamListActivity extends AppCompatActivity {
@@ -90,7 +94,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
     private EditText lastName;
     private TextView positionPicker;
     private EditText number;
-    private EditText nationality;
+    private AutoCompleteTextView nationality;
     private EditText overall;
     private EditText potentialLow;
     private EditText potentialHigh;
@@ -366,6 +370,17 @@ public class FirstTeamListActivity extends AppCompatActivity {
         loanSwitch = view.findViewById(R.id.loan_player_switch_ftp_create);
         createPlayerButton = view.findViewById(R.id.create_ft_player_button);
 
+        String[] countrySuggestions = getResources().getStringArray(R.array.nationalities);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, countrySuggestions);
+
+        nationality.setAdapter(adapter);
+
+        nationality.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) nationality.showDropDown();
+        });
+
         String[] positions = this.getResources().getStringArray(R.array.position_array);
         String[] years = this.getResources().getStringArray(R.array.years_array);
 
@@ -421,6 +436,9 @@ public class FirstTeamListActivity extends AppCompatActivity {
         String positionPlayer = positionPicker.getText().toString().trim();
         String numberPlayer = number.getText().toString().trim();
         String nationalityPlayer = nationality.getText().toString().trim();
+        Map<String, String> variantMap = NationalityFlagUtil.getVariantToStandardMap();
+        String nationalityInput = variantMap.getOrDefault(nationalityPlayer, nationalityPlayer);
+
         String overallPlayer = overall.getText().toString().trim();
         String potentialLowPlayer = potentialLow.getText().toString().trim();
         String potentialHiPlayer = potentialHigh.getText().toString().trim();
@@ -440,7 +458,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
             player.setNumber(99);
         }
         player.setTeam(team);
-        player.setNationality(nationalityPlayer);
+        player.setNationality(nationalityInput);
         player.setOverall(Integer.parseInt(overallPlayer));
         if (!potentialLowPlayer.isEmpty()) {
             player.setPotentialLow(Integer.parseInt(potentialLowPlayer));
@@ -688,6 +706,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
                                 firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, barYear, 0, maxId);
                                 recyclerView.setAdapter(firstTeamPlayerRecAdapter);
                                 firstTeamPlayerRecAdapter.notifyDataSetChanged();
+                                yearPlayerCount.setText(playerList.size() + " players");
                             }
                         }
                     }
