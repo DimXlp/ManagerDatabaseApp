@@ -1,5 +1,8 @@
 package ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -108,6 +111,15 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
     public void onBindViewHolder(@NonNull FirstTeamPlayerRecAdapter.ViewHolder holder, int position) {
         FirstTeamPlayer player = playerList.get(position);
 
+        holder.playerTopBar.setOnClickListener(v -> {
+            boolean isVisible = holder.details.getVisibility() == View.VISIBLE;
+            if (isVisible) {
+                collapseView(holder.details);
+            } else {
+                expandView(holder.details);
+            }
+        });
+
         String fullName = player.getFullName();
         if (fullName.length() > 16 && fullName.contains(" ")) {
             String[] parts = fullName.split(" ");
@@ -162,7 +174,6 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
             slideLeft = AnimationUtils.loadAnimation(context, R.anim.slide_left);
             holder.itemView.startAnimation(slideLeft);
         }
-
     }
 
     @Override
@@ -170,11 +181,46 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         return playerList.size();
     }
 
+    public static void expandView(final View view) {
+        view.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = view.getMeasuredHeight();
+
+        view.getLayoutParams().height = 0;
+        view.setVisibility(View.VISIBLE);
+
+        ValueAnimator animator = ValueAnimator.ofInt(0, targetHeight);
+        animator.setDuration(200); // ms
+        animator.addUpdateListener(animation -> {
+            view.getLayoutParams().height = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+        animator.start();
+    }
+
+    public static void collapseView(final View view) {
+        final int initialHeight = view.getMeasuredHeight();
+
+        ValueAnimator animator = ValueAnimator.ofInt(initialHeight, 0);
+        animator.setDuration(200); // ms
+        animator.addUpdateListener(animation -> {
+            view.getLayoutParams().height = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                view.setVisibility(View.GONE);
+            }
+        });
+        animator.start();
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private AlertDialog.Builder aBuilder;
         private AlertDialog aDialog;
 
+        private LinearLayout playerTopBar;
         private TextView numberText;
         private TextView fullNameText;
         private TextView basicInfo;
@@ -209,6 +255,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
             super(itemView);
             context = ctx;
 
+            playerTopBar = itemView.findViewById(R.id.player_top_bar);
             numberText = itemView.findViewById(R.id.player_number);
             fullNameText = itemView.findViewById(R.id.player_full_name);
             basicInfo = itemView.findViewById(R.id.player_basic_text);
