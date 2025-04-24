@@ -15,6 +15,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -32,6 +33,7 @@ import com.dimxlp.managerdb.ShortlistPlayersActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
@@ -46,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import enumeration.LoanEnum;
@@ -55,6 +58,7 @@ import model.FormerPlayer;
 import model.Manager;
 import model.ShortlistedPlayer;
 import model.Transfer;
+import util.NationalityFlagUtil;
 import util.UserApi;
 import util.ValueFormatter;
 
@@ -770,15 +774,16 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
         private void editPlayer(final ShortlistedPlayer player) {
             Log.d(LOG_TAG, "editPlayer called for player: " + player.getFullName());
 
-            builder = new AlertDialog.Builder(context);
+            BottomSheetDialog createDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.create_shortlisted_player_popup, null);
+            createDialog.setContentView(view);
 
             TextView title = view.findViewById(R.id.create_sh_player);
             final EditText firstName = view.findViewById(R.id.first_name_shp_create);
             final EditText lastName = view.findViewById(R.id.last_name_shp_create);
-            final Spinner positionSpinner = view.findViewById(R.id.position_spinner_shp_create);
-            final EditText nationality = view.findViewById(R.id.nationality_shp_create);
+            final TextView positionPicker = view.findViewById(R.id.position_picker_shp_create);
+            final AutoCompleteTextView nationality = view.findViewById(R.id.nationality_shp_create);
             final EditText overall = view.findViewById(R.id.overall_shp_create);
             final EditText potentialLow = view.findViewById(R.id.potential_low_shp_create);
             final EditText potentialHigh = view.findViewById(R.id.potential_high_shp_create);
@@ -813,13 +818,17 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                         }
                     });
 
-            ArrayAdapter<CharSequence> positionAdapter = ArrayAdapter.createFromResource(context, R.array.position_array, android.R.layout.simple_spinner_item);
-            positionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            positionSpinner.setAdapter(positionAdapter);
+            String[] positions = context.getResources().getStringArray(R.array.position_array);
+            positionPicker.setOnClickListener(v -> {
+                new android.app.AlertDialog.Builder(context)
+                        .setTitle("Select Position")
+                        .setItems(positions, (pickerDialog, which) -> positionPicker.setText(positions[which]))
+                        .show();
+            });
 
             firstName.setText(player.getFirstName());
             lastName.setText(player.getLastName());
-            positionSpinner.setSelection(positionAdapter.getPosition(player.getPosition()));
+            positionPicker.setText(player.getPosition());
             teamText.setText(player.getTeam());
             nationality.setText(player.getNationality());
             overall.setText(String.valueOf(player.getOverall()));
@@ -843,7 +852,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                 public void onClick(View v) {
                     if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
-                        !positionSpinner.getSelectedItem().toString().isEmpty() &&
+                        !positionPicker.getText().toString().isEmpty() &&
                         !teamText.getText().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty()) {
                         shPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
@@ -861,6 +870,10 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                     documentReference = shPlayersColRef.document(ds.getId());
                                                 }
                                             }
+                                            String nationalityPlayer = nationality.getText().toString().trim();
+                                            Map<String, String> variantMap = NationalityFlagUtil.getVariantToStandardMap();
+                                            String nationalityInput = variantMap.getOrDefault(nationalityPlayer, nationalityPlayer);
+
                                             String ptlLow = potentialLow.getText().toString().trim();
                                             String ptlHi = potentialHigh.getText().toString().trim();
                                             String v = value.getText().toString().trim().replaceAll(",", "");
@@ -869,8 +882,8 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                             documentReference.update("firstName", firstName.getText().toString().trim(),
                                                     "lastName", lastName.getText().toString().trim(),
                                                     "fullName", firstName.getText().toString().trim() + " " + lastName.getText().toString().trim(),
-                                                    "position", positionSpinner.getSelectedItem().toString().trim(),
-                                                    "nationality", nationality.getText().toString().trim(),
+                                                    "position", positionPicker.getText().toString().trim(),
+                                                    "nationality", nationalityInput,
                                                     "overall", Integer.parseInt(overall.getText().toString().trim()),
                                                     "potentialLow", (!ptlLow.isEmpty()) ? Integer.parseInt(ptlLow) : 0,
                                                     "potentialHigh", (!ptlHi.isEmpty()) ? Integer.parseInt(ptlHi) : 0,

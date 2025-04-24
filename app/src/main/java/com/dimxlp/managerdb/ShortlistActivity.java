@@ -9,15 +9,13 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +30,7 @@ import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
@@ -81,9 +80,9 @@ public class ShortlistActivity extends AppCompatActivity {
 
     private EditText firstName;
     private EditText lastName;
-    private Spinner positionSpinner;
+    private TextView positionPicker;
     private EditText team;
-    private EditText nationality;
+    private AutoCompleteTextView nationality;
     private EditText overall;
     private EditText potLow;
     private EditText potHigh;
@@ -224,12 +223,13 @@ public class ShortlistActivity extends AppCompatActivity {
 
     private void createPopupDialog() {
         Log.d(LOG_TAG, "Creating popup dialog for adding a shortlisted player.");
-        builder = new AlertDialog.Builder(this);
+        BottomSheetDialog createDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.create_shortlisted_player_popup, null);
+        createDialog.setContentView(view);
 
         firstName = view.findViewById(R.id.first_name_shp_create);
         lastName = view.findViewById(R.id.last_name_shp_create);
-        positionSpinner = view.findViewById(R.id.position_spinner_shp_create);
+        positionPicker = view.findViewById(R.id.position_picker_shp_create);
         team = view.findViewById(R.id.team_shp_create);
         nationality = view.findViewById(R.id.nationality_shp_create);
         overall = view.findViewById(R.id.overall_shp_create);
@@ -269,9 +269,24 @@ public class ShortlistActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching manager data for currency.", e));
 
-        ArrayAdapter<CharSequence> positionAdapter = ArrayAdapter.createFromResource(this, R.array.position_array, android.R.layout.simple_spinner_item);
-        positionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        positionSpinner.setAdapter(positionAdapter);
+        String[] countrySuggestions = getResources().getStringArray(R.array.nationalities);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, countrySuggestions);
+
+        nationality.setAdapter(adapter);
+
+        nationality.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) nationality.showDropDown();
+        });
+
+        String[] positions = this.getResources().getStringArray(R.array.position_array);
+        positionPicker.setOnClickListener(v -> {
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("Select Position")
+                    .setItems(positions, (pickerDialog, which) -> positionPicker.setText(positions[which]))
+                    .show();
+        });
 
         createButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -279,7 +294,7 @@ public class ShortlistActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, "Create player button clicked.");
                 if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
-                        !positionSpinner.getSelectedItem().toString().isEmpty() &&
+                        !positionPicker.getText().toString().isEmpty() &&
                         !team.getText().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty()) {
                     Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
@@ -292,9 +307,7 @@ public class ShortlistActivity extends AppCompatActivity {
             }
         });
 
-        builder.setView(view);
-        dialog = builder.create();
-        dialog.show();
+        createDialog.show();
     }
 
     private void createPlayer() {
@@ -308,7 +321,7 @@ public class ShortlistActivity extends AppCompatActivity {
         } else {
             fullNamePlayer = lastNamePlayer;
         }
-        final String positionPlayer = positionSpinner.getSelectedItem().toString().trim();
+        final String positionPlayer = positionPicker.getText().toString().trim();
         String nationalityPlayer = nationality.getText().toString().trim();
         String overallPlayer = overall.getText().toString().trim();
         String potLowPlayer = potLow.getText().toString().trim();

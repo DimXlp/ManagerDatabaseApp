@@ -376,7 +376,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
 
         firstName = view.findViewById(R.id.first_name_shp_create);
         lastName = view.findViewById(R.id.last_name_shp_create);
-        positionSpinner = view.findViewById(R.id.position_spinner_shp_create);
+//        positionSpinner = view.findViewById(R.id.position_spinner_shp_create);
         team = view.findViewById(R.id.team_shp_create);
         nationality = view.findViewById(R.id.nationality_shp_create);
         overall = view.findViewById(R.id.overall_shp_create);

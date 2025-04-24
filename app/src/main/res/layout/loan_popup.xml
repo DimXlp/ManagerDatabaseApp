@@ -101,11 +101,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/chivo"
+            android:gravity="top|start"
             android:inputType="textMultiLine"
             android:lines="3"
-            android:minLines="2"
             android:maxLines="10"
-            android:gravity="top|start"
+            android:minLines="2"
             android:textColor="@android:color/black" />
     </com.google.android.material.textfield.TextInputLayout>
 

@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -31,6 +32,7 @@ import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.Timestamp;
@@ -45,10 +47,12 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import model.Manager;
 import model.YouthTeamPlayer;
+import util.NationalityFlagUtil;
 import util.UserApi;
 
 public class YouthTeamActivity extends AppCompatActivity {
@@ -68,7 +72,7 @@ public class YouthTeamActivity extends AppCompatActivity {
     private EditText lastName;
     private TextView positionPicker;
     private EditText number;
-    private EditText nationality;
+    private AutoCompleteTextView nationality;
     private EditText overall;
     private EditText potentialLow;
     private EditText potentialHigh;
@@ -223,8 +227,9 @@ public class YouthTeamActivity extends AppCompatActivity {
     private void createPopupDialog() {
         Log.d(LOG_TAG, "Creating popup dialog for adding a youth team player.");
 
-        builder = new AlertDialog.Builder(this);
+        BottomSheetDialog createDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.create_youth_team_player_popup, null);
+        createDialog.setContentView(view);
 
         firstName = view.findViewById(R.id.first_name_ytp_create);
         lastName = view.findViewById(R.id.last_name_ytp_create);
@@ -236,6 +241,17 @@ public class YouthTeamActivity extends AppCompatActivity {
         potentialHigh = view.findViewById(R.id.potential_high_ytp_create);
         yearScouted = view.findViewById(R.id.year_scouted_picker_ytp_create);
         createPlayerButton = view.findViewById(R.id.create_yt_player_button);
+
+        String[] countrySuggestions = getResources().getStringArray(R.array.nationalities);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, countrySuggestions);
+
+        nationality.setAdapter(adapter);
+
+        nationality.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) nationality.showDropDown();
+        });
 
         String[] positions = this.getResources().getStringArray(R.array.position_array);
         String[] years = this.getResources().getStringArray(R.array.years_array);
@@ -272,7 +288,8 @@ public class YouthTeamActivity extends AppCompatActivity {
                 }
             }
         });
-        dialog.show();
+
+        createDialog.show();
     }
 
     private void createPlayer() {
@@ -289,6 +306,9 @@ public class YouthTeamActivity extends AppCompatActivity {
         String positionPlayer = positionPicker.getText().toString().trim();
         String numberPlayer = number.getText().toString().trim();
         String nationalityPlayer = nationality.getText().toString().trim();
+        Map<String, String> variantMap = NationalityFlagUtil.getVariantToStandardMap();
+        String nationalityInput = variantMap.getOrDefault(nationalityPlayer, nationalityPlayer);
+
         String overallPlayer = overall.getText().toString().trim();
         String potentialLowPlayer = potentialLow.getText().toString().trim();
         String potentialHiPlayer = potentialHigh.getText().toString().trim();
@@ -307,7 +327,7 @@ public class YouthTeamActivity extends AppCompatActivity {
             player.setNumber(99);
         }
         player.setTeam(team);
-        player.setNationality(nationalityPlayer);
+        player.setNationality(nationalityInput);
         player.setOverall(Integer.parseInt(overallPlayer));
         if (!potentialLowPlayer.isEmpty()) {
             player.setPotentialLow(Integer.parseInt(potentialLowPlayer));

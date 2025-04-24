@@ -290,6 +290,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                             teamPlayerCount.setText(ytPlayerList.size() + " players");
                             Log.d(LOG_TAG, "Former Youth Team players listed successfully.");
                         } else {
+                            teamPlayerCount.setText(ytPlayerList.size() + " players");
                             Log.w(LOG_TAG, "No former Youth Team players found.");
                         }
                     }
@@ -326,6 +327,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                             teamPlayerCount.setText(ftPlayerList.size() + " players");
                             Log.d(LOG_TAG, "Former First Team players listed successfully.");
                         } else {
+                            teamPlayerCount.setText(ftPlayerList.size() + " players");
                             Log.w(LOG_TAG, "No former First Team players found.");
                         }
                     }
@@ -568,6 +570,7 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                                 teamPlayerCount.setText(ytPlayerList.size() + " players");
                             }
                         } else {
+                            teamPlayerCount.setText(ftPlayerList.size() + " players");
                             Log.w(LOG_TAG, "No former players found.");
                         }
                     }
