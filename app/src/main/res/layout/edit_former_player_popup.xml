@@ -70,15 +70,27 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <Spinner
-                android:id="@+id/position_spinner_frm_edit"
-                android:layout_below="@+id/last_name_til_frm_edit"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="120dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:paddingVertical="8dp"
-                android:entries="@array/position_array"
-                android:backgroundTint="#616161"/>
+                android:layout_below="@+id/last_name_til_frm_edit"
+                android:layout_marginTop="8dp"
+                android:hint="Position"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/position_picker_frm_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:inputType="none"
+                    android:drawableEnd="@drawable/ic_arrow_drop_down"
+                    android:gravity="center_vertical"
+                    android:fontFamily="@font/chivo"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/number_til_frm_edit"
@@ -113,14 +125,13 @@
                 app:boxStrokeColor="#D4AF37"
                 app:boxStrokeWidth="2dp">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <AutoCompleteTextView
                     android:id="@+id/nationality_frm_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/chivo"
-                    android:inputType="textPersonName"
-                    android:textColor="@android:color/black"
-                    android:maxLines="1"/>
+                    android:inputType="text"
+                    android:textColor="@android:color/black"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -179,7 +190,7 @@
                 app:boxStrokeWidth="2dp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/potential_high__frm_edit"
+                    android:id="@+id/potential_high_frm_edit"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/chivo"
@@ -189,71 +200,80 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
-                android:id="@+id/year_signed_text_frm_edit"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/year_signed_picker_til_frm_edit"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Year Signed: "
-                android:fontFamily="@font/chivo"
-                android:textSize="16sp"
-                android:textColor="#616161"
-                android:layout_below="@+id/overall_til_frm_edit"/>
-
-            <Spinner
-                android:id="@+id/year_signed_spinner_frm_edit"
                 android:layout_below="@+id/overall_til_frm_edit"
-                android:layout_toEndOf="@id/year_signed_text_frm_edit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:entries="@array/years_array"/>
+                android:layout_marginTop="8dp"
+                android:hint="Year Signed"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
-            <TextView
-                android:id="@+id/year_scouted_text_frm_edit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Year Scouted: "
-                android:fontFamily="@font/chivo"
-                android:textSize="16sp"
-                android:textColor="#616161"
-                android:layout_below="@+id/year_signed_text_frm_edit"/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/year_signed_picker_frm_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:inputType="none"
+                    android:drawableEnd="@drawable/ic_arrow_drop_down"
+                    android:gravity="center_vertical"
+                    android:fontFamily="@font/chivo"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <Spinner
-                android:id="@+id/year_scouted_spinner_frm_edit"
-                android:layout_below="@+id/year_signed_text_frm_edit"
-                android:layout_toEndOf="@id/year_scouted_text_frm_edit"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/year_scouted_picker_til_frm_edit"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:entries="@array/years_array"/>
+                android:layout_below="@+id/year_signed_picker_til_frm_edit"
+                android:layout_marginTop="8dp"
+                android:hint="Year Scouted"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
 
-            <TextView
-                android:id="@+id/year_left_text_frm_edit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Year Left: "
-                android:fontFamily="@font/chivo"
-                android:textSize="16sp"
-                android:textColor="#616161"
-                android:layout_below="@+id/year_scouted_text_frm_edit"/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/year_scouted_picker_frm_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:inputType="none"
+                    android:drawableEnd="@drawable/ic_arrow_drop_down"
+                    android:gravity="center_vertical"
+                    android:fontFamily="@font/chivo"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <Spinner
-                android:id="@+id/year_left_spinner_frm_edit"
-                android:layout_below="@+id/year_scouted_text_frm_edit"
-                android:layout_toEndOf="@id/year_left_text_frm_edit"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/year_left_picker_til_frm_edit"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:entries="@array/years_array"/>
+                android:layout_below="@+id/year_scouted_picker_til_frm_edit"
+                android:layout_marginTop="8dp"
+                android:hint="Year Left"
+                app:boxStrokeColor="#D4AF37"
+                app:boxStrokeWidth="2dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/year_left_picker_frm_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:inputType="none"
+                    android:drawableEnd="@drawable/ic_arrow_drop_down"
+                    android:gravity="center_vertical"
+                    android:fontFamily="@font/chivo"
+                    android:textColor="@android:color/black"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/edit_frm_player_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/year_left_text_frm_edit"
+                android:layout_below="@id/year_left_picker_til_frm_edit"
                 android:layout_marginTop="24dp"
                 android:background="@drawable/round_button"
                 android:backgroundTint="#D4AF37"

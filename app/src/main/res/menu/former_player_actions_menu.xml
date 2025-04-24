@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_edit"
+        android:title="Edit Player"
+        android:icon="@drawable/edit_outline_64" />
+    <item
+        android:id="@+id/action_shortlist"
+        android:title="Shortlist Player"
+        android:icon="@drawable/ic_add_list"
+        android:iconTint="@android:color/black"/>
+    <item
+        android:id="@+id/action_delete"
+        android:title="Delete Player"
+        android:icon="@android:drawable/ic_delete" />
+</menu>

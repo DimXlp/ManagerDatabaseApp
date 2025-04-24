@@ -12,314 +12,186 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:animateLayoutChanges="true" >
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <RelativeLayout
+        <!-- Top Row: Jersey Number + Full Name + 3-dot menu -->
+        <LinearLayout
+            android:id="@+id/player_top_bar_fpl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryDark"
-            android:padding="12dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="@color/colorPrimaryDark">
 
-            <!-- Player Number -->
             <TextView
                 android:id="@+id/number_fpl"
-                android:layout_width="30dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
-                android:text="99"
-                android:textAlignment="viewEnd"
+                android:text="10"
                 android:textColor="@android:color/white"
-                android:textSize="22sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_alignParentStart="true"
-                android:gravity="center"
-                tools:ignore="RtlCompat" />
+                android:fontFamily="@font/chivo" />
 
-            <ImageView
-                android:id="@+id/line_fpl_1"
-                android:layout_width="1dp"
-                android:layout_height="20dp"
-                android:layout_marginStart="43dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/colorPrimaryDark"/>
-
-            <!-- Player Name -->
             <TextView
                 android:id="@+id/full_name_fpl"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
-                android:text="First Last"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="Lionel Messi"
                 android:textColor="@android:color/white"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_toEndOf="@id/line_fpl_1"
-                android:layout_centerVertical="true"/>
+                android:fontFamily="@font/chivo" />
 
             <ImageView
-                android:id="@+id/position_oval_fpl"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/position_oval"
-                android:layout_toStartOf="@+id/position_fpl"/>
+                android:id="@+id/player_action_menu_fpl"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_three_dots"
+                android:contentDescription="Actions"
+                app:tint="@color/white" />
+        </LinearLayout>
 
-            <TextView
-                android:id="@+id/position_fpl"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="POS"
-                android:textAlignment="viewStart"
-                android:textColor="@android:color/white"
-                android:textSize="20sp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/details_fpl"
+        <!-- Expandable Section (initially hidden) -->
+        <LinearLayout
+            android:id="@+id/expandable_section_fpl"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/lighterGray"
-            android:paddingHorizontal="8dp"
-            android:paddingBottom="8dp">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@color/lighterGray">
 
-            <TextView
-                android:id="@+id/overall_text_fpl"
+            <LinearLayout
+                android:id="@+id/player_basic_info_container_fpl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="OVR"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/overall_fpl"
+                <TextView
+                    android:id="@+id/player_basic_text_fpl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ST · 91 · 87–94"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo" />
+
+                <ImageView
+                    android:id="@+id/player_flag_fpl"
+                    android:layout_width="20dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="4dp"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Flag" />
+
+                <TextView
+                    android:id="@+id/player_nationality_fpl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Argentina"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/player_year_info_container_fpl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="99"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/overall_text_fpl"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
 
-            <ImageView
-                android:id="@+id/line_fpl_2"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_toEndOf="@+id/overall_text_fpl"/>
+                <ImageView
+                    android:id="@+id/year_signed_icon_fpl"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_year_signed"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@android:color/white" />
 
-            <TextView
-                android:id="@+id/potential_text_fpl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="POT"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_toEndOf="@id/line_fpl_2"/>
+                <TextView
+                    android:id="@+id/year_signed_text_fpl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2021/22"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical" />
 
-            <TextView
-                android:id="@+id/potential_fpl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="99-99"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/potential_text_fpl"
-                android:layout_toEndOf="@+id/line_fpl_2"/>
+                <TextView
+                    android:id="@+id/year_separator_1_fpl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="·"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp" />
 
-            <ImageView
-                android:id="@+id/line_fpl_3"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_toEndOf="@+id/potential_fpl"/>
+                <ImageView
+                    android:id="@+id/year_scouted_icon_fpl"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_year_scouted"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@android:color/white" />
 
-            <TextView
-                android:id="@+id/nationality_text_fpl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="NATL"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_toEndOf="@id/line_fpl_3"/>
+                <TextView
+                    android:id="@+id/year_scouted_text_fpl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2021/22"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical" />
 
-            <TextView
-                android:id="@+id/nationality_fpl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="Country"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/nationality_text_fpl"
-                android:layout_toEndOf="@+id/line_fpl_3"/>
+                <TextView
+                    android:id="@+id/year_separator_2_fpl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="·"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp" />
 
-            <TextView
-                android:id="@+id/year_signed_text_fpl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="YR SGN"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_below="@+id/overall_fpl" />
+                <ImageView
+                    android:id="@+id/year_left_icon_fpl"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_goodbye_fill"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@android:color/white" />
 
-            <TextView
-                android:id="@+id/year_signed_fpl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="1993"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/year_signed_text_fpl"/>
+                <TextView
+                    android:id="@+id/year_left_text_fpl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2021/22"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical" />
+            </LinearLayout>
 
-            <ImageView
-                android:id="@+id/line_fpl_4"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_below="@+id/nationality_fpl"
-                android:layout_toEndOf="@+id/year_signed_fpl"/>
-
-            <TextView
-                android:id="@+id/year_scouted_text_fpl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="YR SCT"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_below="@+id/nationality_fpl"
-                android:layout_toEndOf="@+id/line_fpl_4"/>
-
-            <TextView
-                android:id="@+id/year_scouted_fpl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="1993"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/year_scouted_text_fpl"
-                android:layout_toEndOf="@+id/line_fpl_4"/>
-
-            <ImageView
-                android:id="@+id/line_fpl_5"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_below="@+id/nationality_fpl"
-                android:layout_toEndOf="@+id/year_scouted_fpl"/>
-
-            <TextView
-                android:id="@+id/year_left_text_fpl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="YR LFT"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_below="@+id/nationality_fpl"
-                android:layout_toEndOf="@+id/line_fpl_5"/>
-
-            <TextView
-                android:id="@+id/year_left_fpl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="1993"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/year_left_text_fpl"
-                android:layout_toEndOf="@+id/line_fpl_5"/>
-
-            <Button
-                android:id="@+id/edit_button_fpl"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/edit_outline_64"
-                android:backgroundTint="@color/white"
-                android:layout_below="@+id/year_scouted_fpl"/>
-
-            <Button
-                android:id="@+id/list_add_button_fpl"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/add_outline_64"
-                android:backgroundTint="@color/white"
-                android:layout_below="@+id/year_scouted_fpl"
-                android:layout_toEndOf="@+id/edit_button_fpl"/>
-
-            <Button
-                android:id="@+id/delete_button_fpl"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@android:drawable/ic_delete"
-                android:backgroundTint="@color/colorAccent"
-                android:layout_below="@+id/year_scouted_fpl"
-                android:layout_toEndOf="@+id/list_add_button_fpl"/>
-
-
-        </RelativeLayout>
-
+        </LinearLayout>
 
     </LinearLayout>
-
-
+    
 </androidx.cardview.widget.CardView>

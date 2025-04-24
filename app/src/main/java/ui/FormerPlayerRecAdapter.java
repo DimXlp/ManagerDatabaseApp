@@ -1,5 +1,8 @@
 package ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -9,15 +12,18 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +36,7 @@ import com.dimxlp.managerdb.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -39,9 +46,11 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import model.FormerPlayer;
 import model.ShortlistedPlayer;
+import util.NationalityFlagUtil;
 import util.UserApi;
 
 public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRecAdapter.ViewHolder> {
@@ -82,57 +91,60 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
 
     @Override
     public void onBindViewHolder(@NonNull FormerPlayerRecAdapter.ViewHolder holder, int position) {
-
         FormerPlayer player = formerPlayerList.get(position);
 
-        holder.numberText.setText(String.valueOf(player.getNumber()));
-        holder.fullNameText.setText(player.getFullName());
-        holder.positionText.setText(player.getPosition());
-        holder.overallNoText.setText(String.valueOf(player.getOverall()));
-        if (player.getPotentialLow() != 0 && player.getPotentialHigh() != 0) {
-            holder.potentialNoText.setText(String.format("%d-%d", player.getPotentialLow(), player.getPotentialHigh()));
-        } else {
-            holder.potentialNoText.setText("??-??");
-        }
-        holder.countryText.setText(player.getNationality());
-        String ySigned = player.getYearSigned();
-        if (!ySigned.equals("0")) {
-            holder.yearSignedDateText.setText(ySigned);
-        } else {
-            holder.yearSignedDateText.setText("????/??");
-        }
-        String yScouted = player.getYearScouted();
-        if (!yScouted.equals("0")) {
-            holder.yearScoutedDateText.setText(yScouted);
-        } else {
-            holder.yearScoutedDateText.setText("????/??");
-        }
-        holder.yearLeftDateText.setText(player.getYearLeft());
+        holder.playerTopBar.setOnClickListener(v -> {
+            boolean isVisible = holder.details.getVisibility() == View.VISIBLE;
+            if (isVisible) {
+                collapseView(holder.details);
+            } else {
+                expandView(holder.details);
+            }
+        });
 
-        GradientDrawable gradientDrawable = (GradientDrawable) holder.positionOval.getBackground();
-        String pos = holder.positionText.getText().toString().trim();
-        if (pos.equals("CB") ||
-                pos.equals("RB") ||
-                pos.equals("RWB") ||
-                pos.equals("LB") ||
-                pos.equals("LWB")) {
-            gradientDrawable.setColor(Color.YELLOW);
-        } else if (pos.equals("CM") ||
-                pos.equals("CDM") ||
-                pos.equals("CAM") ||
-                pos.equals("RM") ||
-                pos.equals("LM")) {
-            gradientDrawable.setColor(Color.GREEN);
-        } else if (pos.equals("ST") ||
-                pos.equals("CF") ||
-                pos.equals("LF") ||
-                pos.equals("RF") ||
-                pos.equals("RW") ||
-                pos.equals("LW")) {
-            gradientDrawable.setColor(Color.BLUE);
-        } else {
-            gradientDrawable.setColor(Color.parseColor("#FFA500"));
+        String fullName = player.getFullName();
+        if (fullName.length() > 16 && fullName.contains(" ")) {
+            String[] parts = fullName.split(" ");
+            fullName = parts[0].charAt(0) + ". " + parts[1];
         }
+
+        holder.numberText.setText(String.valueOf(player.getNumber()));
+        holder.fullNameText.setText(fullName);
+        StringBuilder basic = new StringBuilder();
+        basic.append(player.getPosition());
+        basic.append(" · ").append(player.getOverall());
+        if (player.getPotentialLow() != 0 && player.getPotentialHigh() != 0) {
+            basic.append(" · ").append(player.getPotentialLow()).append("–").append(player.getPotentialHigh());
+        }
+        basic.append(" · ");
+        holder.basicInfo.setText(basic);
+
+        String nationality = player.getNationality();
+        String iso = NationalityFlagUtil.getNationalityToIsoMap().getOrDefault(nationality, "un");
+        int flagResId = NationalityFlagUtil.getFlagResId(context, iso);
+
+        holder.playerFlag.setImageResource(flagResId);
+        holder.playerNationality.setText(nationality);
+
+        boolean hasSigned = player.getYearSigned() != null && !player.getYearSigned().equals("0");
+        boolean hasScouted = player.getYearScouted() != null && !player.getYearScouted().equals("0");
+        boolean hasLeft = player.getYearLeft() != null && !player.getYearLeft().equals("0");
+
+        holder.signedText.setText(hasSigned ? player.getYearSigned() : null);
+        holder.signedText.setVisibility(hasSigned ? View.VISIBLE : View.GONE);
+        holder.signedIcon.setVisibility(hasSigned ? View.VISIBLE : View.GONE);
+
+        holder.scoutedText.setText(hasScouted ? player.getYearScouted() : null);
+        holder.scoutedText.setVisibility(hasScouted ? View.VISIBLE : View.GONE);
+        holder.scoutedIcon.setVisibility(hasScouted ? View.VISIBLE : View.GONE);
+
+        holder.leftText.setText(hasLeft ? player.getYearLeft() : null);
+        holder.leftText.setVisibility(hasLeft ? View.VISIBLE : View.GONE);
+        holder.leftIcon.setVisibility(hasLeft ? View.VISIBLE : View.GONE);
+
+        holder.separator1.setVisibility((hasSigned && hasScouted) ? View.VISIBLE : View.GONE);
+        holder.separator2.setVisibility(((hasScouted || hasSigned) && hasLeft) ? View.VISIBLE : View.GONE);
+        holder.yearContainer.setVisibility((hasSigned || hasScouted || hasLeft) ? View.VISIBLE : View.GONE);
 
         holder.details.setVisibility(View.GONE);
 
@@ -150,43 +162,81 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
         return formerPlayerList.size();
     }
 
+    public static void expandView(final View view) {
+        view.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = view.getMeasuredHeight();
+
+        view.getLayoutParams().height = 0;
+        view.setVisibility(View.VISIBLE);
+
+        ValueAnimator animator = ValueAnimator.ofInt(0, targetHeight);
+        animator.setDuration(200); // ms
+        animator.addUpdateListener(animation -> {
+            view.getLayoutParams().height = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+        animator.start();
+    }
+
+    public static void collapseView(final View view) {
+        final int initialHeight = view.getMeasuredHeight();
+
+        ValueAnimator animator = ValueAnimator.ofInt(initialHeight, 0);
+        animator.setDuration(200); // ms
+        animator.addUpdateListener(animation -> {
+            view.getLayoutParams().height = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                view.setVisibility(View.GONE);
+            }
+        });
+        animator.start();
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder{
 
+        private LinearLayout playerTopBar;
         private TextView numberText;
         private TextView fullNameText;
-        private TextView positionText;
-        private TextView overallNoText;
-        private TextView potentialNoText;
-        private TextView countryText;
-        private TextView yearSignedDateText;
-        private TextView yearScoutedDateText;
-        private TextView yearLeftDateText;
-        private ImageView positionOval;
-        private Button listAddButton;
-        private Button deleteButton;
-        private Button editButton;
-        private EditText currentTeam;
-        private Button setTeamButton;
-        private RelativeLayout details;
-        private AlertDialog dialog;
+        private TextView basicInfo;
+        private ImageView playerFlag;
+        private TextView playerNationality;
+        private TextView signedText;
+        private TextView scoutedText;
+        private TextView leftText;
+        private View signedIcon;
+        private View scoutedIcon;
+        private View leftIcon;
+        private TextView separator1;
+        private TextView separator2;
+        private View yearContainer;
+        private LinearLayout details;
+        private ImageView actionMenu;
 
         public ViewHolder(@NonNull View itemView, Context ctx) {
             super(itemView);
+            context = ctx;
 
+            playerTopBar = itemView.findViewById(R.id.player_top_bar_fpl);
             numberText = itemView.findViewById(R.id.number_fpl);
             fullNameText = itemView.findViewById(R.id.full_name_fpl);
-            positionText = itemView.findViewById(R.id.position_fpl);
-            overallNoText = itemView.findViewById(R.id.overall_fpl);
-            potentialNoText = itemView.findViewById(R.id.potential_fpl);
-            countryText = itemView.findViewById(R.id.nationality_fpl);
-            yearSignedDateText = itemView.findViewById(R.id.year_signed_fpl);
-            yearScoutedDateText = itemView.findViewById(R.id.year_scouted_fpl);
-            yearLeftDateText = itemView.findViewById(R.id.year_left_fpl);
-            listAddButton = itemView.findViewById(R.id.list_add_button_fpl);
-            positionOval = itemView.findViewById(R.id.position_oval_fpl);
-            deleteButton = itemView.findViewById(R.id.delete_button_fpl);
-            editButton = itemView.findViewById(R.id.edit_button_fpl);
-            details = itemView.findViewById(R.id.details_fpl);
+            basicInfo = itemView.findViewById(R.id.player_basic_text_fpl);
+            playerFlag = itemView.findViewById(R.id.player_flag_fpl);
+            playerNationality = itemView.findViewById(R.id.player_nationality_fpl);
+            signedText = itemView.findViewById(R.id.year_signed_text_fpl);
+            scoutedText = itemView.findViewById(R.id.year_scouted_text_fpl);
+            leftText = itemView.findViewById(R.id.year_left_text_fpl);
+            signedIcon = itemView.findViewById(R.id.year_signed_icon_fpl);
+            scoutedIcon = itemView.findViewById(R.id.year_scouted_icon_fpl);
+            leftIcon = itemView.findViewById(R.id.year_left_icon_fpl);
+            separator1 = itemView.findViewById(R.id.year_separator_1_fpl);
+            separator2 = itemView.findViewById(R.id.year_separator_2_fpl);
+            yearContainer = itemView.findViewById(R.id.player_year_info_container_fpl);
+            details = itemView.findViewById(R.id.expandable_section_fpl);
+            actionMenu = itemView.findViewById(R.id.player_action_menu_fpl);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -199,84 +249,97 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                 }
             });
 
-            editButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int position = getAdapterPosition();
-                    editPlayer(formerPlayerList.get(position));
-                }
-            });
+            actionMenu.setOnClickListener(view -> {
+                PopupMenu popupMenu = new PopupMenu(context, actionMenu);
+                MenuInflater inflater = popupMenu.getMenuInflater();
+                inflater.inflate(R.menu.former_player_actions_menu, popupMenu.getMenu());
 
-            listAddButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which){
-                                case DialogInterface.BUTTON_POSITIVE:
-                                    AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
-                                    View view = LayoutInflater.from(context).inflate(R.layout.current_team_popup, null);
+                var position = getAdapterPosition();
+                var player = formerPlayerList.get(position);
 
-                                    currentTeam = view.findViewById(R.id.current_team_add_list);
-                                    setTeamButton = view.findViewById(R.id.set_team_button_add_list);
+                popupMenu.setOnMenuItemClickListener(menuItem -> {
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_edit:
+                            clickEditPlayerButton(player);
+                            return true;
+                        case R.id.action_shortlist:
+                            clickShortlistPlayerButton();
+                            return true;
+                        case R.id.action_delete:
+                            clickDeletePlayerButton();
+                            return true;
+                        default:
+                            return false;
+                    }
+                });
 
-                                    setTeamButton.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            if (!currentTeam.getText().toString().isEmpty()) {
-                                                addToList(formerPlayerList.get(getAdapterPosition()));
-                                            } else {
-                                                Toast.makeText(context, "Field required", Toast.LENGTH_LONG).show();
-                                            }
-                                        }
-                                    });
-
-                                    aBuilder.setView(view);
-                                    AlertDialog aDialog = aBuilder.create();
-                                    aDialog.show();
-
-                                    break;
-
-                                case DialogInterface.BUTTON_NEGATIVE:
-                                    //No button clicked
-                                    break;
-                            }
-                        }
-                    };
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setMessage("Do you want to add this player to the shortlist?").setPositiveButton("Yes", dialogClickListener)
-                            .setNegativeButton("No", dialogClickListener).show();
-                }
-            });
-
-            deleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which){
-                                case DialogInterface.BUTTON_POSITIVE:
-                                    deletePlayer(formerPlayerList.get(getAdapterPosition()));
-                                    break;
-
-                                case DialogInterface.BUTTON_NEGATIVE:
-                                    //No button clicked
-                                    break;
-                            }
-                        }
-                    };
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setMessage("Do you want to delete this player?").setPositiveButton("Yes", dialogClickListener)
-                            .setNegativeButton("No", dialogClickListener).show();
-                }
+                popupMenu.show();
             });
         }
 
-        private void addToList(final FormerPlayer player) {
+        private void clickDeletePlayerButton() {
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which){
+                        case DialogInterface.BUTTON_POSITIVE:
+                            deletePlayer(formerPlayerList.get(getAdapterPosition()));
+                            break;
+
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //No button clicked
+                            break;
+                    }
+                }
+            };
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setMessage("Do you want to delete this player?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        }
+
+        private void clickShortlistPlayerButton() {
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which){
+                        case DialogInterface.BUTTON_POSITIVE:
+                            AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
+                            View view = LayoutInflater.from(context).inflate(R.layout.current_team_popup, null);
+
+                            TextView currentTeam = view.findViewById(R.id.current_team_add_list);
+                            Button setTeamButton = view.findViewById(R.id.set_team_button_add_list);
+
+                            setTeamButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if (!currentTeam.getText().toString().isEmpty()) {
+                                        addToList(formerPlayerList.get(getAdapterPosition()), currentTeam);
+                                    } else {
+                                        Toast.makeText(context, "Field required", Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            });
+
+                            aBuilder.setView(view);
+                            AlertDialog aDialog = aBuilder.create();
+                            aDialog.show();
+
+                            break;
+
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //No button clicked
+                            break;
+                    }
+                }
+            };
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setMessage("Do you want to add this player to the shortlist?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        }
+
+        private void addToList(final FormerPlayer player, TextView currentTeam) {
             Log.d(LOG_TAG, "addToList called for player: " + player.getFullName());
 
             frmPlayerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
@@ -376,7 +439,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                     });
         }
 
-        private void editPlayer(final FormerPlayer player) {
+        private void clickEditPlayerButton(final FormerPlayer player) {
             if (barTeam.equals("First Team")) {
                 editFormerFirstTeamPlayer(player);
             } else {
@@ -388,68 +451,75 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
         private void editFormerYouthTeamPlayer(final FormerPlayer player) {
             Log.d(LOG_TAG, "editFormerYouthTeamPlayer called for player: " + player.getFullName());
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.edit_former_player_popup, null);
+            dialog.setContentView(view);
 
-            TextView title;
-            final EditText firstName;
-            final EditText lastName;
-            final Spinner positionSpinner;
-            final EditText number;
-            final EditText nationality;
-            final EditText overall;
-            final EditText potentialLow;
-            final EditText potentialHigh;
-            final TextView yearSignedTitle;
-            final Spinner yearSigned;
-            final Spinner yearScouted;
-            final Spinner yearLeft;
-            Button editPlayerButton;
+            TextView title = view.findViewById(R.id.edit_frm_player);
+            EditText firstName = view.findViewById(R.id.first_name_frm_edit);
+            EditText lastName = view.findViewById(R.id.last_name_frm_edit);
+            TextView positionPicker = view.findViewById(R.id.position_picker_frm_edit);
+            EditText number = view.findViewById(R.id.number_frm_edit);
+            AutoCompleteTextView nationality = view.findViewById(R.id.nationality_frm_edit);
+            EditText overall = view.findViewById(R.id.overall_frm_edit);
+            EditText potentialLow = view.findViewById(R.id.potential_low_frm_edit);
+            EditText potentialHigh = view.findViewById(R.id.potential_high_frm_edit);
+            TextView yearSigned = view.findViewById(R.id.year_signed_picker_frm_edit);
+            TextView yearScouted = view.findViewById(R.id.year_scouted_picker_frm_edit);
+            TextView yearLeft = view.findViewById(R.id.year_left_picker_frm_edit);
+            Button editPlayerButton = view.findViewById(R.id.edit_frm_player_button);
 
-            title = view.findViewById(R.id.edit_frm_player);
-            firstName = view.findViewById(R.id.first_name_frm_edit);
-            lastName = view.findViewById(R.id.last_name_frm_edit);
-            positionSpinner = view.findViewById(R.id.position_spinner_frm_edit);
-            number = view.findViewById(R.id.number_frm_edit);
-            nationality = view.findViewById(R.id.nationality_frm_edit);
-            overall = view.findViewById(R.id.overall_frm_edit);
-            potentialLow = view.findViewById(R.id.potential_low_frm_edit);
-            potentialHigh = view.findViewById(R.id.potential_high__frm_edit);
-            yearSignedTitle = view.findViewById(R.id.year_signed_text_frm_edit);
-            yearSigned = view.findViewById(R.id.year_signed_spinner_frm_edit);
-            yearScouted = view.findViewById(R.id.year_scouted_spinner_frm_edit);
-            yearLeft = view.findViewById(R.id.year_left_spinner_frm_edit);
-            editPlayerButton = view.findViewById(R.id.edit_frm_player_button);
-
-            yearSignedTitle.setVisibility(View.GONE);
             yearSigned.setVisibility(View.GONE);
 
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(context, R.array.position_array, android.R.layout.simple_spinner_item);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            positionSpinner.setAdapter(adapter);
+            String[] countrySuggestions = context.getResources().getStringArray(R.array.nationalities);
 
-            ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(context, R.array.years_array, android.R.layout.simple_spinner_item);
-            yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            yearSigned.setAdapter(yearAdapter);
-            yearScouted.setAdapter(yearAdapter);
-            yearLeft.setAdapter(yearAdapter);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                    context, android.R.layout.simple_dropdown_item_1line, countrySuggestions);
+
+            nationality.setAdapter(adapter);
+
+            nationality.setOnFocusChangeListener((v, hasFocus) -> {
+                if (hasFocus) nationality.showDropDown();
+            });
+
+            String[] positions = context.getResources().getStringArray(R.array.position_array);
+            String[] years = context.getResources().getStringArray(R.array.years_array);
+
+            positionPicker.setOnClickListener(v -> {
+                new AlertDialog.Builder(context)
+                        .setTitle("Select Position")
+                        .setItems(positions, (pickerDialog, which) -> positionPicker.setText(positions[which]))
+                        .show();
+            });
+
+            yearScouted.setOnClickListener(v -> {
+                new AlertDialog.Builder(context)
+                        .setTitle("Select Year Scouted")
+                        .setItems(years, (pickerDialog, which) -> yearScouted.setText(years[which]))
+                        .show();
+            });
+
+            yearLeft.setOnClickListener(v -> {
+                new AlertDialog.Builder(context)
+                        .setTitle("Select Year Left")
+                        .setItems(years, (pickerDialog, which) -> yearLeft.setText(years[which]))
+                        .show();
+            });
 
             firstName.setText(player.getFirstName());
             lastName.setText(player.getLastName());
-            positionSpinner.setSelection(adapter.getPosition(player.getPosition()));
+            positionPicker.setText(player.getPosition());
             number.setText(String.valueOf(player.getNumber()));
             nationality.setText(player.getNationality());
             overall.setText(String.valueOf(player.getOverall()));
             potentialLow.setText(String.valueOf(player.getPotentialLow()));
             potentialHigh.setText(String.valueOf(player.getPotentialHigh()));
-            yearSigned.setSelection(yearAdapter.getPosition(player.getYearSigned()));
-            yearScouted.setSelection(yearAdapter.getPosition(player.getYearScouted()));
-            yearLeft.setSelection(yearAdapter.getPosition(player.getYearLeft()));
+            yearSigned.setText(player.getYearSigned());
+            yearScouted.setText(player.getYearScouted());
+            yearLeft.setText(player.getYearLeft());
             Log.d(LOG_TAG, "Player data populated for editing: " + player.getFullName());
 
-            builder.setView(view);
-            dialog = builder.create();
             dialog.show();
 
             editPlayerButton.setOnClickListener(new View.OnClickListener() {
@@ -459,10 +529,10 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
 
                     if (!lastName.getText().toString().isEmpty() &&
                             !nationality.getText().toString().isEmpty() &&
-                            !positionSpinner.getSelectedItem().toString().isEmpty() &&
+                            !positionPicker.getText().toString().isEmpty() &&
                             !overall.getText().toString().isEmpty() &&
-                            !yearScouted.getSelectedItem().toString().equals("0") &&
-                            !yearLeft.getSelectedItem().toString().equals("0")) {
+                            !yearScouted.getText().toString().isEmpty() &&
+                            !yearLeft.getText().toString().isEmpty()) {
 
                         frmPlayerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
@@ -482,22 +552,26 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                 }
                                             }
                                             String no = number.getText().toString().trim();
+                                            String nationalityPlayer = nationality.getText().toString().trim();
+                                            Map<String, String> variantMap = NationalityFlagUtil.getVariantToStandardMap();
+                                            String nationalityInput = variantMap.getOrDefault(nationalityPlayer, nationalityPlayer);
+
                                             String ptlLow = potentialLow.getText().toString().trim();
                                             String ptlHi = potentialHigh.getText().toString().trim();
-                                            String yScouted = yearScouted.getSelectedItem().toString().trim();
+                                            String yScouted = yearScouted.getText().toString().trim();
                                             assert documentReference != null;
                                             documentReference.update("firstName", firstName.getText().toString().trim(),
                                                     "lastName", lastName.getText().toString().trim(),
                                                     "fullName", firstName.getText().toString().trim() + " " + lastName.getText().toString().trim(),
-                                                    "position", positionSpinner.getSelectedItem().toString().trim(),
+                                                    "position", positionPicker.getText().toString().trim(),
                                                     "number", (!no.isEmpty()) ? Integer.parseInt(no) : 99,
-                                                    "nationality", nationality.getText().toString().trim(),
+                                                    "nationality", nationalityInput,
                                                     "overall", Integer.parseInt(overall.getText().toString().trim()),
                                                     "potentialLow", (!ptlLow.isEmpty()) ? Integer.parseInt(ptlLow) : 0,
                                                     "potentialHigh", (!ptlHi.isEmpty()) ? Integer.parseInt(ptlHi) : 0,
                                                     "yearSigned", "0",
                                                     "yearScouted", yScouted,
-                                                    "yearLeft", yearLeft.getSelectedItem().toString().trim())
+                                                    "yearLeft", yearLeft.getText().toString().trim())
                                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
@@ -532,64 +606,81 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
         private void editFormerFirstTeamPlayer(final FormerPlayer player) {
             Log.d(LOG_TAG, "editFormerFirstTeamPlayer called for player: " + player.getFullName());
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.edit_former_player_popup, null);
+            dialog.setContentView(view);
 
-            TextView title;
-            final EditText firstName;
-            final EditText lastName;
-            final Spinner positionSpinner;
-            final EditText number;
-            final EditText nationality;
-            final EditText overall;
-            final EditText potentialLow;
-            final EditText potentialHigh;
-            final Spinner yearSigned;
-            final Spinner yearScouted;
-            final Spinner yearLeft;
-            Button editPlayerButton;
+            TextView title = view.findViewById(R.id.edit_frm_player);
+            EditText firstName = view.findViewById(R.id.first_name_frm_edit);
+            EditText lastName = view.findViewById(R.id.last_name_frm_edit);
+            TextView positionPicker = view.findViewById(R.id.position_picker_frm_edit);
+            EditText number = view.findViewById(R.id.number_frm_edit);
+            AutoCompleteTextView nationality = view.findViewById(R.id.nationality_frm_edit);
+            EditText overall = view.findViewById(R.id.overall_frm_edit);
+            EditText potentialLow = view.findViewById(R.id.potential_low_frm_edit);
+            EditText potentialHigh = view.findViewById(R.id.potential_high_frm_edit);
+            TextView yearSigned = view.findViewById(R.id.year_signed_picker_frm_edit);
+            TextView yearScouted = view.findViewById(R.id.year_scouted_picker_frm_edit);
+            TextView yearLeft = view.findViewById(R.id.year_left_picker_frm_edit);
+            Button editPlayerButton = view.findViewById(R.id.edit_frm_player_button);
 
-            title = view.findViewById(R.id.edit_frm_player);
-            firstName = view.findViewById(R.id.first_name_frm_edit);
-            lastName = view.findViewById(R.id.last_name_frm_edit);
-            positionSpinner = view.findViewById(R.id.position_spinner_frm_edit);
-            number = view.findViewById(R.id.number_frm_edit);
-            nationality = view.findViewById(R.id.nationality_frm_edit);
-            overall = view.findViewById(R.id.overall_frm_edit);
-            potentialLow = view.findViewById(R.id.potential_low_frm_edit);
-            potentialHigh = view.findViewById(R.id.potential_high__frm_edit);
-            yearSigned = view.findViewById(R.id.year_signed_spinner_frm_edit);
-            yearScouted = view.findViewById(R.id.year_scouted_spinner_frm_edit);
-            yearLeft = view.findViewById(R.id.year_left_spinner_frm_edit);
-            editPlayerButton = view.findViewById(R.id.edit_frm_player_button);
+            String[] countrySuggestions = context.getResources().getStringArray(R.array.nationalities);
 
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(context, R.array.position_array, android.R.layout.simple_spinner_item);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            positionSpinner.setAdapter(adapter);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                    context, android.R.layout.simple_dropdown_item_1line, countrySuggestions);
 
-            ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(context, R.array.years_array, android.R.layout.simple_spinner_item);
-            yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            yearSigned.setAdapter(yearAdapter);
-            yearScouted.setAdapter(yearAdapter);
-            yearLeft.setAdapter(yearAdapter);
+            nationality.setAdapter(adapter);
+
+            nationality.setOnFocusChangeListener((v, hasFocus) -> {
+                if (hasFocus) nationality.showDropDown();
+            });
+
+            String[] positions = context.getResources().getStringArray(R.array.position_array);
+            String[] years = context.getResources().getStringArray(R.array.years_array);
+
+            positionPicker.setOnClickListener(v -> {
+                new AlertDialog.Builder(context)
+                        .setTitle("Select Position")
+                        .setItems(positions, (pickerDialog, which) -> positionPicker.setText(positions[which]))
+                        .show();
+            });
+
+            yearSigned.setOnClickListener(v -> {
+                new AlertDialog.Builder(context)
+                        .setTitle("Select Year Signed")
+                        .setItems(years, (pickerDialog, which) -> yearSigned.setText(years[which]))
+                        .show();
+            });
+
+            yearScouted.setOnClickListener(v -> {
+                new AlertDialog.Builder(context)
+                        .setTitle("Select Year Scouted")
+                        .setItems(years, (pickerDialog, which) -> yearScouted.setText(years[which]))
+                        .show();
+            });
+
+            yearLeft.setOnClickListener(v -> {
+                new AlertDialog.Builder(context)
+                        .setTitle("Select Year Left")
+                        .setItems(years, (pickerDialog, which) -> yearLeft.setText(years[which]))
+                        .show();
+            });
 
             firstName.setText(player.getFirstName());
             lastName.setText(player.getLastName());
-            positionSpinner.setSelection(adapter.getPosition(player.getPosition()));
+            positionPicker.setText(player.getPosition());
             number.setText(String.valueOf(player.getNumber()));
             nationality.setText(player.getNationality());
             overall.setText(String.valueOf(player.getOverall()));
             potentialLow.setText(String.valueOf(player.getPotentialLow()));
             potentialHigh.setText(String.valueOf(player.getPotentialHigh()));
-            yearSigned.setSelection(yearAdapter.getPosition(player.getYearSigned()));
-            yearScouted.setSelection(yearAdapter.getPosition(player.getYearScouted()));
-            yearLeft.setSelection(yearAdapter.getPosition(player.getYearLeft()));
+            yearSigned.setText(player.getYearSigned());
+            yearScouted.setText(player.getYearScouted());
+            yearLeft.setText(player.getYearLeft());
             Log.d(LOG_TAG, "Player data populated for editing: " + player.getFullName());
 
-            builder.setView(view);
-            final AlertDialog dialog1 = builder.create();
-            dialog1.show();
+            dialog.show();
 
             editPlayerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -598,10 +689,10 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
 
                     if (!lastName.getText().toString().isEmpty() &&
                             !nationality.getText().toString().isEmpty() &&
-                            !positionSpinner.getSelectedItem().toString().isEmpty() &&
+                            !positionPicker.getText().toString().isEmpty() &&
                             !overall.getText().toString().isEmpty() &&
-                            !yearSigned.getSelectedItem().toString().equals("0") &&
-                            !yearLeft.getSelectedItem().toString().equals("0")) {
+                            !yearSigned.getText().toString().isEmpty() &&
+                            !yearLeft.getText().toString().isEmpty()) {
                         Log.d(LOG_TAG, "Validation successful. Proceeding to update player.");
 
                         frmPlayerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
@@ -621,29 +712,33 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                 }
                                             }
                                             String no = number.getText().toString().trim();
+                                            String nationalityPlayer = nationality.getText().toString().trim();
+                                            Map<String, String> variantMap = NationalityFlagUtil.getVariantToStandardMap();
+                                            String nationalityInput = variantMap.getOrDefault(nationalityPlayer, nationalityPlayer);
+
                                             String ptlLow = potentialLow.getText().toString().trim();
                                             String ptlHi = potentialHigh.getText().toString().trim();
-                                            String yScouted = yearScouted.getSelectedItem().toString().trim();
+                                            String yScouted = yearScouted.getText().toString().trim();
                                             assert documentReference != null;
                                             Log.d(LOG_TAG, "Document reference found for player: " + player.getFullName());
                                             documentReference.update("firstName", firstName.getText().toString().trim(),
                                                     "lastName", lastName.getText().toString().trim(),
                                                     "fullName", firstName.getText().toString().trim() + " " + lastName.getText().toString().trim(),
-                                                    "position", positionSpinner.getSelectedItem().toString().trim(),
+                                                    "position", positionPicker.getText().toString().trim(),
                                                     "number", (!no.isEmpty()) ? Integer.parseInt(no) : 99,
-                                                    "nationality", nationality.getText().toString().trim(),
+                                                    "nationality", nationalityInput,
                                                     "overall", Integer.parseInt(overall.getText().toString().trim()),
                                                     "potentialLow", (!ptlLow.isEmpty()) ? Integer.parseInt(ptlLow) : 0,
                                                     "potentialHigh", (!ptlHi.isEmpty()) ? Integer.parseInt(ptlHi) : 0,
-                                                    "yearSigned", yearSigned.getSelectedItem().toString().trim(),
+                                                    "yearSigned", yearSigned.getText().toString().trim(),
                                                     "yearScouted", (!yScouted.equals("0")) ? yScouted : "0",
-                                                    "yearLeft", yearLeft.getSelectedItem().toString().trim())
+                                                    "yearLeft", yearLeft.getText().toString().trim())
                                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Player successfully updated: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
-                                                            dialog1.dismiss();
+                                                            dialog.dismiss();
                                                             Intent intent = new Intent(context, FormerPlayersListActivity.class);
                                                             intent.putExtra("managerId", managerId);
                                                             intent.putExtra("team", team);
