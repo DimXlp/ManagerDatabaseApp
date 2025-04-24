@@ -50,6 +50,7 @@ import java.util.Map;
 import model.FirstTeamPlayer;
 import model.FormerPlayer;
 import model.YouthTeamPlayer;
+import util.AnimationUtil;
 import util.NationalityFlagUtil;
 import util.UserApi;
 
@@ -98,9 +99,9 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
         holder.playerTopBar.setOnClickListener(v -> {
             boolean isVisible = holder.details.getVisibility() == View.VISIBLE;
             if (isVisible) {
-                collapseView(holder.details);
+                AnimationUtil.collapseView(holder.details);
             } else {
-                expandView(holder.details);
+                AnimationUtil.expandView(holder.details);
             }
         });
 
@@ -149,40 +150,6 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
     @Override
     public int getItemCount() {
         return playerList.size();
-    }
-
-    public static void expandView(final View view) {
-        view.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        final int targetHeight = view.getMeasuredHeight();
-
-        view.getLayoutParams().height = 0;
-        view.setVisibility(View.VISIBLE);
-
-        ValueAnimator animator = ValueAnimator.ofInt(0, targetHeight);
-        animator.setDuration(200); // ms
-        animator.addUpdateListener(animation -> {
-            view.getLayoutParams().height = (int) animation.getAnimatedValue();
-            view.requestLayout();
-        });
-        animator.start();
-    }
-
-    public static void collapseView(final View view) {
-        final int initialHeight = view.getMeasuredHeight();
-
-        ValueAnimator animator = ValueAnimator.ofInt(initialHeight, 0);
-        animator.setDuration(200); // ms
-        animator.addUpdateListener(animation -> {
-            view.getLayoutParams().height = (int) animation.getAnimatedValue();
-            view.requestLayout();
-        });
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                view.setVisibility(View.GONE);
-            }
-        });
-        animator.start();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
