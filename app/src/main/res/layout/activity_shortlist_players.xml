@@ -21,34 +21,51 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
+            android:layout_marginBottom="32dp"
             android:animateLayoutChanges="true">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardView"
+            <!-- Updated Position Navigation Container -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/position_navigation_container_shp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="8dp"
-                tools:ignore="MissingConstraints">
+                android:padding="12dp"
+                android:background="@drawable/flat_background_rounded"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
+                <Button
+                    android:id="@+id/prev_position_button_shp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/ic_baseline_keyboard_arrow_left_24"
+                    android:backgroundTint="@color/colorAccent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <Button
+                    android:id="@+id/next_position_button_shp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/ic_baseline_keyboard_arrow_right_24"
+                    android:backgroundTint="@color/colorAccent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <LinearLayout
+                    android:id="@+id/position_picker_container_shp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:background="@color/lighterGray">
-
-                    <Button
-                        android:id="@+id/prev_position_button_shp"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:background="@drawable/ic_baseline_keyboard_arrow_left_24"
-                        android:backgroundTint="@color/colorAccent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:paddingHorizontal="12dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/prev_position_button_shp"
+                    app:layout_constraintEnd_toStartOf="@id/next_position_button_shp">
 
                     <TextView
                         android:id="@+id/position_text_shp"
@@ -58,54 +75,54 @@
                         android:text="Goalkeepers"
                         android:textColor="@color/colorAccent"
                         android:textSize="20sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/next_position_button_shp"
-                        app:layout_constraintStart_toEndOf="@+id/prev_position_button_shp"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        android:textStyle="bold" />
 
-                    <Button
-                        android:id="@+id/next_position_button_shp"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:background="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        android:backgroundTint="@color/colorAccent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                    <TextView
+                        android:id="@+id/position_player_count_shp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="17 players"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="14sp"
+                        android:fontFamily="@font/chivo"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-            </androidx.cardview.widget.CardView>
-
+            <View
+                android:id="@+id/divider_shp"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lighterGray"
+                android:layout_marginHorizontal="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/position_navigation_container_shp"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rec_view_shp"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="match_parent"
                 android:layout_margin="16dp"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="2"
-                app:layout_constraintTop_toBottomOf="@+id/cardView"
-                app:layout_constraintBottom_toTopOf="@+id/add_new_sh_player_button"
-                android:clipToPadding="false"
-                android:paddingBottom="80dp" />
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/add_new_sh_player_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:contentDescription="@string/add_player"
-                android:src="@drawable/ic_baseline_add_24"
-                app:backgroundTint="@color/colorAccent"
-                app:tint="@color/white"
-                app:layout_anchorGravity="bottom|end"
+                app:layout_constrainedHeight="true"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider_shp"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <Button
+                android:id="@+id/add_player_button_shp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add Player"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold"
+                android:background="@drawable/round_button"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/chivo"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- Bottom Native Ad -->
@@ -113,48 +130,33 @@
             android:id="@+id/native_ad_view_bottom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="6dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            android:layout_marginHorizontal="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="1dp">
+                android:background="@drawable/ad_border"
+                android:padding="6dp">
 
-                <!-- Ad Headline -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ad"
+                    android:textStyle="bold"
+                    android:textColor="#D32F2F"
+                    android:textSize="12sp"
+                    android:paddingBottom="2dp"/>
+
                 <TextView
                     android:id="@+id/ad_headline_bottom"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/darker_gray" />
-
-                <!-- Ad Body -->
-                <TextView
-                    android:id="@+id/ad_body_bottom"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
                     android:textSize="14sp"
-                    android:textColor="@android:color/darker_gray" />
-
-                <!-- Call-to-Action Button -->
-                <Button
-                    android:id="@+id/ad_call_to_action_bottom"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:textColor="@color/colorAccent"
-                    android:padding="1dp"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimary" />
             </LinearLayout>
         </com.google.android.gms.ads.nativead.NativeAdView>
-
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
@@ -166,5 +168,4 @@
         android:background="@android:color/white"
         app:itemIconTint="@color/colorAccent"
         app:menu="@menu/drawer_menu" />
-
 </androidx.drawerlayout.widget.DrawerLayout>

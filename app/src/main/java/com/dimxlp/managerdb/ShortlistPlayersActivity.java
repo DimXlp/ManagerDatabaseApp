@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,15 +16,15 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.nativead.NativeAd;
@@ -31,6 +32,7 @@ import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
@@ -48,13 +50,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import enumeration.PositionEnum;
 import model.Manager;
 import model.ShortlistedPlayer;
 import ui.ShortlistedPlayerRecAdapter;
+import util.NationalityFlagUtil;
 import util.UserApi;
 import util.ValueFormatter;
 
@@ -83,17 +88,16 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
     private Button prevPositionButton;
     private Button nextPositionButton;
     private TextView positionText;
-    private FloatingActionButton addPlayerFab;
+    private TextView positionPlayerCount;
+    private Button addPlayerButton;
     private boolean ftPlayersExist;
     private boolean ytPlayersExist;
-    private AlertDialog.Builder builder;
-    private AlertDialog dialog;
 
     private EditText firstName;
     private EditText lastName;
-    private Spinner positionSpinner;
+    private TextView positionPicker;
     private EditText team;
-    private EditText nationality;
+    private AutoCompleteTextView nationality;
     private EditText overall;
     private EditText potLow;
     private EditText potHigh;
@@ -168,24 +172,38 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         managerNameHeader = headerLayout.findViewById(R.id.manager_name_header);
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
 
+        LinearLayout positionPickerLayout = findViewById(R.id.position_picker_container_shp);
+
         prevPositionButton = findViewById(R.id.prev_position_button_shp);
         nextPositionButton = findViewById(R.id.next_position_button_shp);
         positionText = findViewById(R.id.position_text_shp);
-        addPlayerFab = findViewById(R.id.add_new_sh_player_button);
+        addPlayerButton = findViewById(R.id.add_player_button_shp);
         positionText.setText(PositionEnum.GK.getCategory());
+        positionPlayerCount = findViewById(R.id.position_player_count_shp);
+
+        List<String> positionCategories = new ArrayList<>(
+                new LinkedHashSet<>(getAllPositionCategories()) // removes duplicates while preserving order
+        );
+        positionPickerLayout.setOnClickListener(v -> {
+            if (!positionCategories.isEmpty()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Select Position");
+                builder.setItems(positionCategories.toArray(new String[0]), (dialog, which) -> {
+                    String category = positionCategories.get(which);
+                    positionText.setText(category);
+                    listPlayers(category, 0);
+                });
+                builder.show();
+            }
+        });
 
         // Initialize Mobile Ads SDK
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
-        // Load Banner Ads
-//        AdView shortlistBanner = findViewById(R.id.shortlist_banner);
-//        AdRequest adBannerRequest = new AdRequest.Builder().build();
-//        shortlistBanner.loadAd(adBannerRequest);
-
         nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
         loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
-        addPlayerFab.setOnClickListener(new View.OnClickListener() {
+        addPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(LOG_TAG, "Add player FAB clicked.");
@@ -213,6 +231,14 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         nextPositionButton.setOnClickListener(nextPositionListener);
     }
 
+    private List<String> getAllPositionCategories() {
+        List<String> list = new ArrayList<>();
+        for (PositionEnum position : PositionEnum.values()) {
+            list.add(position.getCategory());
+        }
+        return list;
+    }
+
     private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
         AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
                 .forNativeAd(ad -> {
@@ -220,7 +246,6 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                         ad.destroy();
                         return;
                     }
-                    nativeAdBottom = ad;
                     populateNativeAdView(ad, nativeAdView);
                     Log.d(LOG_TAG, "Native ad loaded successfully.");
                 })
@@ -236,37 +261,21 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        Log.d(LOG_TAG, "Populating native ad view.");
-        // Dynamically assign IDs
-        int headlineId = R.id.ad_headline_bottom;
-        int bodyId = R.id.ad_body_bottom;
-        int callToActionId = R.id.ad_call_to_action_bottom;
-
-        // Set views for the NativeAdView
+        int headlineId =  R.id.ad_headline_bottom;
         nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
-        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
 
-        // Populate the Headline
-        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
-
-        // Populate the Body
-        if (nativeAd.getBody() != null) {
-            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
-            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        if (nativeAd.getHeadline() != null) {
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
         } else {
-            nativeAdView.getBodyView().setVisibility(View.GONE);
+            headlineView.setVisibility(View.GONE);
         }
 
-        // Populate the Call-to-Action
-        if (nativeAd.getCallToAction() != null) {
-            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
-            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getCallToActionView().setVisibility(View.GONE);
-        }
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
 
-        // Bind the NativeAd object to the NativeAdView
         nativeAdView.setNativeAd(nativeAd);
     }
 
@@ -371,12 +380,13 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
 
     private void createPopupDialog() {
         Log.d(LOG_TAG, "Creating popup dialog for adding a shortlisted player.");
-        builder = new AlertDialog.Builder(this);
+        BottomSheetDialog createDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.create_shortlisted_player_popup, null);
+        createDialog.setContentView(view);
 
         firstName = view.findViewById(R.id.first_name_shp_create);
         lastName = view.findViewById(R.id.last_name_shp_create);
-//        positionSpinner = view.findViewById(R.id.position_spinner_shp_create);
+        positionPicker = view.findViewById(R.id.position_picker_shp_create);
         team = view.findViewById(R.id.team_shp_create);
         nationality = view.findViewById(R.id.nationality_shp_create);
         overall = view.findViewById(R.id.overall_shp_create);
@@ -414,9 +424,24 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching manager data for currency.", e));
 
-        ArrayAdapter<CharSequence> positionAdapter = ArrayAdapter.createFromResource(this, R.array.position_array, android.R.layout.simple_spinner_item);
-        positionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        positionSpinner.setAdapter(positionAdapter);
+        String[] countrySuggestions = getResources().getStringArray(R.array.nationalities);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, countrySuggestions);
+
+        nationality.setAdapter(adapter);
+
+        nationality.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) nationality.showDropDown();
+        });
+
+        String[] positions = this.getResources().getStringArray(R.array.position_array);
+        positionPicker.setOnClickListener(v -> {
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("Select Position")
+                    .setItems(positions, (pickerDialog, which) -> positionPicker.setText(positions[which]))
+                    .show();
+        });
 
         createButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -424,7 +449,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, "Create player button clicked.");
                 if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
-                        !positionSpinner.getSelectedItem().toString().isEmpty() &&
+                        !positionPicker.getText().toString().isEmpty() &&
                         !team.getText().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty()) {
                     Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
@@ -437,9 +462,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
             }
         });
 
-        builder.setView(view);
-        dialog = builder.create();
-        dialog.show();
+        createDialog.show();
     }
 
     private void createPlayer() {
@@ -453,8 +476,11 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         } else {
             fullNamePlayer = lastNamePlayer;
         }
-        final String positionPlayer = positionSpinner.getSelectedItem().toString().trim();
+        final String positionPlayer = positionPicker.getText().toString().trim();
         String nationalityPlayer = nationality.getText().toString().trim();
+        Map<String, String> variantMap = NationalityFlagUtil.getVariantToStandardMap();
+        String nationalityInput = variantMap.getOrDefault(nationalityPlayer, nationalityPlayer);
+
         String overallPlayer = overall.getText().toString().trim();
         String potLowPlayer = potLow.getText().toString().trim();
         String potHighPlayer = potHigh.getText().toString().trim();
@@ -471,7 +497,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         player.setLastName(lastNamePlayer);
         player.setFullName(fullNamePlayer);
         player.setPosition(positionPlayer);
-        player.setNationality(nationalityPlayer);
+        player.setNationality(nationalityInput);
         player.setOverall(Integer.parseInt(overallPlayer));
         if (!potLowPlayer.isEmpty()) {
             player.setPotentialLow(Integer.parseInt(potLowPlayer));
@@ -611,6 +637,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                             shortlistedPlayerRecAdapter = new ShortlistedPlayerRecAdapter(ShortlistPlayersActivity.this, playerList, managerId, myTeam, position, buttonInt);
                             recyclerView.setAdapter(shortlistedPlayerRecAdapter);
                             shortlistedPlayerRecAdapter.notifyDataSetChanged();
+                            positionPlayerCount.setText(playerList.size() + " player(s)");
                             Log.d(LOG_TAG, "RecyclerView updated with shortlisted players.");
                         } else {
                             Log.w(LOG_TAG, "No players found for userId=" + UserApi.getInstance().getUserId() + ", managerId=" + managerId);
@@ -847,8 +874,10 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                             }
                             recyclerView.setAdapter(shortlistedPlayerRecAdapter);
                             shortlistedPlayerRecAdapter.notifyDataSetChanged();
+                            positionPlayerCount.setText(playerList.size() + " player(s)");
                             Log.d(LOG_TAG, "RecyclerView updated with shortlisted players.");
                         } else {
+                            positionPlayerCount.setText(playerList.size() + " player(s)");
                             Log.w(LOG_TAG, "No shortlisted players found for managerId=" + managerId);
                         }
                     }

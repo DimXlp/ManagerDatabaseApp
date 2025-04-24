@@ -46,10 +46,12 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import model.Manager;
 import model.ShortlistedPlayer;
+import util.NationalityFlagUtil;
 import util.UserApi;
 import util.ValueFormatter;
 
@@ -323,6 +325,9 @@ public class ShortlistActivity extends AppCompatActivity {
         }
         final String positionPlayer = positionPicker.getText().toString().trim();
         String nationalityPlayer = nationality.getText().toString().trim();
+        Map<String, String> variantMap = NationalityFlagUtil.getVariantToStandardMap();
+        String nationalityInput = variantMap.getOrDefault(nationalityPlayer, nationalityPlayer);
+
         String overallPlayer = overall.getText().toString().trim();
         String potLowPlayer = potLow.getText().toString().trim();
         String potHighPlayer = potHigh.getText().toString().trim();
@@ -339,7 +344,7 @@ public class ShortlistActivity extends AppCompatActivity {
         player.setLastName(lastNamePlayer);
         player.setFullName(fullNamePlayer);
         player.setPosition(positionPlayer);
-        player.setNationality(nationalityPlayer);
+        player.setNationality(nationalityInput);
         player.setOverall(Integer.parseInt(overallPlayer));
         if (!potLowPlayer.isEmpty()) {
             player.setPotentialLow(Integer.parseInt(potLowPlayer));
@@ -375,12 +380,10 @@ public class ShortlistActivity extends AppCompatActivity {
                             case "CB":
                                 barPosition = "Center Backs";
                                 break;
-                            case "RB":
-                            case "RWB":
+                            case "RB", "RWB":
                                 barPosition = "Right Backs";
                                 break;
-                            case "LB":
-                            case "LWB":
+                            case "LB", "LWB":
                                 barPosition = "Left Backs";
                                 break;
                             case "CDM":
@@ -392,18 +395,13 @@ public class ShortlistActivity extends AppCompatActivity {
                             case "CAM":
                                 barPosition = "Center Attacking Mids";
                                 break;
-                            case "RM":
-                            case "RW":
+                            case "RM", "RW":
                                 barPosition = "Right Wingers";
                                 break;
-                            case "LM":
-                            case "LW":
+                            case "LM", "LW":
                                 barPosition = "Left Wingers";
                                 break;
-                            case "ST":
-                            case "CF":
-                            case "RF":
-                            case "LF":
+                            case "ST", "CF", "RF", "LF":
                                 barPosition = "Strikers";
                                 break;
 
