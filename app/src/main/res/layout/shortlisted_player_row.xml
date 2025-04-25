@@ -16,297 +16,161 @@
         android:orientation="vertical"
         android:animateLayoutChanges="true" >
 
-        <RelativeLayout
+        <!-- Top Row: Jersey Number + Full Name + 3-dot menu -->
+        <LinearLayout
+            android:id="@+id/player_top_bar_shp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryDark"
-            android:padding="12dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="@color/colorPrimaryDark">
 
             <TextView
-                android:id="@+id/full_name_shp"
-                android:layout_width="wrap_content"
+                android:id="@+id/player_full_name_shp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
-                android:text="First Last"
+                android:layout_weight="1"
+                android:text="Lionel Messi"
                 android:textColor="@android:color/white"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_centerVertical="true"/>
+                android:fontFamily="@font/chivo" />
 
             <ImageView
-                android:id="@+id/position_oval_shp"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/position_oval"
-                android:layout_toStartOf="@+id/position_shp"/>
+                android:id="@+id/player_action_menu_shp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_three_dots"
+                android:contentDescription="Actions"
+                app:tint="@color/white" />
+        </LinearLayout>
 
-            <TextView
-                android:id="@+id/position_shp"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="POS"
-                android:textAlignment="viewStart"
-                android:textColor="@android:color/white"
-                android:textSize="20sp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/details_shp"
+        <!-- Expandable Section (initially hidden) -->
+        <LinearLayout
+            android:id="@+id/expandable_section_shp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/lighterGray"
-            android:paddingHorizontal="8dp"
-            android:paddingBottom="8dp">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@color/lighterGray">
 
-            <TextView
-                android:id="@+id/overall_text_shp"
+            <LinearLayout
+                android:id="@+id/player_basic_info_container_shp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="OVR"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/overall_shp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="99"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/overall_text_shp"/>
+                <TextView
+                    android:id="@+id/player_basic_text_shp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ST · 91 · 87–94"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo" />
 
-            <ImageView
-                android:id="@+id/line_shp_2"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_toEndOf="@+id/overall_text_shp"/>
+                <ImageView
+                    android:id="@+id/player_flag_shp"
+                    android:layout_width="20dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="4dp"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Flag" />
 
-            <TextView
-                android:id="@+id/potential_text_shp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="POT"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_toEndOf="@+id/line_shp_2"/>
-
-            <TextView
-                android:id="@+id/potential_shp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="99-99"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/potential_text_shp"
-                android:layout_toEndOf="@+id/line_shp_2"/>
-
-            <ImageView
-                android:id="@+id/line_shp_3"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_toEndOf="@+id/potential_shp"/>
-
-            <TextView
-                android:id="@+id/nationality_text_shp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="NATL"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_toEndOf="@id/line_shp_3"/>
-
-            <TextView
-                android:id="@+id/nationality_shp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="Country"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/nationality_text_shp"
-                android:layout_toEndOf="@id/line_shp_3"/>
+                <TextView
+                    android:id="@+id/player_nationality_shp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Argentina"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/team_text_shp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="TEAM"
+                android:layout_marginTop="4dp"
+                android:text="Inter Miami"
                 android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_below="@+id/overall_shp"/>
+                android:textSize="18sp"
+                android:fontFamily="@font/chivo"
+                android:layout_gravity="center_vertical" />
 
-            <TextView
-                android:id="@+id/team_shp"
+            <LinearLayout
+                android:id="@+id/player_financial_info_container_shp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="Free"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/team_text_shp"/>
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/value_text_shp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="VALUE"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_below="@+id/team_shp" />
+                <ImageView
+                    android:id="@+id/value_icon_shp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_euros"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@android:color/white" />
 
-            <TextView
-                android:id="@+id/value_shp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="$150000000"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/value_text_shp"/>
+                <TextView
+                    android:id="@+id/value_text_shp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="20,000,000"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical" />
 
-            <ImageView
-                android:id="@+id/line_shp_4"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_below="@+id/team_shp"
-                android:layout_toEndOf="@+id/value_shp"/>
+                <TextView
+                    android:id="@+id/finance_separator_shp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="·"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp" />
 
-            <TextView
-                android:id="@+id/wage_text_shp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="WAGE"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_below="@+id/team_shp"
-                android:layout_toEndOf="@+id/line_shp_4"/>
+                <ImageView
+                    android:id="@+id/wage_icon_shp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_wallet"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@android:color/white" />
 
-            <TextView
-                android:id="@+id/wage_shp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="$350000"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/wage_text_shp"
-                android:layout_toEndOf="@+id/line_shp_4"/>
+                <TextView
+                    android:id="@+id/wage_text_shp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="150,000"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/comments_shp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="4dp"
                 android:fontFamily="@font/chivo"
                 android:text="Potential to be special"
                 android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/value_shp"/>
+                android:textSize="14sp" />
 
-            <Button
-                android:id="@+id/edit_button_shp"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/edit_outline_64"
-                android:backgroundTint="@color/white"
-                android:layout_below="@+id/comments_shp"/>
-
-            <Button
-                android:id="@+id/buy_button_shp"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/buy_outline_64"
-                android:backgroundTint="@color/white"
-                android:layout_below="@+id/comments_shp"
-                android:layout_toEndOf="@+id/edit_button_shp"/>
-
-            <Button
-                android:id="@+id/loan_button_shp"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/loan_outline_64"
-                android:backgroundTint="@color/white"
-                android:layout_below="@+id/comments_shp"
-                android:layout_toEndOf="@+id/buy_button_shp"/>
-
-            <Button
-                android:id="@+id/delete_button_shp"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="@android:drawable/ic_delete"
-                android:backgroundTint="@color/colorAccent"
-                android:layout_below="@+id/comments_shp"
-                android:layout_toEndOf="@+id/loan_button_shp"/>
-
-
-        </RelativeLayout>
-
-
+        </LinearLayout>
     </LinearLayout>
-
 
 </androidx.cardview.widget.CardView>

@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_edit"
+        android:title="Edit Player"
+        android:icon="@drawable/edit_outline_64" />
+    <item
+        android:id="@+id/action_buy"
+        android:title="Buy Player"
+        android:icon="@drawable/buy_outline_64" />
+    <item
+        android:id="@+id/action_loan"
+        android:title="Loan Player"
+        android:icon="@drawable/loan_outline_64" />
+    <item
+        android:id="@+id/action_delete"
+        android:title="Delete Player"
+        android:icon="@android:drawable/ic_delete" />
+</menu>

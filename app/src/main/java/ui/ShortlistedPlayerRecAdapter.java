@@ -5,22 +5,19 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.Spinner;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,8 +53,10 @@ import enumeration.PurchaseTransferEnum;
 import model.FirstTeamPlayer;
 import model.FormerPlayer;
 import model.Manager;
+import model.Player;
 import model.ShortlistedPlayer;
 import model.Transfer;
+import util.AnimationUtil;
 import util.NationalityFlagUtil;
 import util.UserApi;
 import util.ValueFormatter;
@@ -100,25 +99,49 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
 
     @Override
     public void onBindViewHolder(@NonNull final ShortlistedPlayerRecAdapter.ViewHolder holder, int position) {
-
         final ShortlistedPlayer player = playerList.get(position);
 
-        holder.fullNameText.setText(player.getFullName());
-        holder.positionText.setText(player.getPosition());
-        holder.overallNoText.setText(String.valueOf(player.getOverall()));
-        if (player.getPotentialLow() != 0 && player.getPotentialHigh() != 0) {
-            holder.potentialNoText.setText(String.format("%d-%d", player.getPotentialLow(), player.getPotentialHigh()));
-        } else {
-            holder.potentialNoText.setText("??-??");
-        }
-        holder.teamNameText.setText(player.getTeam());
-        holder.countryText.setText(player.getNationality());
+        holder.playerTopBar.setOnClickListener(v -> {
+            boolean isVisible = holder.details.getVisibility() == View.VISIBLE;
+            if (isVisible) {
+                AnimationUtil.collapseView(holder.details);
+            } else {
+                AnimationUtil.expandView(holder.details);
+            }
+        });
 
-        if (player.getComments().isEmpty()) {
-            holder.commentsText.setVisibility(View.GONE);
-        } else {
-            holder.commentsText.setText(player.getComments());
+        String fullName = player.getFullName();
+        if (fullName.length() > 16 && fullName.contains(" ")) {
+            String[] parts = fullName.split(" ");
+            fullName = parts[0].charAt(0) + ". " + parts[1];
         }
+
+        holder.fullNameText.setText(fullName);
+        StringBuilder basic = new StringBuilder();
+        basic.append(player.getPosition());
+        basic.append(" · ").append(player.getOverall());
+        if (player.getPotentialLow() != 0 && player.getPotentialHigh() != 0) {
+            basic.append(" · ").append(player.getPotentialLow()).append("–").append(player.getPotentialHigh());
+        }
+        basic.append(" · ");
+        holder.basicInfo.setText(basic);
+
+        String nationality = player.getNationality();
+        String iso = NationalityFlagUtil.getNationalityToIsoMap().getOrDefault(nationality, "un");
+        int flagResId = NationalityFlagUtil.getFlagResId(context, iso);
+
+        holder.playerFlag.setImageResource(flagResId);
+        holder.playerNationality.setText(nationality);
+
+        holder.teamNameText.setText(player.getTeam());
+
+        boolean hasValue = player.getValue() > 0;
+        boolean hasWage = player.getWage() > 0;
+
+        holder.valueIcon.setVisibility(hasValue ? View.VISIBLE : View.GONE);
+        holder.valueText.setVisibility(hasValue ? View.VISIBLE : View.GONE);
+        holder.wageIcon.setVisibility(hasWage? View.VISIBLE : View.GONE);
+        holder.wageText.setVisibility(hasWage? View.VISIBLE : View.GONE);
 
         managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("id", managerId)
@@ -134,45 +157,37 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                             }
                             Manager manager = managerList.get(0);
                             String currency = manager.getCurrency();
-                            if (player.getValue() != 0) {
-                                holder.valueNoText.setText(String.format("%s %s", currency, NumberFormat.getInstance().format(player.getValue())));
-                            } else {
-                                holder.valueNoText.setText(String.format("%s ???", currency));
+                            if (hasValue) {
+                                holder.valueText.setText(String.format("%s %s", currency, NumberFormat.getInstance().format(player.getValue())));
                             }
-                            if (player.getWage() != 0) {
-                                holder.wageNoText.setText(String.format("%s %s", currency, NumberFormat.getInstance().format(player.getWage())));
-                            } else {
-                                holder.wageNoText.setText(String.format("%s ???", currency));
+                            if (hasWage) {
+                                holder.wageText.setText(String.format("%s %s", currency, NumberFormat.getInstance().format(player.getWage())));
                             }
 
+                            switch (currency) {
+                                case "€":
+                                    holder.valueIcon.setImageResource(R.drawable.ic_euros);
+                                    break;
+                                case "$":
+                                    holder.valueIcon.setImageResource(R.drawable.ic_dollars);
+                                    break;
+                                case "£":
+                                    holder.valueIcon.setImageResource(R.drawable.ic_pounds);
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     }
                 });
 
-        GradientDrawable gradientDrawable = (GradientDrawable) holder.positionOval.getBackground();
-        String pos = holder.positionText.getText().toString().trim();
-        if (pos.equals("CB") ||
-                pos.equals("RB") ||
-                pos.equals("RWB") ||
-                pos.equals("LB") ||
-                pos.equals("LWB")) {
-            gradientDrawable.setColor(Color.YELLOW);
-        } else if (pos.equals("CM") ||
-                pos.equals("CDM") ||
-                pos.equals("CAM") ||
-                pos.equals("RM") ||
-                pos.equals("LM")) {
-            gradientDrawable.setColor(Color.GREEN);
-        } else if (pos.equals("ST") ||
-                pos.equals("CF") ||
-                pos.equals("LF") ||
-                pos.equals("RF") ||
-                pos.equals("RW") ||
-                pos.equals("LW")) {
-            gradientDrawable.setColor(Color.BLUE);
-        } else {
-            gradientDrawable.setColor(Color.parseColor("#FFA500"));
-        }
+        holder.financeSeparator.setVisibility((hasValue && hasWage) ? View.VISIBLE : View.GONE);
+        holder.playerFinancialInfo.setVisibility((hasValue || hasWage) ? View.VISIBLE : View.GONE);
+
+        boolean hasComments = !player.getComments().isEmpty();
+
+        holder.commentsText.setText(player.getComments());
+        holder.commentsText.setVisibility(hasComments ? View.VISIBLE : View.GONE);
 
         holder.details.setVisibility(View.GONE);
 
@@ -192,32 +207,31 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
+        private LinearLayout playerTopBar;
         private TextView fullNameText;
-        private ImageView positionOval;
-        private TextView positionText;
-        private TextView overallNoText;
-        private TextView potentialNoText;
+        private TextView basicInfo;
+        private ImageView playerFlag;
+        private TextView playerNationality;
         private TextView teamNameText;
-        private TextView countryText;
-        private TextView valueNoText;
-        private TextView wageNoText;
+        private LinearLayout playerFinancialInfo;
+        private ImageView valueIcon;
+        private TextView valueText;
+        private TextView financeSeparator;
+        private ImageView wageIcon;
+        private TextView wageText;
         private TextView commentsText;
-        private RelativeLayout details;
-        private Button buyButton;
-        private Button loanButton;
-        private Button deleteButton;
-        private Button editButton;
-        private AlertDialog.Builder builder;
-        private AlertDialog dialog;
-        private Spinner typeOfTransferSpinner;
+        private LinearLayout details;
+        private ImageView actionMenu;
+
+        private TextView typeOfTransferPicker;
         private TextInputLayout transferFeeTil;
         private EditText transferFee;
-        private TextView playerSpinnerText;
-        private Spinner playerSpinner;
+        private TextInputLayout playerPickerText;
+        private TextView playerPicker;
         private TextInputLayout wageTil;
         private EditText wage;
-        private EditText noOfContractYears;
-        private Spinner yearSigned;
+        private EditText contractYears;
+        private TextView yearSigned;
         private EditText comments;
         private Button transferButton;
         private long ftPlayerId;
@@ -225,22 +239,23 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
 
         public ViewHolder(@NonNull View itemView, Context ctx) {
             super(itemView);
+            context = ctx;
 
-            fullNameText = itemView.findViewById(R.id.full_name_shp);
-            positionOval = itemView.findViewById(R.id.position_oval_shp);
-            positionText = itemView.findViewById(R.id.position_shp);
-            overallNoText = itemView.findViewById(R.id.overall_shp);
-            potentialNoText = itemView.findViewById(R.id.potential_shp);
-            teamNameText = itemView.findViewById(R.id.team_shp);
-            countryText = itemView.findViewById(R.id.nationality_shp);
-            valueNoText = itemView.findViewById(R.id.value_shp);
-            wageNoText = itemView.findViewById(R.id.wage_shp);
+            playerTopBar = itemView.findViewById(R.id.player_top_bar_shp);
+            fullNameText = itemView.findViewById(R.id.player_full_name_shp);
+            basicInfo = itemView.findViewById(R.id.player_basic_text_shp);
+            playerFlag = itemView.findViewById(R.id.player_flag_shp);
+            playerNationality = itemView.findViewById(R.id.player_nationality_shp);
+            teamNameText = itemView.findViewById(R.id.team_text_shp);
+            playerFinancialInfo = itemView.findViewById(R.id.player_financial_info_container_shp);
+            valueIcon = itemView.findViewById(R.id.value_icon_shp);
+            valueText = itemView.findViewById(R.id.value_text_shp);
+            financeSeparator = itemView.findViewById(R.id.finance_separator_shp);
+            wageIcon = itemView.findViewById(R.id.wage_icon_shp);
+            wageText = itemView.findViewById(R.id.wage_text_shp);
             commentsText = itemView.findViewById(R.id.comments_shp);
-            details = itemView.findViewById(R.id.details_shp);
-            buyButton = itemView.findViewById(R.id.buy_button_shp);
-            loanButton = itemView.findViewById(R.id.loan_button_shp);
-            deleteButton = itemView.findViewById(R.id.delete_button_shp);
-            editButton = itemView.findViewById(R.id.edit_button_shp);
+            details = itemView.findViewById(R.id.expandable_section_shp);
+            actionMenu = itemView.findViewById(R.id.player_action_menu_shp);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -253,278 +268,312 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                 }
             });
 
-            buyButton.setOnClickListener(new View.OnClickListener() {
+            actionMenu.setOnClickListener(view -> {
+                PopupMenu popupMenu = new PopupMenu(context, actionMenu);
+                MenuInflater inflater = popupMenu.getMenuInflater();
+                inflater.inflate(R.menu.shortlist_players_action_menu, popupMenu.getMenu());
+
+                popupMenu.setOnMenuItemClickListener(menuItem -> {
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_edit:
+                            clickEditPlayerButton(playerList.get(getAdapterPosition()));
+                            return true;
+                        case R.id.action_buy:
+                            clickBuyPlayerButton();
+                            return true;
+                        case R.id.action_loan:
+                            clickLoanPlayerButton();
+                            return true;
+                        case R.id.action_delete:
+                            clickDeletePlayerButton();
+                            return true;
+                        default:
+                            return false;
+                    }
+                });
+
+                popupMenu.show();
+            });
+        }
+
+        private void clickDeletePlayerButton() {
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which){
-                                case DialogInterface.BUTTON_POSITIVE:
-                                    AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
-                                    View view = LayoutInflater.from(context).inflate(R.layout.transfer_popup, null);
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which){
+                        case DialogInterface.BUTTON_POSITIVE:
+                            deletePlayer(playerList.get(getAdapterPosition()));
+                            break;
 
-                                    typeOfTransferSpinner = view.findViewById(R.id.type_of_transfer_spinner);
-                                    transferFeeTil = view.findViewById(R.id.transfer_fee_til_buy);
-                                    transferFee = view.findViewById(R.id.transfer_fee_buy);
-                                    playerSpinnerText = view.findViewById(R.id.plus_player_text_buy);
-                                    playerSpinner = view.findViewById(R.id.plus_player_spinner_buy);
-                                    wageTil = view.findViewById(R.id.wage_til_buy);
-                                    wage = view.findViewById(R.id.wage_buy);
-                                    noOfContractYears = view.findViewById(R.id.contract_years_buy);
-                                    yearSigned = view.findViewById(R.id.year_signed_spinner_buy);
-                                    comments = view.findViewById(R.id.comments_buy);
-                                    transferButton = view.findViewById(R.id.transfer_button);
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //No button clicked
+                            break;
+                    }
+                }
+            };
 
-                                    ValueFormatter.formatValue(transferFee);
-                                    ValueFormatter.formatValue(wage);
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setMessage("Do you want to delete this player?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        }
 
-                                    List<String> transferTypes = Arrays.stream(PurchaseTransferEnum.values())
-                                            .map(PurchaseTransferEnum::getDescription)
-                                            .collect(Collectors.toList());
+        private void clickLoanPlayerButton() {
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which){
+                        case DialogInterface.BUTTON_POSITIVE:
+                            BottomSheetDialog loanDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+                            View view = LayoutInflater.from(context).inflate(R.layout.transfer_popup, null);
+                            loanDialog.setContentView(view);
 
-                                    ArrayAdapter<String> transferAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, transferTypes);
-                                    transferAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                    typeOfTransferSpinner.setAdapter(transferAdapter);
+                            typeOfTransferPicker = view.findViewById(R.id.type_of_transfer_picker_buy);
+                            transferFeeTil = view.findViewById(R.id.transfer_fee_til_buy);
+                            transferFee = view.findViewById(R.id.transfer_fee_buy);
+                            playerPickerText = view.findViewById(R.id.plus_player_picker_til_buy);
+                            playerPicker = view.findViewById(R.id.plus_player_picker_buy);
+                            wageTil = view.findViewById(R.id.wage_til_buy);
+                            wage = view.findViewById(R.id.wage_buy);
+                            contractYears = view.findViewById(R.id.contract_years_buy);
+                            yearSigned = view.findViewById(R.id.year_signed_picker_buy);
+                            comments = view.findViewById(R.id.comments_buy);
+                            transferButton = view.findViewById(R.id.transfer_button);
+                            transferButton.setText("Loan Player");
 
-                                    typeOfTransferSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            ValueFormatter.formatValue(wage);
+
+                            transferFeeTil.setVisibility(View.GONE);
+                            transferFee.setVisibility(View.GONE);
+                            playerPickerText.setVisibility(View.GONE);
+                            playerPicker.setVisibility(View.GONE);
+                            contractYears.setVisibility(View.GONE);
+
+                            typeOfTransferPicker.setText(LoanEnum.SHORT_TERM.getDescription());
+
+                            String[] transferTypes = getLoans();
+
+                            typeOfTransferPicker.setOnClickListener(v -> {
+                                new android.app.AlertDialog.Builder(context)
+                                        .setTitle("Select Loan Type")
+                                        .setItems(transferTypes, (pickerDialog, transfer) -> typeOfTransferPicker.setText(transferTypes[transfer]))
+                                        .show();
+                            });
+
+                            String[] years = context.getResources().getStringArray(R.array.years_array);
+
+                            yearSigned.setOnClickListener(v -> {
+                                new AlertDialog.Builder(context)
+                                        .setTitle("Select Year Signed")
+                                        .setItems(years, (pickerDialog, item) -> yearSigned.setText(years[item]))
+                                        .show();
+                            });
+
+                            managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                                    .whereEqualTo("id", managerId)
+                                    .get()
+                                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                                         @Override
-                                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                            String selectedTransferType = parent.getItemAtPosition(position).toString();
+                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            if (!queryDocumentSnapshots.isEmpty()) {
+                                                List<Manager> managerList = new ArrayList<>();
+                                                for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
+                                                    Manager manager = doc.toObject(Manager.class);
+                                                    managerList.add(manager);
+                                                }
+                                                Manager manager = managerList.get(0);
+                                                String currency = manager.getCurrency();
+                                                wageTil.setHint("Wage (in " + currency + ")");
+                                            }
+                                        }
+                                    });
 
-                                            if (PurchaseTransferEnum.FREE_TRANSFER.getDescription().equals(selectedTransferType)) {
+                            transferButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if (!yearSigned.getText().toString().isEmpty() &&
+                                            !typeOfTransferPicker.getText().toString().isEmpty()) {
+                                        transferPlayer(playerList.get(getAdapterPosition()), true);
+                                    } else {
+                                        Toast.makeText(context, "Transfer Type & Year Signed are required!", Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            });
+
+                            loanDialog.show();
+
+                            break;
+
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //No button clicked
+                            break;
+                    }
+                }
+            };
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setMessage("Do you want to loan this player?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        }
+
+        private void clickBuyPlayerButton() {
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which){
+                        case DialogInterface.BUTTON_POSITIVE:
+                            BottomSheetDialog buyDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+                            View view = LayoutInflater.from(context).inflate(R.layout.transfer_popup, null);
+                            buyDialog.setContentView(view);
+
+                            typeOfTransferPicker = view.findViewById(R.id.type_of_transfer_picker_buy);
+                            transferFeeTil = view.findViewById(R.id.transfer_fee_til_buy);
+                            transferFee = view.findViewById(R.id.transfer_fee_buy);
+                            playerPickerText = view.findViewById(R.id.plus_player_picker_til_buy);
+                            playerPicker = view.findViewById(R.id.plus_player_picker_buy);
+                            wageTil = view.findViewById(R.id.wage_til_buy);
+                            wage = view.findViewById(R.id.wage_buy);
+                            contractYears = view.findViewById(R.id.contract_years_buy);
+                            yearSigned = view.findViewById(R.id.year_signed_picker_buy);
+                            comments = view.findViewById(R.id.comments_buy);
+                            transferButton = view.findViewById(R.id.transfer_button);
+
+                            typeOfTransferPicker.setText(PurchaseTransferEnum.WITH_TRANSFER_FEE.getTransferType());
+
+                            ValueFormatter.formatValue(transferFee);
+                            ValueFormatter.formatValue(wage);
+
+                            String[] transferTypes = getPurchaseTransfers();
+
+                            typeOfTransferPicker.setOnClickListener(v -> {
+                                new android.app.AlertDialog.Builder(context)
+                                        .setTitle("Select Purchase Type")
+                                        .setItems(transferTypes, (pickerDialog, transfer) -> {
+                                            String selectedType = transferTypes[transfer];
+                                            typeOfTransferPicker.setText(selectedType);
+
+                                            if (PurchaseTransferEnum.FREE_TRANSFER.getTransferType().equals(selectedType)) {
                                                 transferFeeTil.setVisibility(View.GONE);
                                                 transferFee.setEnabled(false);
-                                                playerSpinnerText.setVisibility(View.GONE);
-                                                playerSpinner.setVisibility(View.GONE);
+                                                playerPickerText.setVisibility(View.GONE);
+                                                playerPicker.setVisibility(View.GONE);
                                             } else {
                                                 transferFeeTil.setVisibility(View.VISIBLE);
                                                 transferFee.setEnabled(true);
-                                                playerSpinnerText.setVisibility(View.VISIBLE);
-                                                playerSpinner.setVisibility(View.VISIBLE);
+                                                playerPickerText.setVisibility(View.VISIBLE);
+                                                playerPicker.setVisibility(View.VISIBLE);
                                             }
-                                        }
+                                        })
+                                        .show();
+                            });
 
+                            String[] years = context.getResources().getStringArray(R.array.years_array);
+
+                            yearSigned.setOnClickListener(v -> {
+                                new AlertDialog.Builder(context)
+                                        .setTitle("Select Year Signed")
+                                        .setItems(years, (pickerDialog, item) -> yearSigned.setText(years[item]))
+                                        .show();
+                            });
+
+                            playerPicker.setText("None");
+
+                            ftPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                                    .whereEqualTo("managerId", managerId)
+                                    .get()
+                                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                                         @Override
-                                        public void onNothingSelected(AdapterView<?> parent) {
+                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            if (!queryDocumentSnapshots.isEmpty()) {
+                                                List<FirstTeamPlayer> ftPlayerList = new ArrayList<>();
+                                                var firstPlayer = new FirstTeamPlayer();
+                                                firstPlayer.setFullName("None");
+                                                ftPlayerList.add(firstPlayer);
+                                                queryDocumentSnapshots.getDocuments().stream()
+                                                        .map(doc -> doc.toObject(FirstTeamPlayer.class))
+                                                        .forEach(ftPlayerList::add);
 
-                                        }
-                                    });
+                                                List<String> playerNames = ftPlayerList.stream()
+                                                        .map(Player::getFullName)
+                                                        .collect(Collectors.toList());
 
-                                    ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(context, R.array.years_array, android.R.layout.simple_spinner_item);
-                                    yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                    yearSigned.setAdapter(yearAdapter);
+                                                playerPicker.setOnClickListener(v -> {
+                                                    if (!playerNames.isEmpty()) {
+                                                        String[] nameArray = playerNames.toArray(new String[0]);
 
-                                    ftPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
-                                            .whereEqualTo("managerId", managerId)
-                                            .get()
-                                            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                                                @Override
-                                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                                    if (!queryDocumentSnapshots.isEmpty()) {
-                                                        List<FirstTeamPlayer> ftPlayerList = new ArrayList<>();
-                                                        var firstPlayer = new FirstTeamPlayer();
-                                                        firstPlayer.setFullName("");
-                                                        ftPlayerList.add(firstPlayer);
-                                                        queryDocumentSnapshots.getDocuments().stream()
-                                                                .map(doc -> doc.toObject(FirstTeamPlayer.class))
-                                                                .forEach(ftPlayerList::add);
+                                                        new AlertDialog.Builder(context)
+                                                                .setTitle("Select First Team Player")
+                                                                .setItems(nameArray, (dialog, which) -> {
+                                                                    FirstTeamPlayer selectedPlayer = ftPlayerList.get(which);
+                                                                    playerPicker.setText(selectedPlayer.getFullName());
 
-                                                        ArrayAdapter<FirstTeamPlayer> playerAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, ftPlayerList);
-                                                        playerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                                        playerSpinner.setAdapter(playerAdapter);
-                                                        playerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                                                            @Override
-                                                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                                                FirstTeamPlayer player = (FirstTeamPlayer) parent.getSelectedItem();
-                                                                ftPlayerId = player.getId();
-                                                                hasPlusPlayer = ftPlayerId > 0;
-                                                            }
-
-                                                            @Override
-                                                            public void onNothingSelected(AdapterView<?> parent) {
-
-                                                            }
-                                                        });
+                                                                    ftPlayerId = selectedPlayer.getId();
+                                                                    hasPlusPlayer = ftPlayerId > 0 && !selectedPlayer.getFullName().equals("None");
+                                                                })
+                                                                .show();
                                                     }
-                                                }
-                                            });
-
-                                    managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
-                                            .whereEqualTo("id", managerId)
-                                            .get()
-                                            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                                                @Override
-                                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                                    if (!queryDocumentSnapshots.isEmpty()) {
-                                                        List<Manager> managerList = new ArrayList<>();
-                                                        for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
-                                                            Manager manager = doc.toObject(Manager.class);
-                                                            managerList.add(manager);
-                                                        }
-                                                        Manager manager = managerList.get(0);
-                                                        String currency = manager.getCurrency();
-                                                        transferFeeTil.setHint("Transfer Fee (in " + currency + ")");
-                                                        wageTil.setHint("Wage (in " + currency + ")");
-                                                    }
-                                                }
-                                            });
-
-                                    transferButton.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            if (!yearSigned.getSelectedItem().toString().equals("0") &&
-                                                !typeOfTransferSpinner.getSelectedItem().toString().isEmpty()) {
-                                                transferPlayer(playerList.get(getAdapterPosition()), false);
-                                            } else {
-                                                Toast.makeText(context, "Transfer Type & Year Signed are required!", Toast.LENGTH_LONG).show();
+                                                });
                                             }
                                         }
                                     });
 
-                                    aBuilder.setView(view);
-                                    AlertDialog aDialog = aBuilder.create();
-                                    aDialog.show();
-
-                                    break;
-
-                                case DialogInterface.BUTTON_NEGATIVE:
-                                    //No button clicked
-                                    break;
-                            }
-                        }
-                    };
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setMessage("Do you want to buy this player?").setPositiveButton("Yes", dialogClickListener)
-                            .setNegativeButton("No", dialogClickListener).show();
-                }
-            });
-
-            loanButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which){
-                                case DialogInterface.BUTTON_POSITIVE:
-                                    AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
-                                    View view = LayoutInflater.from(context).inflate(R.layout.transfer_popup, null);
-
-                                    typeOfTransferSpinner = view.findViewById(R.id.type_of_transfer_spinner);
-                                    transferFeeTil = view.findViewById(R.id.transfer_fee_til_buy);
-                                    transferFee = view.findViewById(R.id.transfer_fee_buy);
-                                    playerSpinnerText = view.findViewById(R.id.plus_player_text_buy);
-                                    playerSpinner = view.findViewById(R.id.plus_player_spinner_buy);
-                                    wageTil = view.findViewById(R.id.wage_til_buy);
-                                    wage = view.findViewById(R.id.wage_buy);
-                                    noOfContractYears = view.findViewById(R.id.contract_years_buy);
-                                    yearSigned = view.findViewById(R.id.year_signed_spinner_buy);
-                                    comments = view.findViewById(R.id.comments_buy);
-                                    transferButton = view.findViewById(R.id.transfer_button);
-                                    transferButton.setText("Loan Player");
-
-                                    ValueFormatter.formatValue(wage);
-
-                                    transferFeeTil.setVisibility(View.GONE);
-                                    transferFee.setVisibility(View.GONE);
-                                    playerSpinnerText.setVisibility(View.GONE);
-                                    playerSpinner.setVisibility(View.GONE);
-                                    noOfContractYears.setVisibility(View.GONE);
-
-                                    List<String> loanTypes = Arrays.stream(LoanEnum.values())
-                                            .map(LoanEnum::getDescription)
-                                            .collect(Collectors.toList());
-
-                                    ArrayAdapter<String> transferAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, loanTypes);
-                                    transferAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                    typeOfTransferSpinner.setAdapter(transferAdapter);
-
-                                    ArrayAdapter<CharSequence> yearAdapter = ArrayAdapter.createFromResource(context, R.array.years_array, android.R.layout.simple_spinner_item);
-                                    yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                    yearSigned.setAdapter(yearAdapter);
-
-                                    managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
-                                            .whereEqualTo("id", managerId)
-                                            .get()
-                                            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                                                @Override
-                                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                                    if (!queryDocumentSnapshots.isEmpty()) {
-                                                        List<Manager> managerList = new ArrayList<>();
-                                                        for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
-                                                            Manager manager = doc.toObject(Manager.class);
-                                                            managerList.add(manager);
-                                                        }
-                                                        Manager manager = managerList.get(0);
-                                                        String currency = manager.getCurrency();
-                                                        wageTil.setHint("Wage (in " + currency + ")");
-                                                    }
-                                                }
-                                            });
-
-                                    transferButton.setOnClickListener(new View.OnClickListener() {
+                            managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                                    .whereEqualTo("id", managerId)
+                                    .get()
+                                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                                         @Override
-                                        public void onClick(View v) {
-                                            if (!yearSigned.getSelectedItem().toString().equals("0") &&
-                                                    !typeOfTransferSpinner.getSelectedItem().toString().isEmpty()) {
-                                                transferPlayer(playerList.get(getAdapterPosition()), true);
-                                            } else {
-                                                Toast.makeText(context, "Transfer Type & Year Signed are required!", Toast.LENGTH_LONG).show();
+                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            if (!queryDocumentSnapshots.isEmpty()) {
+                                                List<Manager> managerList = new ArrayList<>();
+                                                for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
+                                                    Manager manager = doc.toObject(Manager.class);
+                                                    managerList.add(manager);
+                                                }
+                                                Manager manager = managerList.get(0);
+                                                String currency = manager.getCurrency();
+                                                transferFeeTil.setHint("Transfer Fee (in " + currency + ")");
+                                                wageTil.setHint("Wage (in " + currency + ")");
                                             }
                                         }
                                     });
 
-                                    aBuilder.setView(view);
-                                    AlertDialog aDialog = aBuilder.create();
-                                    aDialog.show();
+                            transferButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if (!yearSigned.getText().toString().isEmpty() &&
+                                        !typeOfTransferPicker.getText().toString().isEmpty()) {
+                                        transferPlayer(playerList.get(getAdapterPosition()), false);
+                                    } else {
+                                        Toast.makeText(context, "Transfer Type & Year Signed are required!", Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            });
 
-                                    break;
+                            buyDialog.show();
 
-                                case DialogInterface.BUTTON_NEGATIVE:
-                                    //No button clicked
-                                    break;
-                            }
-                        }
-                    };
+                            break;
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setMessage("Do you want to loan this player?").setPositiveButton("Yes", dialogClickListener)
-                            .setNegativeButton("No", dialogClickListener).show();
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //No button clicked
+                            break;
+                    }
                 }
-            });
-            
-            editButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    editPlayer(playerList.get(getAdapterPosition()));
-                }
-            });
+            };
 
-            deleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which){
-                                case DialogInterface.BUTTON_POSITIVE:
-                                    deletePlayer(playerList.get(getAdapterPosition()));
-                                    break;
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setMessage("Do you want to buy this player?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        }
 
-                                case DialogInterface.BUTTON_NEGATIVE:
-                                    //No button clicked
-                                    break;
-                            }
-                        }
-                    };
+        private String[] getLoans() {
+            return Arrays.stream(LoanEnum.values())
+                    .map(LoanEnum::getDescription)
+                    .toArray(String[]::new);
+        }
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setMessage("Do you want to delete this player?").setPositiveButton("Yes", dialogClickListener)
-                            .setNegativeButton("No", dialogClickListener).show();
-                }
-            });
+        private String[] getPurchaseTransfers() {
+            return Arrays.stream(PurchaseTransferEnum.values())
+                    .map(PurchaseTransferEnum::getTransferType)
+                    .toArray(String[]::new);
         }
 
         private void deletePlayer(final ShortlistedPlayer player) {
@@ -627,7 +676,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                 newTransfer.setOverall(player.getOverall());
                                                 newTransfer.setPotentialLow(player.getPotentialLow());
                                                 newTransfer.setPotentialHigh(player.getPotentialHigh());
-                                                newTransfer.setType(typeOfTransferSpinner.getSelectedItem().toString().trim());
+                                                newTransfer.setType(typeOfTransferPicker.getText().toString());
                                                 newTransfer.setManagerId(managerId);
                                                 newTransfer.setNationality(player.getNationality());
                                                 String trFee = transferFee.getText().toString().trim().replaceAll(",", "");
@@ -638,7 +687,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                     Log.d(LOG_TAG, "Transfer is a loan. No additional player involved.");
                                                 } else {
                                                     newTransfer.setHasPlusPlayer(hasPlusPlayer);
-                                                    String plusPlayerName = playerSpinner.getSelectedItem().toString().trim();
+                                                    String plusPlayerName = playerPicker.getText().toString().trim();
                                                     newTransfer.setPlusPlayerName((!plusPlayerName.isEmpty()) ? plusPlayerName : "");
                                                     newTransfer.setPlusPlayerId(ftPlayerId);
                                                     Log.d(LOG_TAG, "Transfer involves another player: " + plusPlayerName);
@@ -646,9 +695,9 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
 
                                                 String wg = wage.getText().toString().trim().replaceAll(",", "");
                                                 newTransfer.setWage((!wg.isEmpty()) ? Integer.parseInt(wg) : 0);
-                                                String conYears = noOfContractYears.getText().toString().trim();
+                                                String conYears = contractYears.getText().toString().trim();
                                                 newTransfer.setContractYears((!conYears.isEmpty()) ? Integer.parseInt(conYears) : 0);
-                                                newTransfer.setYear(yearSigned.getSelectedItem().toString().trim());
+                                                newTransfer.setYear(yearSigned.getText().toString().trim());
                                                 String coms = comments.getText().toString().trim();
                                                 newTransfer.setComments((!coms.isEmpty()) ? coms : "");
                                                 newTransfer.setFormerPlayer(false);
@@ -694,7 +743,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                                         fmPlayer.setYearSigned(thePlayer.getYearSigned());
                                                                         fmPlayer.setYearScouted(thePlayer.getYearScouted());
                                                                         // Player left when new player was signed
-                                                                        fmPlayer.setYearLeft(yearSigned.getSelectedItem().toString().trim());
+                                                                        fmPlayer.setYearLeft(yearSigned.getText().toString().trim());
                                                                         fmPlayer.setManagerId(managerId);
                                                                         fmPlayer.setUserId(UserApi.getInstance().getUserId());
                                                                         fmPlayer.setTimeAdded(new Timestamp(new Date()));
@@ -719,7 +768,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                 ftPlayer.setTeam(team);
                                                 ftPlayer.setNationality(player.getNationality());
                                                 ftPlayer.setOverall(player.getOverall());
-                                                ftPlayer.setYearSigned(yearSigned.getSelectedItem().toString().trim());
+                                                ftPlayer.setYearSigned(yearSigned.getText().toString().trim());
                                                 ftPlayer.setYearScouted("0");
                                                 ftPlayer.setManagerId(managerId);
                                                 ftPlayer.setUserId(UserApi.getInstance().getUserId());
@@ -734,8 +783,14 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                             @Override
                                                             public void onSuccess(DocumentReference documentReference) {
                                                                 Log.d(LOG_TAG, "Player successfully added to First Team: " + player.getFullName());
-                                                                Toast.makeText(context, "Player bought!", Toast.LENGTH_LONG)
-                                                                        .show();
+                                                                boolean isPurchase = checkIfPurchaseType();
+                                                                if (isPurchase) {
+                                                                    Toast.makeText(context, "Player bought!", Toast.LENGTH_LONG)
+                                                                            .show();
+                                                                } else {
+                                                                    Toast.makeText(context, "Player loaned in!", Toast.LENGTH_LONG)
+                                                                            .show();
+                                                                }
                                                             }
                                                         });
                                                 shPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
@@ -771,7 +826,38 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                     });
         }
 
-        private void editPlayer(final ShortlistedPlayer player) {
+        private boolean checkIfPurchaseType() {
+            String selectedText = typeOfTransferPicker.getText().toString().trim();
+
+            boolean isPurchaseTransfer = false;
+            boolean isLoanTransfer = false;
+
+            for (PurchaseTransferEnum transferEnum : PurchaseTransferEnum.values()) {
+                if (transferEnum.getTransferType().equals(selectedText)) {
+                    isPurchaseTransfer = true;
+                    break;
+                }
+            }
+
+            if (!isPurchaseTransfer) {
+                for (LoanEnum loanEnum : LoanEnum.values()) {
+                    if (loanEnum.getDescription().equals(selectedText)) {
+                        isLoanTransfer = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isPurchaseTransfer) {
+                return true;
+            } else if (isLoanTransfer) {
+                return false;
+            } else {
+                return false;
+            }
+        }
+
+        private void clickEditPlayerButton(final ShortlistedPlayer player) {
             Log.d(LOG_TAG, "editPlayer called for player: " + player.getFullName());
 
             BottomSheetDialog createDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
@@ -797,6 +883,9 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
 
             title.setText("Edit Player");
             editPlayerButton.setText("Edit Player");
+
+            ValueFormatter.formatValue(value);
+            ValueFormatter.formatValue(wage);
 
             managersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                     .whereEqualTo("id", managerId)
@@ -843,9 +932,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
 
             comments.setText(player.getComments());
 
-            builder.setView(view);
-            dialog = builder.create();
-            dialog.show();
+            createDialog.show();
 
             editPlayerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -896,7 +983,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Player successfully updated: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
-                                                            dialog.dismiss();
+                                                            createDialog.dismiss();
                                                             Intent intent = new Intent(context, ShortlistPlayersActivity.class);
                                                             intent.putExtra("managerId", managerId);
                                                             intent.putExtra("team", team);

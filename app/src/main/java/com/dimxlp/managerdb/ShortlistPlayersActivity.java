@@ -47,6 +47,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -54,6 +55,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import enumeration.PositionEnum;
 import model.Manager;
@@ -232,11 +234,9 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
     }
 
     private List<String> getAllPositionCategories() {
-        List<String> list = new ArrayList<>();
-        for (PositionEnum position : PositionEnum.values()) {
-            list.add(position.getCategory());
-        }
-        return list;
+        return Arrays.stream(PositionEnum.values())
+                .map(p -> p.getCategory())
+                .collect(Collectors.toList());
     }
 
     private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
