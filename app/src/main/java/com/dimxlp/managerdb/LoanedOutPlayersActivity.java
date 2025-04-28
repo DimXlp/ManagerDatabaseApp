@@ -64,6 +64,7 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
     private boolean ytPlayersExist;
     private boolean shPlayersExist;
 
+    private TextView loanedOutPlayerCount;
     private RecyclerView recyclerView;
     private LoanedOutPlayerRecAdapter loanedOutPlayerRecAdapter;
     private List<LoanedOutPlayer> playerList;
@@ -119,6 +120,8 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
         managerNameHeader = headerLayout.findViewById(R.id.manager_name_header);
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
 
+        loanedOutPlayerCount = findViewById(R.id.player_count_lop);
+
         recyclerView = findViewById(R.id.rec_view_lop);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -127,20 +130,20 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
         // Load Native Ad
-        nativeAdView = findViewById(R.id.native_ad_view);
-        loadNativeAd();
+        nativeAdView = findViewById(R.id.native_ad_view_bottom);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdView);
         Log.d(LOG_TAG, "Native ad view set up.");
     }
 
-    private void loadNativeAd() {
-        AdLoader adLoader = new AdLoader.Builder(this, "ca-app-pub-8349697523222717/6227292184") // Replace with your Native Ad Unit ID
+    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
                 .forNativeAd(ad -> {
                     if (isDestroyed()) {
                         ad.destroy();
                         return;
                     }
-                    nativeAd = ad;
-                    populateNativeAdView(nativeAd, nativeAdView);
+                    populateNativeAdView(ad, nativeAdView);
+                    Log.d(LOG_TAG, "Native ad loaded successfully.");
                 })
                 .withAdListener(new com.google.android.gms.ads.AdListener() {
                     @Override
@@ -154,32 +157,21 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+        int headlineId =  R.id.ad_headline_bottom;
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
 
-        // Set the views for the NativeAdView
-        nativeAdView.setHeadlineView(nativeAdView.findViewById(R.id.ad_headline));
-        nativeAdView.setBodyView(nativeAdView.findViewById(R.id.ad_body));
-        nativeAdView.setCallToActionView(nativeAdView.findViewById(R.id.ad_call_to_action));
-
-        // Populate the Headline
-        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
-
-        // Populate the Body
-        if (nativeAd.getBody() != null) {
-            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
-            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+        if (nativeAd.getHeadline() != null) {
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
         } else {
-            nativeAdView.getBodyView().setVisibility(View.GONE);
+            headlineView.setVisibility(View.GONE);
         }
 
-        // Populate the Call-to-Action
-        if (nativeAd.getCallToAction() != null) {
-            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
-            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getCallToActionView().setVisibility(View.GONE);
-        }
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
 
-        // Bind native ad to the view
         nativeAdView.setNativeAd(nativeAd);
     }
 
@@ -386,8 +378,10 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
                             loanedOutPlayerRecAdapter = new LoanedOutPlayerRecAdapter(LoanedOutPlayersActivity.this, playerList, managerId, team);
                             recyclerView.setAdapter(loanedOutPlayerRecAdapter);
                             loanedOutPlayerRecAdapter.notifyDataSetChanged();
+                            loanedOutPlayerCount.setText(playerList.size() + " players");
                             Log.d(LOG_TAG, "Loaned out players listed successfully.");
                         } else {
+                            loanedOutPlayerCount.setText(playerList.size() + " players");
                             Log.w(LOG_TAG, "No loaned out players found.");
                         }
                     }

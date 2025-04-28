@@ -2,311 +2,224 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
+    app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
-    app:cardCornerRadius="10dp"
-    android:foreground="?attr/selectableItemBackground">
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:animateLayoutChanges="true" >
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <RelativeLayout
+        <!-- Top Row: Jersey Number + Full Name + 3-dot menu -->
+        <LinearLayout
+            android:id="@+id/player_top_bar_lop"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryDark"
-            android:padding="12dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="@color/colorPrimaryDark">
 
-            <!-- Player Number -->
             <TextView
-                android:id="@+id/number_lop"
-                android:layout_width="30dp"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
-                android:text="99"
-                android:textAlignment="viewEnd"
-                android:textColor="@android:color/white"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:layout_alignParentStart="true"
-                android:gravity="center"
-                tools:ignore="RtlCompat" />
-
-            <ImageView
-                android:id="@+id/line_lop_1"
-                android:layout_width="1dp"
-                android:layout_height="20dp"
-                android:layout_marginStart="43dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/colorPrimaryDark"/>
-
-            <!-- Player Name -->
-            <TextView
-                android:id="@+id/full_name_lop"
+                android:id="@+id/player_number_lop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/chivo"
+                android:text="10"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/chivo" />
+
+            <TextView
+                android:id="@+id/player_full_name_lop"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
                 android:text="First Last"
                 android:textColor="@android:color/white"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_toEndOf="@id/line_lop_1"
-                android:layout_centerVertical="true"/>
+                android:fontFamily="@font/chivo" />
 
             <ImageView
-                android:id="@+id/position_oval_lop"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/position_oval"
-                android:layout_toStartOf="@+id/position_lop"/>
+                android:id="@+id/player_action_menu_lop"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_three_dots"
+                android:contentDescription="Actions"
+                app:tint="@color/white" />
+        </LinearLayout>
 
-            <TextView
-                android:id="@+id/position_lop"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="POS"
-                android:textAlignment="viewStart"
-                android:textColor="@android:color/white"
-                android:textSize="20sp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/details_lop"
+        <!-- Expandable Section -->
+        <LinearLayout
+            android:id="@+id/expandable_section_lop"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/lighterGray"
-            android:paddingHorizontal="8dp"
-            android:paddingBottom="8dp">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@color/lighterGray">
 
-            <TextView
-                android:id="@+id/overall_text_lop"
+            <!-- First line: Position · Overall · Potential · Nationality -->
+            <LinearLayout
+                android:id="@+id/player_basic_info_container_lop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="OVR"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/overall_lop"
+                <TextView
+                    android:id="@+id/player_basic_text_lop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ST · 91 · 87–94"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo" />
+
+                <ImageView
+                    android:id="@+id/player_flag_lop"
+                    android:layout_width="20dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="6dp"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Flag" />
+
+                <TextView
+                    android:id="@+id/player_nationality_lop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="Argentina"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo" />
+            </LinearLayout>
+
+            <!-- Second line: Year Signed · Year Scouted -->
+            <LinearLayout
+                android:id="@+id/player_year_info_container_lop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="99"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/overall_text_lop"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
 
-            <ImageView
-                android:id="@+id/line_lop_2"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_toEndOf="@+id/overall_text_lop"/>
+                <ImageView
+                    android:id="@+id/year_signed_icon_lop"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_year_signed"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@android:color/white" />
 
+                <TextView
+                    android:id="@+id/year_signed_text_lop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2022/23"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo" />
+
+                <TextView
+                    android:id="@+id/year_separator_lop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="·"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:fontFamily="@font/chivo" />
+
+                <ImageView
+                    android:id="@+id/year_scouted_icon_lop"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_year_scouted"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/year_scouted_text_lop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2021/22"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/chivo" />
+            </LinearLayout>
+
+            <!-- Third Row: Loan To Info (Loaned Club Name) -->
             <TextView
-                android:id="@+id/potential_text_lop"
+                android:id="@+id/player_loan_to_info_lop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="POT"
+                android:text="Loan to Wolverhampton Wanderers"
                 android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_toEndOf="@id/line_lop_2"/>
+                android:textSize="16sp"
+                android:fontFamily="@font/chivo"
+                android:layout_marginTop="6dp" />
 
-            <TextView
-                android:id="@+id/potential_lop"
+            <!-- Fourth Row: Year Loaned · Loan Type -->
+            <LinearLayout
+                android:id="@+id/player_loan_info_lop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="99-99"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/potential_text_lop"
-                android:layout_toEndOf="@+id/line_lop_2"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
 
-            <ImageView
-                android:id="@+id/line_lop_3"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_toEndOf="@+id/potential_lop"/>
+                <ImageView
+                    android:id="@+id/year_loaned_icon_lop"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_loan"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@android:color/white" />
 
-            <TextView
-                android:id="@+id/nationality_text_lop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="NATL"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_toEndOf="@id/line_lop_3"/>
+                <TextView
+                    android:id="@+id/year_loaned_text_lop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2024/25"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical" />
 
-            <TextView
-                android:id="@+id/nationality_lop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="Country"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/nationality_text_lop"
-                android:layout_toEndOf="@+id/line_lop_3"/>
+                <TextView
+                    android:id="@+id/loan_separator_lop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="·"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp" />
 
-            <TextView
-                android:id="@+id/year_signed_text_lop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="YR SGN"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_below="@+id/overall_lop" />
-
-            <TextView
-                android:id="@+id/year_signed_lop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="1993"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/year_signed_text_lop"/>
-
-            <ImageView
-                android:id="@+id/line_lop_4"
-                android:layout_width="1dp"
-                android:layout_height="37dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/line"
-                android:backgroundTint="@color/lighterGray"
-                android:layout_below="@+id/nationality_lop"
-                android:layout_toEndOf="@+id/year_signed_lop"/>
-
-            <TextView
-                android:id="@+id/year_scouted_text_lop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="YR SCT"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_below="@+id/nationality_lop"
-                android:layout_toEndOf="@+id/line_lop_4"/>
-
-            <TextView
-                android:id="@+id/year_scouted_lop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="1993"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/year_scouted_text_lop"
-                android:layout_toEndOf="@+id/line_lop_4"/>
-
-            <TextView
-                android:id="@+id/loan_to_text_lop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="LOAN TO"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_below="@+id/year_signed_lop"/>
-
-            <TextView
-                android:id="@+id/loan_to_lop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="@font/chivo"
-                android:text="Wolverhampton Wanderers"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/loan_to_text_lop"/>
-
-            <Button
-                android:id="@+id/edit_button_lop"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="25dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/edit_outline_64"
-                android:backgroundTint="@color/white"
-                android:layout_below="@+id/loan_to_lop"/>
-
-            <Button
-                android:id="@+id/return_button_lop"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="25dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/terminate_outline_64"
-                android:backgroundTint="@color/white"
-                android:layout_below="@+id/loan_to_lop"
-                android:layout_toEndOf="@+id/edit_button_lop"/>
-
-            <Button
-                android:id="@+id/delete_button_lop"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="25dp"
-                android:layout_marginBottom="8dp"
-                android:background="@android:drawable/ic_delete"
-                android:backgroundTint="@color/colorAccent"
-                android:layout_below="@+id/loan_to_lop"
-                android:layout_toEndOf="@+id/return_button_lop"/>
-
-
-        </RelativeLayout>
-
+                <TextView
+                    android:id="@+id/loan_type_text_lop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Short-Term"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/chivo"
+                    android:layout_gravity="center_vertical" />
+            </LinearLayout>
+        </LinearLayout>
 
     </LinearLayout>
-
-
 </androidx.cardview.widget.CardView>
