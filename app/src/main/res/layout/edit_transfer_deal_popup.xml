@@ -72,33 +72,46 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <Spinner
-                    android:id="@+id/position_spinner_trf_edit"
-                    android:layout_below="@+id/last_name_til_trf_edit"
-                    android:layout_width="wrap_content"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/position_picker_til_trf_edit"
+                    android:layout_width="120dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:entries="@array/position_array"
-                    android:backgroundTint="#616161"/>
+                    android:layout_below="@+id/last_name_til_trf_edit"
+                    android:layout_marginTop="8dp"
+                    android:hint="Position"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/position_picker_trf_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:inputType="none"
+                        android:drawableEnd="@drawable/ic_arrow_drop_down"
+                        android:gravity="center_vertical"
+                        android:fontFamily="@font/chivo"
+                        android:textColor="@android:color/black"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/nationality_til_trf_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/position_spinner_trf_edit"
+                    android:layout_below="@+id/position_picker_til_trf_edit"
+                    android:layout_marginTop="8dp"
                     android:hint="@string/nationality_text"
                     app:boxStrokeColor="#D4AF37"
                     app:boxStrokeWidth="2dp">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <AutoCompleteTextView
                         android:id="@+id/nationality_trf_edit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/chivo"
-                        android:inputType="textPersonName"
-                        android:textColor="@android:color/black"
-                        android:maxLines="1"/>
-
+                        android:inputType="text"
+                        android:textColor="@android:color/black" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -163,13 +176,28 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <Spinner
-                    android:id="@+id/type_of_transfer_spinner_trf_edit"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/type_of_transfer_til_trf_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:layout_marginTop="16dp"
-                    android:layout_below="@+id/overall_til_trf_edit"/>
+                    android:layout_below="@+id/potential_high_til_trf_edit"
+                    android:layout_marginTop="8dp"
+                    android:hint="Type of Transfer"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/type_of_transfer_picker_trf_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:inputType="none"
+                        android:drawableEnd="@drawable/ic_arrow_drop_down"
+                        android:gravity="center_vertical"
+                        android:fontFamily="@font/chivo"
+                        android:textColor="@android:color/black"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/player_exchange_switch_trf_edit"
@@ -182,7 +210,7 @@
                     android:textColor="#616161"
                     android:textOn="Yes"
                     android:textOff="No"
-                    android:layout_below="@+id/type_of_transfer_spinner_trf_edit" />
+                    android:layout_below="@+id/type_of_transfer_til_trf_edit" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/old_team_til_trf_edit"
@@ -244,30 +272,35 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
-                    android:id="@+id/plus_player_text_trf_edit"
-                    android:layout_width="wrap_content"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/plus_player_picker_til_trf_edit"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="+ Player: "
-                    android:fontFamily="@font/chivo"
-                    android:textSize="16sp"
-                    android:textColor="#616161"
-                    android:layout_below="@+id/fee_til_trf_edit"/>
-
-                <Spinner
-                    android:id="@+id/plus_player_spinner_trf_edit"
                     android:layout_below="@+id/fee_til_trf_edit"
-                    android:layout_toEndOf="@id/plus_player_text_trf_edit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"/>
+                    android:hint="+ Player"
+                    android:layout_marginTop="16dp"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/plus_player_picker_trf_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:inputType="none"
+                        android:drawableEnd="@drawable/ic_arrow_drop_down"
+                        android:gravity="center_vertical"
+                        android:fontFamily="@font/chivo"
+                        android:textColor="@android:color/black"
+                        android:text="None" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/wage_til_trf_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/plus_player_text_trf_edit"
+                    android:layout_below="@+id/plus_player_picker_til_trf_edit"
                     android:hint="@string/wage"
                     app:boxStrokeColor="#D4AF37"
                     app:boxStrokeWidth="2dp">
@@ -303,31 +336,35 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
-                    android:id="@+id/year_text_trf_edit"
-                    android:layout_width="wrap_content"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/year_picker_til_trf_edit"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="YR SGN/LFT: "
-                    android:fontFamily="@font/chivo"
-                    android:textSize="16sp"
-                    android:textColor="#616161"
-                    android:layout_below="@+id/contract_years_til_trf_edit"/>
-
-                <Spinner
-                    android:id="@+id/year_spinner_trf_edit"
                     android:layout_below="@+id/contract_years_til_trf_edit"
-                    android:layout_toEndOf="@+id/year_text_trf_edit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:entries="@array/years_array"/>
+                    android:hint="Year Signed/Left"
+                    app:boxStrokeColor="#D4AF37"
+                    app:boxStrokeWidth="2dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/year_picker_trf_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:inputType="none"
+                        android:drawableEnd="@drawable/ic_arrow_drop_down"
+                        android:gravity="center_vertical"
+                        android:fontFamily="@font/chivo"
+                        android:textColor="@android:color/black" />
+                </com.google.android.material.textfield.TextInputLayout>
+
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/comments_til_trf_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/year_text_trf_edit"
+                    android:layout_below="@+id/year_picker_til_trf_edit"
                     android:hint="@string/comments"
                     app:boxStrokeColor="#D4AF37"
                     app:boxStrokeWidth="2dp">
@@ -336,10 +373,13 @@
                         android:id="@+id/comments_trf_edit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:inputType="textMultiLine"
+                        android:lines="3"
+                        android:maxLines="10"
+                        android:minLines="2"
+                        android:gravity="top|start"
                         android:fontFamily="@font/chivo"
-                        android:inputType="text"
-                        android:textColor="@android:color/black"
-                        android:maxLines="1"/>
+                        android:textColor="@android:color/black"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 

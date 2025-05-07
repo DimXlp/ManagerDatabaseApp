@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<!--    <item-->
+<!--        android:id="@+id/action_edit"-->
+<!--        android:title="Edit Transfer"-->
+<!--        android:icon="@drawable/edit_outline_64" />-->
+    <item
+        android:id="@+id/action_delete"
+        android:title="Delete Transfer"
+        android:icon="@android:drawable/ic_delete" />
+</menu>

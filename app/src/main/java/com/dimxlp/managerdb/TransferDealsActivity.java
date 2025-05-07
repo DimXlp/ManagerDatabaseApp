@@ -1,6 +1,7 @@
 package com.dimxlp.managerdb;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -14,11 +15,15 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -63,7 +68,9 @@ public class TransferDealsActivity extends AppCompatActivity {
 
     private Button prevButton;
     private Button nextButton;
-    private TextView typeOfTransfer;
+    private LinearLayout transferTypeContainer;
+    private TextView transferType;
+    private TextView transferCount;
     private boolean ftPlayersExist;
     private boolean ytPlayersExist;
     private List<Transfer> transferList;
@@ -74,6 +81,7 @@ public class TransferDealsActivity extends AppCompatActivity {
 
     private TextView managerNameHeader;
     private TextView teamHeader;
+    private NativeAdView nativeAdViewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +119,32 @@ public class TransferDealsActivity extends AppCompatActivity {
 
         prevButton = findViewById(R.id.prev_button_trf);
         nextButton = findViewById(R.id.next_button_trf);
-        typeOfTransfer = findViewById(R.id.type_of_transfer_trf);
+
+        transferTypeContainer = findViewById(R.id.transfer_type_container_trf);
+        transferType = findViewById(R.id.transfer_type_trf);
+        transferCount = findViewById(R.id.player_count_trf);
+
+        List<String> transferTypes = new ArrayList<>();
+        transferTypes.add("Arrived");
+        transferTypes.add("Left");
+
+        transferTypeContainer.setOnClickListener(v -> {
+            if (!transferTypes.isEmpty()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Select Transfer Type");
+                builder.setItems(transferTypes.toArray(new String[0]), (dialog, which) -> {
+                    String type = transferTypes.get(which);
+                    transferType.setText(type);
+
+                    if (type.equals("Arrived")) {
+                        listPlayersArrived(1);
+                    } else {
+                        listPlayersLeft(1);
+                    }
+                });
+                builder.show();
+            }
+        });
 
         View headerLayout = null;
         if (navView.getHeaderCount() > 0) {
@@ -129,21 +162,19 @@ public class TransferDealsActivity extends AppCompatActivity {
         // Initialize Mobile Ads SDK
         MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
 
-        // Load Banner Ads
-        AdView transfersBanner = findViewById(R.id.transfers_banner);
-        AdRequest adBannerRequest = new AdRequest.Builder().build();
-        transfersBanner.loadAd(adBannerRequest);
+        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         View.OnClickListener prevButtonListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 animateTransferButtons(v);
-                String type = typeOfTransfer.getText().toString().trim();
+                String type = transferType.getText().toString().trim();
                 if (type.equals("Arrived")) {
-                    typeOfTransfer.setText("Left");
+                    transferType.setText("Left");
                     listPlayersLeft(1);
                 } else {
-                    typeOfTransfer.setText("Arrived");
+                    transferType.setText("Arrived");
                     listPlayersArrived(1);
                 }
             }
@@ -153,12 +184,12 @@ public class TransferDealsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 animateTransferButtons(v);
-                String type = typeOfTransfer.getText().toString().trim();
+                String type = transferType.getText().toString().trim();
                 if (type.equals("Arrived")) {
-                    typeOfTransfer.setText("Left");
+                    transferType.setText("Left");
                     listPlayersLeft(2);
                 } else {
-                    typeOfTransfer.setText("Arrived");
+                    transferType.setText("Arrived");
                     listPlayersArrived(2);
                 }
             }
@@ -166,6 +197,46 @@ public class TransferDealsActivity extends AppCompatActivity {
 
         prevButton.setOnClickListener(prevButtonListener);
         nextButton.setOnClickListener(nextButtonListener);
+    }
+
+    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+                .forNativeAd(ad -> {
+                    if (isDestroyed()) {
+                        ad.destroy();
+                        return;
+                    }
+                    populateNativeAdView(ad, nativeAdView);
+                    Log.d(LOG_TAG, "Native ad loaded successfully.");
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
+                    }
+                })
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+        int headlineId =  R.id.ad_headline_bottom;
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
+
+        if (nativeAd.getHeadline() != null) {
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
+        } else {
+            headlineView.setVisibility(View.GONE);
+        }
+
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
+
+        nativeAdView.setNativeAd(nativeAd);
     }
 
     private void animateTransferButtons(View v) {
@@ -197,7 +268,7 @@ public class TransferDealsActivity extends AppCompatActivity {
                             Log.d(LOG_TAG, "Transfers fetched from Firestore for players who left.");
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 Transfer transfer = doc.toObject(Transfer.class);
-                                if (transfer.isFormerPlayer()) {
+                                if (team.equals(transfer.getFormerTeam())) {
                                     transferList.add(transfer);
                                     Log.d(LOG_TAG, "Player added to list: " + transfer.getFullName());
                                 }
@@ -213,7 +284,9 @@ public class TransferDealsActivity extends AppCompatActivity {
                             transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, team, buttonInt);
                             recyclerView.setAdapter(transferDealsRecAdapter);
                             transferDealsRecAdapter.notifyDataSetChanged();
+                            transferCount.setText(transferList.size() + " transfer(s)");
                         } else {
+                            transferCount.setText(transferList.size() + " transfer(s)");
                             Log.w(LOG_TAG, "No players found who left.");
                         }
                     }
@@ -237,7 +310,7 @@ public class TransferDealsActivity extends AppCompatActivity {
                             Log.d(LOG_TAG, "Transfers fetched from Firestore for players who arrived.");
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 Transfer transfer = doc.toObject(Transfer.class);
-                                if (!transfer.isFormerPlayer()) {
+                                if (team.equals(transfer.getCurrentTeam())) {
                                     transferList.add(transfer);
                                     Log.d(LOG_TAG, "Player added to list: " + transfer.getFullName());
                                 }
@@ -253,7 +326,9 @@ public class TransferDealsActivity extends AppCompatActivity {
                             transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, team, buttonInt);
                             recyclerView.setAdapter(transferDealsRecAdapter);
                             transferDealsRecAdapter.notifyDataSetChanged();
+                            transferCount.setText(transferList.size() + " transfer(s)");
                         } else {
+                            transferCount.setText(transferList.size() + " transfer(s)");
                             Log.w(LOG_TAG, "No players found who arrived.");
                         }
                     }
@@ -456,12 +531,17 @@ public class TransferDealsActivity extends AppCompatActivity {
                             managerNameHeader.setText(theManager.getFullName());
                             teamHeader.setText(theManager.getTeam());
                             Log.d(LOG_TAG, "UI updated with manager details.");
+                            findMaxIdAndFetchArrived(team);
                         } else {
                             Log.w(LOG_TAG, "No manager data found for managerId=" + managerId);
                         }
                     }
                 });
 
+
+        }
+
+    private void findMaxIdAndFetchArrived(String managerTeam) {
         transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
                 .get()
@@ -485,13 +565,18 @@ public class TransferDealsActivity extends AppCompatActivity {
                                     Log.d(LOG_TAG, "Transfer ID updated: " + transfer.getFullName());
                                 }
                             }
-                            refreshTransfers();
+                            fetchPlayersArrived(managerTeam);
                         } else {
                             Log.w(LOG_TAG, "No transfers found for ID updates.");
                         }
                     }
                 })
                 .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching transfers for ID updates.", e));
+    }
+
+    private void fetchPlayersArrived(String managerTeam) {
+        Log.d(LOG_TAG, "Filtering arrivals for team: " + managerTeam);
+        transferList.clear();
 
         transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -502,7 +587,7 @@ public class TransferDealsActivity extends AppCompatActivity {
                         if (!queryDocumentSnapshots.isEmpty()) {
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 Transfer transfer = doc.toObject(Transfer.class);
-                                if (!transfer.isFormerPlayer()) {
+                                if (managerTeam.equals(transfer.getCurrentTeam())) {
                                     transferList.add(transfer);
                                 }
                             }
@@ -516,16 +601,19 @@ public class TransferDealsActivity extends AppCompatActivity {
                             });
                             Log.d(LOG_TAG, "Transfers sorted by time added.");
 
-                            typeOfTransfer.setText("Arrived");
-                            transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, team, 0);
+                            transferType.setText("Arrived");
+                            transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, managerTeam, 0);
                             recyclerView.setAdapter(transferDealsRecAdapter);
                             transferDealsRecAdapter.notifyDataSetChanged();
+                            transferCount.setText(transferList.size() + " transfer(s)");
                         } else {
+                            transferCount.setText(transferList.size() + " transfer(s)");
                             Log.w(LOG_TAG, "No players found who arrived.");
                         }
                     }
                 })
                 .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching players who arrived.", e));
+
     }
 
     private void findMaxTransferId(List<Transfer> transfers) {
@@ -537,26 +625,6 @@ public class TransferDealsActivity extends AppCompatActivity {
         }
         Log.d(LOG_TAG, "Max transfer ID determined: " + maxId);
     }
-
-    private void refreshTransfers() {
-        Log.d(LOG_TAG, "Refreshing transfers list.");
-        transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
-                .whereEqualTo("managerId", managerId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    transferList.clear();
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        Transfer transfer = doc.toObject(Transfer.class);
-                        transferList.add(transfer);
-                    }
-                    Log.d(LOG_TAG, "Transfer list refreshed. Count: " + transferList.size());
-
-                    Collections.sort(transferList, Comparator.comparing(Transfer::getTimeAdded));
-                    transferDealsRecAdapter.notifyDataSetChanged();
-                })
-                .addOnFailureListener(e -> Log.e(LOG_TAG, "Failed to refresh transfer list.", e));
-    }
-
 
     @Override
     protected void onResume() {
