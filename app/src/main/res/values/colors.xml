@@ -16,4 +16,8 @@
     <!-- Text and Highlight Colors -->
     <color name="lighterGray">#616161</color>
     <color name="white">#FFFFFF</color>
+
+    <!-- Delete Account Colors -->
+    <color name="deleteRedBackground">#FFF3F3</color>
+    <color name="deleteColor">#D32F2F</color>
 </resources>

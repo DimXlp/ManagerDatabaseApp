@@ -154,15 +154,15 @@ public class SupportActivity extends AppCompatActivity {
             }
         });
 
-        // Handle App Guides button click
-        Button appGuidesButton = findViewById(R.id.app_guides_button);
-        appGuidesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(LOG_TAG, "App Guides button clicked.");
-                Toast.makeText(SupportActivity.this, "App guides are not supported yet.", Toast.LENGTH_SHORT).show();
-            }
-        });
+//        // Handle App Guides button click
+//        Button appGuidesButton = findViewById(R.id.app_guides_button);
+//        appGuidesButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.d(LOG_TAG, "App Guides button clicked.");
+//                Toast.makeText(SupportActivity.this, "App guides are not supported yet.", Toast.LENGTH_SHORT).show();
+//            }
+//        });
 
         // Delete Account Button
         Button deleteAccountButton = findViewById(R.id.delete_account_button);
@@ -250,17 +250,13 @@ public class SupportActivity extends AppCompatActivity {
                         ad.destroy();
                         return;
                     }
-                    if (nativeAdView == nativeAdViewBottom) {
-                        nativeAdBottom = ad;
-                    } else {
-                        nativeAdBottom = ad;
-                    }
                     populateNativeAdView(ad, nativeAdView);
+                    Log.d(LOG_TAG, "Native ad loaded successfully.");
                 })
                 .withAdListener(new com.google.android.gms.ads.AdListener() {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
-
+                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
                     }
                 })
                 .build();
@@ -269,17 +265,20 @@ public class SupportActivity extends AppCompatActivity {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        nativeAdView.setHeadlineView(nativeAdView.findViewById(R.id.ad_headline_bottom));
-        nativeAdView.setBodyView(nativeAdView.findViewById(R.id.ad_body_bottom));
-        nativeAdView.setCallToActionView(nativeAdView.findViewById(R.id.ad_call_to_action_bottom));
+        int headlineId =  R.id.ad_headline_bottom;
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
 
-        ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
-        if (nativeAd.getBody() != null) {
-            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
+        if (nativeAd.getHeadline() != null) {
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
+        } else {
+            headlineView.setVisibility(View.GONE);
         }
-        if (nativeAd.getCallToAction() != null) {
-            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
-        }
+
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
 
         nativeAdView.setNativeAd(nativeAd);
     }
