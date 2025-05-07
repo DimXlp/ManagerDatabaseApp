@@ -101,6 +101,8 @@ public class FirstTeamActivity extends AppCompatActivity {
     private NativeAd nativeAdTop, nativeAdBottom;
     private NativeAdView nativeAdViewTop, nativeAdViewBottom;
 
+    private BottomSheetDialog createDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -228,7 +230,7 @@ public class FirstTeamActivity extends AppCompatActivity {
 
     private void createPopupDialog() {
         Log.d(LOG_TAG, "Creating popup dialog for adding a new player.");
-        BottomSheetDialog createDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+        createDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.create_first_team_player_popup, null);
         createDialog.setContentView(view);
 
@@ -361,6 +363,9 @@ public class FirstTeamActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.i(LOG_TAG, "Player successfully added to Firestore. Document ID: " + documentReference.getId());
+                        if (createDialog != null && createDialog.isShowing()) {
+                            createDialog.dismiss();
+                        }
                         Intent intent = new Intent(FirstTeamActivity.this, FirstTeamListActivity.class);
                         intent.putExtra("managerId", managerId);
                         intent.putExtra("team", team);
