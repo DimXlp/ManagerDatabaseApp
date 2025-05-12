@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -160,11 +161,12 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                             }
                             Manager manager = managerList.get(0);
                             String currency = manager.getCurrency();
+                            NumberFormat formatter = NumberFormat.getInstance(Locale.US);
                             if (hasValue) {
-                                holder.valueText.setText(String.format("%s %s", currency, NumberFormat.getInstance().format(player.getValue())));
+                                holder.valueText.setText(String.format("%s %s", currency, formatter.format(player.getValue())));
                             }
                             if (hasWage) {
-                                holder.wageText.setText(String.format("%s %s", currency, NumberFormat.getInstance().format(player.getWage())));
+                                holder.wageText.setText(String.format("%s %s", currency,formatter.format(player.getWage())));
                             }
 
                             switch (currency) {
@@ -930,10 +932,11 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
             potentialLow.setText(String.valueOf(player.getPotentialLow()));
             potentialHigh.setText(String.valueOf(player.getPotentialHigh()));
 
-            String formattedValue = NumberFormat.getInstance().format(player.getValue());
+            NumberFormat formatter = NumberFormat.getInstance(Locale.US);
+            String formattedValue = formatter.format(player.getValue());
             value.setText(formattedValue);
 
-            String formattedWage = NumberFormat.getInstance().format(player.getWage());
+            String formattedWage = formatter.format(player.getWage());
             wage.setText(formattedWage);
 
             comments.setText(player.getComments());

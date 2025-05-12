@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -218,8 +219,9 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                         if (manager != null) {
                             String currency = manager.getCurrency();
 
+                            NumberFormat formatter = NumberFormat.getInstance(Locale.US);
                             if (hasTransferFee) {
-                                holder.transferFee.setText(String.format("%s %s", currency, NumberFormat.getInstance().format(transfer.getTransferFee())));
+                                holder.transferFee.setText(String.format("%s %s", currency, formatter.format(transfer.getTransferFee())));
                                 switch (currency) {
                                     case "€":
                                         holder.transferFeeIcon.setImageResource(R.drawable.ic_euros); break;
@@ -231,7 +233,7 @@ public class TransferDealsRecAdapter extends RecyclerView.Adapter<TransferDealsR
                             }
 
                             if (hasWage) {
-                                holder.wage.setText(String.format("%s %s", currency, NumberFormat.getInstance().format(transfer.getWage())));
+                                holder.wage.setText(String.format("%s %s", currency, formatter.format(transfer.getWage())));
                             }
                         }
                     }
