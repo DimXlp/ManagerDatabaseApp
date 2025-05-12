@@ -6,12 +6,16 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -66,6 +70,8 @@ import util.UserApi;
 public class ProfileActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "RAFI|Profile";
+    private static final int STORAGE_PERMISSION_REQUEST_CODE = 1001;
+
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private NavigationView navView;
@@ -299,7 +305,18 @@ public class ProfileActivity extends AppCompatActivity {
         uploadBadgeEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openFileChooser();
+                String permissionToRequest = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                        ? android.Manifest.permission.READ_MEDIA_IMAGES
+                        : android.Manifest.permission.READ_EXTERNAL_STORAGE;
+
+                if (ContextCompat.checkSelfPermission(ProfileActivity.this, permissionToRequest)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(ProfileActivity.this,
+                            new String[]{permissionToRequest},
+                            STORAGE_PERMISSION_REQUEST_CODE);
+                } else {
+                    openFileChooser();
+                }
             }
         });
 
