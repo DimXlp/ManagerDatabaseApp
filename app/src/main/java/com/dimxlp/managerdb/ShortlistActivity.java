@@ -102,6 +102,8 @@ public class ShortlistActivity extends AppCompatActivity {
     private NativeAd nativeAdTop, nativeAdBottom;
     private NativeAdView nativeAdViewTop, nativeAdViewBottom;
 
+    private BottomSheetDialog createDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -225,7 +227,7 @@ public class ShortlistActivity extends AppCompatActivity {
 
     private void createPopupDialog() {
         Log.d(LOG_TAG, "Creating popup dialog for adding a shortlisted player.");
-        BottomSheetDialog createDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+        createDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.create_shortlisted_player_popup, null);
         createDialog.setContentView(view);
 
@@ -370,6 +372,9 @@ public class ShortlistActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.i(LOG_TAG, "Player successfully added to Firestore: " + documentReference.getId());
+                        if (createDialog != null && createDialog.isShowing()) {
+                            createDialog.dismiss();
+                        }
                         Intent intent = new Intent(ShortlistActivity.this, ShortlistPlayersActivity.class);
                         intent.putExtra("managerId", managerId);
                         intent.putExtra("team", myTeam);

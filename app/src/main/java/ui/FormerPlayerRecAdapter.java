@@ -73,6 +73,8 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
     private Animation slideLeft;
     private Animation slideRight;
 
+    private BottomSheetDialog editDialog;
+
     public FormerPlayerRecAdapter(Context context, List<FormerPlayer> formerPlayerList, long managerId, String team, String barTeam, int buttonInt) {
         this.context = context;
         this.formerPlayerList = formerPlayerList;
@@ -418,10 +420,10 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
         private void editFormerYouthTeamPlayer(final FormerPlayer player) {
             Log.d(LOG_TAG, "editFormerYouthTeamPlayer called for player: " + player.getFullName());
 
-            BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+            editDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.edit_former_player_popup, null);
-            dialog.setContentView(view);
+            editDialog.setContentView(view);
 
             TextView title = view.findViewById(R.id.edit_frm_player);
             EditText firstName = view.findViewById(R.id.first_name_frm_edit);
@@ -487,7 +489,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
             yearLeft.setText(player.getYearLeft());
             Log.d(LOG_TAG, "Player data populated for editing: " + player.getFullName());
 
-            dialog.show();
+            editDialog.show();
 
             editPlayerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -544,7 +546,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Player successfully updated: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
-                                                            dialog.dismiss();
+                                                            editDialog.dismiss();
                                                             Intent intent = new Intent(context, FormerPlayersListActivity.class);
                                                             intent.putExtra("managerId", managerId);
                                                             intent.putExtra("team", team);
@@ -573,10 +575,10 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
         private void editFormerFirstTeamPlayer(final FormerPlayer player) {
             Log.d(LOG_TAG, "editFormerFirstTeamPlayer called for player: " + player.getFullName());
 
-            BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+            editDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.edit_former_player_popup, null);
-            dialog.setContentView(view);
+            editDialog.setContentView(view);
 
             TextView title = view.findViewById(R.id.edit_frm_player);
             EditText firstName = view.findViewById(R.id.first_name_frm_edit);
@@ -647,7 +649,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
             yearLeft.setText(player.getYearLeft());
             Log.d(LOG_TAG, "Player data populated for editing: " + player.getFullName());
 
-            dialog.show();
+            editDialog.show();
 
             editPlayerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -705,7 +707,7 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Player successfully updated: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
-                                                            dialog.dismiss();
+                                                            editDialog.dismiss();
                                                             Intent intent = new Intent(context, FormerPlayersListActivity.class);
                                                             intent.putExtra("managerId", managerId);
                                                             intent.putExtra("team", team);

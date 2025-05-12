@@ -80,6 +80,9 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
     private Animation slideLeft;
     private Animation slideRight;
 
+    private BottomSheetDialog createDialog;
+    private BottomSheetDialog transferDialog;
+
     public ShortlistedPlayerRecAdapter(Context context, List<ShortlistedPlayer> playerList, long managerId, String team, String position, int buttonInt) {
         this.context = context;
         this.playerList = playerList;
@@ -323,9 +326,9 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
-                            BottomSheetDialog loanDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+                            transferDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
                             View view = LayoutInflater.from(context).inflate(R.layout.transfer_popup, null);
-                            loanDialog.setContentView(view);
+                            transferDialog.setContentView(view);
 
                             typeOfTransferPicker = view.findViewById(R.id.type_of_transfer_picker_buy);
                             transferFeeTil = view.findViewById(R.id.transfer_fee_til_buy);
@@ -399,7 +402,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                 }
                             });
 
-                            loanDialog.show();
+                            transferDialog.show();
 
                             break;
 
@@ -421,9 +424,9 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
-                            BottomSheetDialog buyDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+                            transferDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
                             View view = LayoutInflater.from(context).inflate(R.layout.transfer_popup, null);
-                            buyDialog.setContentView(view);
+                            transferDialog.setContentView(view);
 
                             typeOfTransferPicker = view.findViewById(R.id.type_of_transfer_picker_buy);
                             transferFeeTil = view.findViewById(R.id.transfer_fee_til_buy);
@@ -548,7 +551,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                 }
                             });
 
-                            buyDialog.show();
+                            transferDialog.show();
 
                             break;
 
@@ -656,6 +659,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                     ShortlistedPlayer shPlayer = ds.toObject(ShortlistedPlayer.class);
                                     if (shPlayer.getId() == player.getId()) {
                                         documentReference = shPlayersColRef.document(ds.getId());
+                                        Log.d(LOG_TAG, "Matching player ID: " + shPlayer.getId() + " with " + player.getId());
                                     }
                                 }
                                 assert documentReference != null;
@@ -802,6 +806,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
                                                                         Log.d(LOG_TAG, "Navigating to ShortlistPlayersActivity.");
+                                                                        transferDialog.dismiss();
                                                                         Intent intent = new Intent(context, ShortlistPlayersActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -810,6 +815,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                                         ((Activity)context).finish();
                                                                     } else {
                                                                         Log.d(LOG_TAG, "Navigating to ShortlistActivity.");
+                                                                        transferDialog.dismiss();
                                                                         Intent intent = new Intent(context, ShortlistActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -860,7 +866,7 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
         private void clickEditPlayerButton(final ShortlistedPlayer player) {
             Log.d(LOG_TAG, "editPlayer called for player: " + player.getFullName());
 
-            BottomSheetDialog createDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+            createDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.create_shortlisted_player_popup, null);
             createDialog.setContentView(view);

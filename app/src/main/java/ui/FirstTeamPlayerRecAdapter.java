@@ -90,6 +90,10 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
     private long maxId;
     private int maxTransferId;
 
+    private BottomSheetDialog editDialog;
+    private BottomSheetDialog departDialog;
+    private BottomSheetDialog loanDialog;
+
     public FirstTeamPlayerRecAdapter(Context context, List<FirstTeamPlayer> playerList, long managerId, String team, String barYear, int buttonInt, long maxId) {
         this.context = context;
         this.playerList = playerList;
@@ -361,7 +365,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
-                            BottomSheetDialog loanDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+                            loanDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
                             View view = LayoutInflater.from(context).inflate(R.layout.loan_popup, null);
                             loanDialog.setContentView(view);
 
@@ -428,7 +432,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
-                            BottomSheetDialog departDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+                            departDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
                             View view = LayoutInflater.from(context).inflate(R.layout.depart_popup, null);
                             departDialog.setContentView(view);
 
@@ -731,6 +735,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
                                                                         Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + task.getResult().size());
+                                                                        loanDialog.dismiss();
                                                                         Intent intent = new Intent(context, FirstTeamListActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -739,6 +744,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                         ((Activity)context).finish();
                                                                     } else {
                                                                         Log.d(LOG_TAG, "No players left in First Team. Navigating to FirstTeamActivity.");
+                                                                        loanDialog.dismiss();
                                                                         Intent intent = new Intent(context, FirstTeamActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -844,6 +850,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     assert ftPlayer != null;
                                     if (ftPlayer.getId() == player.getId()) {
                                         documentReference = ftPlayersReference.document(ds.getId());
+                                        Log.d(LOG_TAG, "Matching player ID: " + ftPlayer.getId() + " with " + player.getId());
                                     }
                                 }
                                 assert documentReference != null;
@@ -928,6 +935,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                     if (task.isSuccessful()) {
                                                                         if (!task.getResult().isEmpty()) {
                                                                             Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + task.getResult().size());
+                                                                            departDialog.dismiss();
                                                                             Intent intent = new Intent(context, FirstTeamListActivity.class);
                                                                             intent.putExtra("managerId", managerId);
                                                                             intent.putExtra("team", team);
@@ -936,6 +944,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                             ((Activity) context).finish();
                                                                         } else {
                                                                             Log.d(LOG_TAG, "No players left in First Team. Navigating to FirstTeamActivity.");
+                                                                            departDialog.dismiss();
                                                                             Intent intent = new Intent(context, FirstTeamActivity.class);
                                                                             intent.putExtra("managerId", managerId);
                                                                             intent.putExtra("team", team);
@@ -1118,9 +1127,9 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         private void clickEditPlayerButton(final FirstTeamPlayer player) {
             Log.d(LOG_TAG, "editPlayer called for player: " + player.getFullName());
 
-            BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+            editDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
             View view = LayoutInflater.from(context).inflate(R.layout.create_first_team_player_popup, null);
-            dialog.setContentView(view);
+            editDialog.setContentView(view);
 
             TextView title = view.findViewById(R.id.create_ft_player);
             final EditText firstName = view.findViewById(R.id.first_name_ftp_create);
@@ -1187,12 +1196,12 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
             loanSwitch.setChecked(player.isLoanPlayer());
             Log.d(LOG_TAG, "Player data populated into fields for editing: " + player.getFullName());
 
-            dialog.show();
+            editDialog.show();
 
             savePlayerButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(LOG_TAG, "Save Player button clicked for player: " + player.getFullName());
+                    Log.d(LOG_TAG, "Save Player button clicked for player: " + player.getFullName() + ", id: " + player.getId());
 
                     if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
@@ -1216,6 +1225,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 FirstTeamPlayer ftplayer = ds.toObject(FirstTeamPlayer.class);
                                                 if (ftplayer.getId() == player.getId()) {
                                                     documentReference = ftPlayersReference.document(ds.getId());
+                                                    Log.d(LOG_TAG, "Matching player ID: " + ftplayer.getId() + " with " + player.getId());
                                                 }
                                             }
                                             String no = number.getText().toString().trim();
@@ -1245,7 +1255,7 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Player successfully updated in Firestore: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
-                                                            dialog.dismiss();
+                                                            editDialog.dismiss();
                                                             Intent intent = new Intent(context, FirstTeamListActivity.class);
                                                             intent.putExtra("managerId", managerId);
                                                             intent.putExtra("team", team);

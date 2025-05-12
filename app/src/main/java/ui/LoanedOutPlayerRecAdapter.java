@@ -62,6 +62,8 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
     private CollectionReference ftPlayersColRef = db.collection("FirstTeamPlayers");
     private CollectionReference transfersColRef = db.collection("Transfers");
 
+    private BottomSheetDialog editDialog;
+
     public LoanedOutPlayerRecAdapter(Context context, List<LoanedOutPlayer> loanedOutPlayerList, long managerId, String team) {
         this.context = context;
         this.loanedOutPlayerList = loanedOutPlayerList;
@@ -387,7 +389,7 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
         private void clickEditPlayerButton(final LoanedOutPlayer player) {
             Log.d(LOG_TAG, "editPlayer called for player: " + player.getFullName());
 
-            BottomSheetDialog editDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+            editDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.edit_loaned_out_player_popup, null);
             editDialog.setContentView(view);

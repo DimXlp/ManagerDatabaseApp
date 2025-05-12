@@ -47,7 +47,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -121,6 +120,8 @@ public class FirstTeamListActivity extends AppCompatActivity {
     private Animation slideLeft;
     private Animation slideRight;
     private NativeAdView nativeAdViewBottom;
+
+    private BottomSheetDialog createDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -353,9 +354,9 @@ public class FirstTeamListActivity extends AppCompatActivity {
     }
 
     private void createPopupDialog() {
-        dialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+        createDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.create_first_team_player_popup, null);
-        dialog.setContentView(view);
+        createDialog.setContentView(view);
 
         firstName = view.findViewById(R.id.first_name_ftp_create);
         lastName = view.findViewById(R.id.last_name_ftp_create);
@@ -421,7 +422,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
             }
         });
 
-        dialog.show();
+        createDialog.show();
     }
 
     private void createPlayer() {
@@ -479,7 +480,9 @@ public class FirstTeamListActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
-                        dialog.dismiss();
+                        if (createDialog != null && createDialog.isShowing()) {
+                            createDialog.dismiss();
+                        }
                         Intent intent = new Intent(FirstTeamListActivity.this, FirstTeamListActivity.class);
                         intent.putExtra("managerId", managerId);
                         intent.putExtra("team", team);
@@ -609,144 +612,90 @@ public class FirstTeamListActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        // Ensure currentYear has a fallback value
-        if (barYear != null) {
-            currentYear = barYear;
-        } else if (minYearText != null) {
-            currentYear = minYearText;
-        } else {
-            currentYear = "2020/21"; // Default fallback
-        }
-
         db.collection("YouthTeamPlayers").whereEqualTo("userId", currentUserId)
                 .whereEqualTo("managerId", managerId)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                ytPlayersExist = true;
-                            } else {
-                                ytPlayersExist = false;
-                            }
-                        }
-                    }
-                });
-
-        collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
-                .whereEqualTo("managerId", managerId)
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
-                            List<FirstTeamPlayer> ftplayers = new ArrayList<>();
-                            for (DocumentSnapshot doc: docs) {
-                                FirstTeamPlayer player = doc.toObject(FirstTeamPlayer.class);
-                                ftplayers.add(player);
-                            }
-                            findMinYearSigned(ftplayers);
-                            findMaxPlayerId(ftplayers);
-
-                            if (barYear != null) {
-                                currentYear = barYear;
-                            } else {
-                                currentYear = minYearText;
-                            }
-
-                            //lastYear = minYear;
-                            for (DocumentSnapshot ds: docs) {
-                                FirstTeamPlayer ftp = ds.toObject(FirstTeamPlayer.class);
-                                assert ftp != null;
-                                if (ftp.getId() == 0) {
-                                    ftp.setId(maxId+1);
-                                    collectionReference.document(ds.getId()).update("id", ftp.getId());
-                                    maxId++;
-                                }
-                            }
-                        }
-                    }
-                });
-
-        collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
-                .whereEqualTo("managerId", managerId)
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                                FirstTeamPlayer player = doc.toObject(FirstTeamPlayer.class);
-                                if (barYear == null || barYear.equals(minYearText)) {
-                                    if (player.getYearSigned().equals(minYearText)) {
-                                        playerList.add(player);
-                                    }
-                                } else {
-                                    if (player.getYearSigned().equals(barYear)) {
-                                        playerList.add(player);
-                                    }
-                                }
-                            }
-                            Collections.sort(playerList, new Comparator<FirstTeamPlayer>() {
-                                @Override
-                                public int compare(FirstTeamPlayer o1, FirstTeamPlayer o2) {
-                                    return o1.getTimeAdded().compareTo(o2.getTimeAdded());
-                                }
-                            });
-                            if (barYear == null) {
-                                yearText.setText(minYearText);
-                                firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, minYearText, 0, maxId);
-                                recyclerView.setAdapter(firstTeamPlayerRecAdapter);
-                                firstTeamPlayerRecAdapter.notifyDataSetChanged();
-                                yearPlayerCount.setText(playerList.size() + " players");
-                            } else {
-                                yearText.setText(barYear);
-                                firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, barYear, 0, maxId);
-                                recyclerView.setAdapter(firstTeamPlayerRecAdapter);
-                                firstTeamPlayerRecAdapter.notifyDataSetChanged();
-                                yearPlayerCount.setText(playerList.size() + " players");
-                            }
-                        }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        ytPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
                     }
                 });
 
         db.collection("ShortlistedPlayers").whereEqualTo("userId", currentUserId)
                 .whereEqualTo("managerId", managerId)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            if (Objects.requireNonNull(task.getResult()).size() > 0) {
-                                shPlayersExist = true;
-                            } else {
-                                shPlayersExist = false;
-                            }
-                        }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        shPlayersExist = !Objects.requireNonNull(task.getResult()).isEmpty();
                     }
                 });
 
         db.collection("Managers").whereEqualTo("userId", currentUserId)
                 .whereEqualTo("id", managerId)
                 .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            List<Manager> managerList = new ArrayList<>();
-                            for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
-                                Manager manager = doc.toObject(Manager.class);
-                                managerList.add(manager);
-                            }
-                            Manager theManager = managerList.get(0);
-                            managerNameHeader.setText(theManager.getFullName());
-                            teamHeader.setText(theManager.getTeam());
-                        }
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        Manager theManager = queryDocumentSnapshots.getDocuments()
+                                .get(0).toObject(Manager.class);
+                        managerNameHeader.setText(theManager.getFullName());
+                        teamHeader.setText(theManager.getTeam());
                     }
                 });
 
+        fetchPlayersAndFixIds(); // single source of data load and UI refresh
+    }
+
+    private void fetchPlayersAndFixIds() {
+        collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                .whereEqualTo("managerId", managerId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        List<DocumentSnapshot> docs = queryDocumentSnapshots.getDocuments();
+                        List<FirstTeamPlayer> ftplayers = new ArrayList<>();
+                        for (DocumentSnapshot doc : docs) {
+                            FirstTeamPlayer player = doc.toObject(FirstTeamPlayer.class);
+                            ftplayers.add(player);
+                        }
+                        findMinYearSigned(ftplayers);
+                        findMaxPlayerId(ftplayers);
+
+                        // Ensure currentYear has a fallback value
+                        if (barYear != null) {
+                            currentYear = barYear;
+                        } else if (minYearText != null) {
+                            currentYear = minYearText;
+                        } else {
+                            currentYear = "2020/21"; // Default fallback
+                        }
+
+                        List<Task<Void>> updateTasks = new ArrayList<>();
+
+                        for (DocumentSnapshot ds : docs) {
+                            FirstTeamPlayer ftp = ds.toObject(FirstTeamPlayer.class);
+                            assert ftp != null;
+                            if (ftp.getId() == 0) {
+                                maxId++;
+                                Task<Void> updateTask = collectionReference.document(ds.getId())
+                                        .update("id", maxId);
+                                updateTasks.add(updateTask);
+                            }
+                        }
+
+                        if (!updateTasks.isEmpty()) {
+                            com.google.android.gms.tasks.Tasks.whenAllComplete(updateTasks)
+                                    .addOnSuccessListener(tasks -> {
+                                        Log.d(LOG_TAG, "All player IDs fixed. Proceeding to display.");
+                                        listPlayers(0);
+                                    });
+                        } else {
+                            listPlayers(0);
+                        }
+                    } else {
+                        currentYear = (barYear != null) ? barYear : "2020/21";
+                        listPlayers(0);
+                    }
+                });
     }
 
     private void findMaxPlayerId(List<FirstTeamPlayer> ftplayers) {

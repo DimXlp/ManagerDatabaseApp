@@ -75,6 +75,10 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
     private Animation slideLeft;
     private Animation slideRight;
 
+    private BottomSheetDialog editDialog;
+    private BottomSheetDialog promoteDialog;
+    private BottomSheetDialog departDialog;
+
     public YouthTeamPlayerRecAdapter(Context context, List<YouthTeamPlayer> playerList, long managerId, String team, String barYear, int buttonInt) {
         this.context = context;
         this.playerList = playerList;
@@ -259,7 +263,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
-                            BottomSheetDialog promoteDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+                            promoteDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
                             View view = LayoutInflater.from(context).inflate(R.layout.year_signed_popup, null);
                             promoteDialog.setContentView(view);
 
@@ -307,7 +311,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
-                            BottomSheetDialog departDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+                            departDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
                             View view = LayoutInflater.from(context).inflate(R.layout.year_left_popup, null);
                             departDialog.setContentView(view);
 
@@ -409,6 +413,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
+                                                                        departDialog.dismiss();
                                                                         Intent intent = new Intent(context, YouthTeamListActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -416,6 +421,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                                         context.startActivity(intent);
                                                                         ((Activity)context).finish();
                                                                     } else {
+                                                                        departDialog.dismiss();
                                                                         Intent intent = new Intent(context, YouthTeamActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -496,6 +502,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
+                                                                        promoteDialog.dismiss();
                                                                         Intent intent = new Intent(context, YouthTeamListActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -503,6 +510,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                                         context.startActivity(intent);
                                                                         ((Activity)context).finish();
                                                                     } else {
+                                                                        promoteDialog.dismiss();
                                                                         Intent intent = new Intent(context, YouthTeamActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -584,7 +592,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
         private void clickEditPlayerButton(final YouthTeamPlayer player) {
             Log.d(LOG_TAG, "Opening edit dialog for player: " + player.getFullName());
 
-            BottomSheetDialog editDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+            editDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
             View view = LayoutInflater.from(context)
                     .inflate(R.layout.create_youth_team_player_popup, null);
             editDialog.setContentView(view);
@@ -692,7 +700,9 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Successfully updated player: " + player.getFullName());
                                                             notifyItemChanged(getAdapterPosition(), player);
-                                                            editDialog.dismiss();
+                                                            if (editDialog != null && editDialog.isShowing()) {
+                                                                editDialog.dismiss();
+                                                            }
                                                             Intent intent = new Intent(context, YouthTeamListActivity.class);
                                                             intent.putExtra("managerId", managerId);
                                                             intent.putExtra("team", team);
