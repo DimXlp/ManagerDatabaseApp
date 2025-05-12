@@ -3,9 +3,13 @@ package com.dimxlp.managerdb;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -17,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
@@ -27,6 +32,7 @@ import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -54,6 +60,8 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
 
     private static final String LOG_TAG = "RAFI|CreateManager";
     private static final int PICK_IMAGE_REQUEST = 1;
+    private static final int STORAGE_PERMISSION_REQUEST_CODE = 1001;
+
     private ProgressBar progressBar;
     private EditText firstNameText, lastNameText, nationalityText, teamText;
     private ImageView badgeImage;
@@ -179,12 +187,36 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
 
     @Override
     public void onClick(View v) {
+        String permissionToRequest = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                ? android.Manifest.permission.READ_MEDIA_IMAGES
+                : android.Manifest.permission.READ_EXTERNAL_STORAGE;
+
         if (v.getId() == R.id.manager_create_button) {
             saveManager();
         } else if (v.getId() == R.id.upload_button_create) {
-            openFileChooser();
+            if (ContextCompat.checkSelfPermission(this, permissionToRequest)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{permissionToRequest},
+                        STORAGE_PERMISSION_REQUEST_CODE);
+            } else {
+                openFileChooser();
+            }
         }
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openFileChooser();
+            } else {
+                Toast.makeText(this, "Permission denied. Cannot open gallery.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 
     @Override
     protected void onStart() {
@@ -248,13 +280,46 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         String currencyDescription = selectedCurrencyText.getText().toString().trim();
         String currency = currencyDescription.split(" - ")[0];
 
-        if (TextUtils.isEmpty(firstName) || TextUtils.isEmpty(lastName) ||
-                TextUtils.isEmpty(nationality) || TextUtils.isEmpty(team) ||
-                TextUtils.isEmpty(currency) || currency.equals("Choose currency")) {
-            Log.w(LOG_TAG, "Validation failed: One or more fields are empty.");
+        boolean isValid = true;
+
+        TextInputLayout firstNameLayout = (TextInputLayout) firstNameText.getParent().getParent();
+        TextInputLayout lastNameLayout = (TextInputLayout) lastNameText.getParent().getParent();
+        TextInputLayout nationalityLayout = (TextInputLayout) nationalityText.getParent().getParent();
+        TextInputLayout teamLayout = (TextInputLayout) teamText.getParent().getParent();
+
+        firstNameLayout.setError(null);
+        lastNameLayout.setError(null);
+        nationalityLayout.setError(null);
+        teamLayout.setError(null);
+
+        if (TextUtils.isEmpty(firstName)) {
+            firstNameLayout.setError("Required");
+            isValid = false;
+        }
+        if (TextUtils.isEmpty(lastName)) {
+            lastNameLayout.setError("Required");
+            isValid = false;
+        }
+        if (TextUtils.isEmpty(nationality)) {
+            nationalityLayout.setError("Required");
+            isValid = false;
+        }
+        if (TextUtils.isEmpty(team)) {
+            teamLayout.setError("Required");
+            isValid = false;
+        }
+        if (TextUtils.isEmpty(currency) || currency.equals("Choose currency")) {
+            selectedCurrencyText.setError("Required");
+            isValid = false;
+        } else {
+            selectedCurrencyText.setError(null);
+        }
+
+        if (!isValid) {
             progressBar.setVisibility(View.INVISIBLE);
             return;
         }
+
 
         progressBar.setVisibility(View.VISIBLE);
 

@@ -79,6 +79,12 @@
     <string name="feedback">Your feedback helps this app improve! Share your thoughts, ideas for enhancements, or report any bugs or crashes you encounter.</string>
     <string name="how_to">Learn how to use the app. Guides, tips etc.</string>
 
+    <!-- Required Hints -->
+    <string name="first_name_hint">First Name *</string>
+    <string name="last_name_hint">Last Name/Nickname *</string>
+    <string name="nationality_hint">Nationality *</string>
+    <string name="team_hint">Team *</string>
+
     <string-array name="position_array">
         <item>GK</item>
         <item>CB</item>
