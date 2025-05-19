@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,9 +27,9 @@ import com.google.firebase.auth.FirebaseUser;
 public class UserProfileFragment extends Fragment {
 
     private static final String LOG_TAG = "RAFI|UserProfile";
-
-    private AutoCompleteTextView usernameInput, emailInput;
-    private TextInputLayout usernameLayout, emailLayout;
+    private AutoCompleteTextView emailInput;
+    private TextView unverifiedNotice;
+    private TextView resendVerificationLink;
     private TextView changePasswordText;
     private Button saveChangesButton;
 
@@ -40,8 +41,9 @@ public class UserProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_user_profile, container, false);
 
-        emailLayout = view.findViewById(R.id.email_til_user_profile);
         emailInput = view.findViewById(R.id.email_user_profile);
+        unverifiedNotice = view.findViewById(R.id.email_unverified_notice);
+        resendVerificationLink = view.findViewById(R.id.resend_verification_link);
         changePasswordText = view.findViewById(R.id.change_password_text);
         saveChangesButton = view.findViewById(R.id.login_button);
 
@@ -50,6 +52,20 @@ public class UserProfileFragment extends Fragment {
 
         if (firebaseUser != null) {
             emailInput.setText(firebaseUser.getEmail());
+
+            if (!firebaseUser.isEmailVerified()) {
+                unverifiedNotice.setVisibility(View.VISIBLE);
+            } else {
+                unverifiedNotice.setVisibility(View.GONE);
+            }
+
+            resendVerificationLink.setOnClickListener(v -> {
+                firebaseUser.sendEmailVerification()
+                        .addOnSuccessListener(aVoid ->
+                                Toast.makeText(getContext(), "Verification email sent again.", Toast.LENGTH_SHORT).show())
+                        .addOnFailureListener(e ->
+                                Toast.makeText(getContext(), "Failed to send: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            });
         }
 
         saveChangesButton.setOnClickListener(v -> saveUserChanges());

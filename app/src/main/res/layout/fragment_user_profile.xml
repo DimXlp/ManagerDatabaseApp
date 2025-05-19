@@ -37,6 +37,32 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:id="@+id/email_unverified_notice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Your email is not verified."
+            android:textColor="@color/deleteColor"
+            android:textSize="14sp"
+            android:fontFamily="@font/chivo"
+            android:visibility="visible"
+            android:gravity="left" />
+
+        <TextView
+            android:id="@+id/resend_verification_link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Resend verification email"
+            android:textColor="@color/colorAccent"
+            android:textSize="14sp"
+            android:fontFamily="@font/chivo"
+            android:textStyle="bold"
+            android:layout_marginTop="32dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center" />
+
         <!-- Change Password -->
         <TextView
             android:id="@+id/change_password_text"
@@ -50,13 +76,12 @@
             android:clickable="true"
             android:focusable="true" />
 
-
         <!-- Save Changes Button -->
         <Button
             android:id="@+id/login_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="32dp"
+            android:layout_marginTop="32dp"
             android:background="@drawable/round_button"
             android:text="Save Changes"
             android:textColor="@color/colorPrimary"
