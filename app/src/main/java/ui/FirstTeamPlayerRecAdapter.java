@@ -522,13 +522,19 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                         if (isYearLeftZero) {
                                             Toast.makeText(context, "Year Left required!", Toast.LENGTH_LONG).show();
                                         } else {
-                                            letPlayerLeave(playerList.get(getAdapterPosition()));
+                                            int position = getAdapterPosition();
+                                            if (position != RecyclerView.NO_POSITION) {
+                                                letPlayerLeave(playerList.get(position));
+                                            }
                                         }
                                     } else if (isWithTransferFeeType) {
                                         if (teamLeftText.isEmpty() && isYearLeftZero) {
                                             Toast.makeText(context, "Team and Year Left fields required!", Toast.LENGTH_LONG).show();
                                         } else {
-                                            letPlayerLeave(playerList.get(getAdapterPosition()));
+                                            int position = getAdapterPosition();
+                                            if (position != RecyclerView.NO_POSITION) {
+                                                letPlayerLeave(playerList.get(position));
+                                            }
                                         }
                                     }
                                 }
