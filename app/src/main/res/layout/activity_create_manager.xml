@@ -183,13 +183,13 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="32dp"
                     android:text="Choose currency"
-                    android:textColor="@color/ic_logo_background"
+                    android:textColor="@color/colorPrimaryDark"
                     android:background="@drawable/edit_text_bg"
                     android:padding="12dp"
                     android:drawableEnd="@drawable/ic_arrow_drop_down"
+                    android:drawableTint="@color/colorPrimaryDark"
                     android:gravity="center_vertical"
                     android:textStyle="bold"/>
-
 
                 <Button
                     android:id="@+id/manager_create_button"

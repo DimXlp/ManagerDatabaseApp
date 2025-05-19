@@ -84,6 +84,7 @@
     <string name="last_name_hint">Last Name/Nickname *</string>
     <string name="nationality_hint">Nationality *</string>
     <string name="team_hint">Team *</string>
+    <string name="manager_photo">Manager/Team Photo</string>
 
     <string-array name="position_array">
         <item>GK</item>

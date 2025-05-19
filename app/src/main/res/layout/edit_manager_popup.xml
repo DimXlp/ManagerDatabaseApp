@@ -124,41 +124,36 @@
                 android:id="@+id/upload_button_edit"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/outline_round_button"
+                android:background="@drawable/round_button"
                 android:backgroundTint="@android:color/white"
                 android:fontFamily="@font/chivo"
                 android:text="Upload Badge"
                 android:textColor="@color/colorAccent"
                 android:textStyle="bold"
                 android:layout_marginStart="16dp"
-                android:layout_above="@+id/currency_spinner_edit"
+                android:layout_above="@+id/currency_text_edit"
                 android:layout_toEndOf="@id/team_badge_image_edit"/>
 
             <TextView
-                android:id="@+id/currency_title_edit"
-                android:layout_width="wrap_content"
+                android:id="@+id/currency_text_edit"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/team_badge_image_edit"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/chivo"
-                android:text="Currency: "
-                android:textColor="#616161"
-                android:textSize="16sp"/>
-
-            <Spinner
-                android:id="@+id/currency_spinner_edit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_below="@+id/team_badge_image_edit"
-                android:layout_toEndOf="@id/currency_title_edit"/>
+                android:layout_marginTop="32dp"
+                android:text="Choose currency"
+                android:textColor="@color/colorPrimaryDark"
+                android:background="@drawable/edit_text_bg"
+                android:padding="12dp"
+                android:drawableEnd="@drawable/ic_arrow_drop_down"
+                android:drawableTint="@color/colorPrimaryDark"
+                android:gravity="center_vertical"
+                android:textStyle="bold"
+                android:layout_below="@+id/team_badge_image_edit"/>
 
             <Button
                 android:id="@+id/save_manager_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/currency_title_edit"
+                android:layout_below="@id/currency_text_edit"
                 android:layout_marginTop="24dp"
                 android:background="@drawable/round_button"
                 android:backgroundTint="#D4AF37"
