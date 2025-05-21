@@ -1,13 +1,14 @@
 package ui;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -54,6 +55,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import enumeration.LoanEnum;
+import enumeration.PositionEnum;
 import enumeration.SaleTransferEnum;
 import model.FirstTeamPlayer;
 import model.FormerPlayer;
@@ -133,14 +135,24 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
 
         holder.numberText.setText(String.valueOf(player.getNumber()));
         holder.fullNameText.setText(fullName);
-        StringBuilder basic = new StringBuilder();
-        basic.append(player.getPosition());
-        basic.append(" · ").append(player.getOverall());
+        holder.positionTopBar.setText(player.getPosition());
+        holder.positionTopBar.setTextColor(getPositionColor(player.getPosition()));
+
+        SpannableStringBuilder basic = new SpannableStringBuilder();
+        String positionText = player.getPosition();
+        int color = getPositionColor(positionText);
+        basic.append(positionText);
+        basic.setSpan(new ForegroundColorSpan(color), 0, positionText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        String overall = " · " + player.getOverall();
+        basic.append(overall);
         if (player.getPotentialLow() != 0 && player.getPotentialHigh() != 0) {
-            basic.append(" · ").append(player.getPotentialLow()).append("–").append(player.getPotentialHigh());
+            String potential = " · " + player.getPotentialLow() + "–" + player.getPotentialHigh();
+            basic.append(potential);
         }
         basic.append(" · ");
-        holder.basicInfo.setText(basic);
+        holder.basicInfo.setText(basic, TextView.BufferType.SPANNABLE);
+
 
         String nationality = player.getNationality();
         String iso = NationalityFlagUtil.getNationalityToIsoMap().getOrDefault(nationality, "un");
@@ -181,6 +193,21 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         }
     }
 
+    private int getPositionColor(String positionText) {
+        String group = Arrays.stream(PositionEnum.values())
+                .filter(pos -> positionText.equals(pos.getInitials()))
+                .findFirst()
+                .map(PositionEnum::getGroup)
+                .orElse(null);
+
+        return switch (group) {
+            case "GKs" -> Color.parseColor("#FFA726");
+            case "Defs" -> Color.parseColor("#FFD54F");
+            case "Mids" -> Color.parseColor("#9CCC65");
+            default -> Color.parseColor("#4FC3F7");
+        };
+    }
+
     @Override
     public int getItemCount() {
         return playerList.size();
@@ -190,9 +217,11 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         private AlertDialog.Builder aBuilder;
         private AlertDialog aDialog;
 
+        private LinearLayout playerRow;
         private LinearLayout playerTopBar;
         private TextView numberText;
         private TextView fullNameText;
+        private TextView positionTopBar;
         private TextView basicInfo;
         private ImageView playerFlag;
         private TextView playerNationality;
@@ -225,9 +254,11 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
             super(itemView);
             context = ctx;
 
+            playerRow = itemView.findViewById(R.id.complete_player_row);
             playerTopBar = itemView.findViewById(R.id.player_top_bar);
             numberText = itemView.findViewById(R.id.player_number);
             fullNameText = itemView.findViewById(R.id.player_full_name);
+            positionTopBar = itemView.findViewById(R.id.player_position_top_bar);
             basicInfo = itemView.findViewById(R.id.player_basic_text);
             playerFlag = itemView.findViewById(R.id.player_flag);
             playerNationality = itemView.findViewById(R.id.player_nationality);

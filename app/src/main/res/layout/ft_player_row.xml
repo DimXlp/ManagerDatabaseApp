@@ -10,11 +10,12 @@
     android:clickable="true">
 
     <LinearLayout
+        android:id="@+id/complete_player_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Top Row: Jersey Number + Full Name + 3-dot menu -->
+        <!-- Top Row: Jersey Number + Full Name + Position + 3-dot menu -->
         <LinearLayout
             android:id="@+id/player_top_bar"
             android:layout_width="match_parent"
@@ -45,6 +46,18 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:fontFamily="@font/chivo" />
+
+            <TextView
+                android:id="@+id/player_position_top_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CM"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="@font/chivo"
+                android:visibility="visible"
+                android:textColor="#9CCC65" />
 
             <ImageView
                 android:id="@+id/player_action_menu"

@@ -2,32 +2,35 @@ package enumeration;
 
 public enum PositionEnum {
 
-    GK("GK", "Goalkeeper", "Goalkeepers"),
-    CB("CB", "Center Back", "Center Backs"),
-    RB("RB", "Right Back", "Right Backs"),
-    RWB("RWB", "Right Wing Back", "Right Backs"),
-    LB("LB", "Left Back", "Left Backs"),
-    LWB("LWB", "Left Wing Back", "Left Backs"),
-    CDM("CDM", "Center Defensive Midfielder", "Center Defensive Mids"),
-    CM("CM", "Center Midfielder", "Center Midfielders"),
-    CAM("CAM", "Center Attacking Midfielder", "Center Attacking Mids"),
-    RM("RM", "Right Midfielder", "Right Wingers"),
-    RW("RW", "Right Winger", "Right Wingers"),
-    LM("LM", "Left Midfielder", "Left Wingers"),
-    LW("LW", "Left Winger", "Left Wingers"),
-    ST("ST", "Striker", "Strikers"),
-    CF("CF", "Center Forward", "Strikers"),
-    RF("RF", "Right Forward", "Strikers"),
-    LF("LF", "Left Forwards", "Strikers");
+    GK("GK", "Goalkeeper", "Goalkeepers", "GKs"),
+    CB("CB", "Center Back", "Center Backs", "Defs"),
+    RB("RB", "Right Back", "Right Backs", "Defs"),
+    RWB("RWB", "Right Wing Back", "Right Backs", "Defs"),
+    LB("LB", "Left Back", "Left Backs", "Defs"),
+    LWB("LWB", "Left Wing Back", "Left Backs", "Defs"),
+    CDM("CDM", "Center Defensive Midfielder", "Center Defensive Mids", "Mids"),
+    CM("CM", "Center Midfielder", "Center Midfielders", "Mids"),
+    CAM("CAM", "Center Attacking Midfielder", "Center Attacking Mids", "Mids"),
+    RM("RM", "Right Midfielder", "Right Wingers", "Mids"),
+    RW("RW", "Right Winger", "Right Wingers", "Atts"),
+    LM("LM", "Left Midfielder", "Left Wingers", "Mids"),
+    LW("LW", "Left Winger", "Left Wingers", "Atts"),
+    ST("ST", "Striker", "Strikers", "Atts"),
+    CF("CF", "Center Forward", "Strikers", "Atts"),
+    RF("RF", "Right Forward", "Strikers", "Atts"),
+    LF("LF", "Left Forwards", "Strikers", "Atts");
 
     private String initials;
     private String positionName;
     private String category;
 
-    PositionEnum(String initials, String positionName, String category) {
+    private String group;
+
+    PositionEnum(String initials, String positionName, String category, String group) {
         this.initials = initials;
         this.positionName = positionName;
         this.category = category;
+        this.group = group;
     }
 
     public String getInitials() {
@@ -52,5 +55,13 @@ public enum PositionEnum {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 }
