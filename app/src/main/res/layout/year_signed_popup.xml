@@ -4,7 +4,9 @@
     android:id="@+id/edit_manager_popup"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true">
 
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"

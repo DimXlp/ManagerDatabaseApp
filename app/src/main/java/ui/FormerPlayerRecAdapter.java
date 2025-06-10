@@ -503,6 +503,9 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                             !yearScouted.getText().toString().isEmpty() &&
                             !yearLeft.getText().toString().isEmpty()) {
 
+                        // Disable to prevent duplicate taps
+                        editPlayerButton.setEnabled(false);
+
                         frmPlayerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -557,7 +560,11 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                                     .show();
                                                         }
                                                     })
-                                                    .addOnFailureListener(e -> Log.e(LOG_TAG, "Error updating player.", e));
+                                                    .addOnFailureListener(e -> {
+                                                        Log.e(LOG_TAG, "Error updating player.", e);
+                                                        editDialog.dismiss();
+                                                        editPlayerButton.setEnabled(true);
+                                                    });
                                         } else {
                                             Log.e(LOG_TAG, "Error fetching FormerPlayer collection.", task.getException());
                                         }
@@ -664,6 +671,9 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                             !yearLeft.getText().toString().isEmpty()) {
                         Log.d(LOG_TAG, "Validation successful. Proceeding to update player.");
 
+                        // Disable to prevent duplicate taps
+                        editPlayerButton.setEnabled(false);
+
                         frmPlayerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -718,7 +728,11 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                                     .show();
                                                         }
                                                     })
-                                                    .addOnFailureListener(e -> Log.e(LOG_TAG, "Error updating player.", e));
+                                                    .addOnFailureListener(e -> {
+                                                        Log.e(LOG_TAG, "Error updating player.", e);
+                                                        editDialog.dismiss();
+                                                        editPlayerButton.setEnabled(true);
+                                                    });
                                         } else {
                                             Log.e(LOG_TAG, "Error fetching FormerPlayer collection.", task.getException());
                                         }

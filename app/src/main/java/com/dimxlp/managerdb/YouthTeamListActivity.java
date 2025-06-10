@@ -9,6 +9,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +32,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -407,6 +409,8 @@ public class YouthTeamListActivity extends AppCompatActivity {
                         !overall.getText().toString().isEmpty() &&
                         !yearScouted.getText().toString().isEmpty()) {
                     Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
+                    // Disable to prevent duplicate taps
+                    createPlayerButton.setEnabled(false);
                     createPlayer();
                 } else {
                     Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
@@ -481,6 +485,14 @@ public class YouthTeamListActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                         Log.d(LOG_TAG, "YouthTeamListActivity restarted. Current activity finished.");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(LOG_TAG, "Error creating player", e);
+                        dialog.dismiss();
+                        createPlayerButton.setEnabled(true);
                     }
                 });
     }

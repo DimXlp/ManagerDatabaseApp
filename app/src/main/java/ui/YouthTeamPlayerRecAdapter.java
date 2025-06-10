@@ -33,6 +33,7 @@ import com.dimxlp.managerdb.R;
 import com.dimxlp.managerdb.YouthTeamActivity;
 import com.dimxlp.managerdb.YouthTeamListActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -285,6 +286,8 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                 @Override
                                 public void onClick(View v) {
                                     if (!yearSigned.getText().toString().isEmpty()) {
+                                        // Disable to prevent duplicate taps
+                                        saveButton.setEnabled(false);
                                         promotePlayer(playerList.get(getAdapterPosition()));
                                     } else {
                                         Toast.makeText(context, "Field required", Toast.LENGTH_LONG).show();
@@ -333,6 +336,8 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                 @Override
                                 public void onClick(View v) {
                                     if (!yearLeft.getText().toString().isEmpty()) {
+                                        // Disable to prevent duplicate taps
+                                        saveButton.setEnabled(false);
                                         letPlayerLeave(playerList.get(getAdapterPosition()));
                                     } else {
                                         Toast.makeText(context, "Field required", Toast.LENGTH_LONG).show();
@@ -432,6 +437,14 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                             }
                                                         });
                                             }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.e(LOG_TAG, "Error letting youth player leave", e);
+                                                departDialog.dismiss();
+                                                saveButton.setEnabled(true);;
+                                            }
                                         });
                             } else {
                                 Log.e(LOG_TAG, "Failed to fetch player document: " + task.getException());
@@ -522,6 +535,14 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                         });
 
 
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.e(LOG_TAG, "Error promoting youth player", e);
+                                                promoteDialog.dismiss();
+                                                saveButton.setEnabled(true);;
                                             }
                                         });
                             }
@@ -661,6 +682,10 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                         !positionPicker.getText().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty() &&
                         !yearScoutedPicker.getText().toString().isEmpty()) {
+
+                        // Disable to prevent duplicate taps
+                        savePlayerButton.setEnabled(false);
+
                         ytPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -715,6 +740,8 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                     })
                                                     .addOnFailureListener(e -> {
                                                         Log.e(LOG_TAG, "Failed to update player: " + e.getMessage());
+                                                        editDialog.dismiss();
+                                                        savePlayerButton.setEnabled(true);
                                                     });
                                         }
                                     }

@@ -434,6 +434,8 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     if (!teamLoan.getText().toString().isEmpty() &&
                                         !yearLoaned.getText().toString().isEmpty() &&
                                         !loanPicker.getText().toString().isEmpty()) {
+                                        // Disable to prevent duplicate taps
+                                        loanPlayerButton.setEnabled(false);
                                         loanPlayer(playerList.get(getAdapterPosition()));
                                     } else {
                                         Toast.makeText(context, "Team, Year Loaned and Type of Loan are required", Toast.LENGTH_LONG).show();
@@ -548,6 +550,9 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                     boolean isWithTransferFeeType = SaleTransferEnum.WITH_TRANSFER_FEE.getDescription().equals(selectedTransferType);
                                     boolean isReleaseType = SaleTransferEnum.RELEASE.getDescription().equals(selectedTransferType);
                                     boolean isYearLeftZero = "0".equals(selectedYearLeft);
+
+                                    // Disable to prevent duplicate taps
+                                    transferButton.setEnabled(false);
 
                                     if (isReleaseType) {
                                         if (isYearLeftZero) {
@@ -796,7 +801,11 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                         .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding player to LoanedOutPlayer collection.", e));
                                             }
                                         })
-                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error removing player from First Team.", e));
+                                        .addOnFailureListener(e -> {
+                                            Log.e(LOG_TAG, "Error removing player from First Team.", e);
+                                            loanDialog.dismiss();
+                                            loanPlayerButton.setEnabled(true);
+                                        });
                             }
                         }
                     });
@@ -997,7 +1006,11 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
 
                                             }
                                         })
-                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error removing player from First Team.", e));
+                                        .addOnFailureListener(e -> {
+                                            Log.e(LOG_TAG, "Error removing player from First Team.", e);
+                                            departDialog.dismiss();
+                                            transferButton.setEnabled(true);
+                                        });
                             }
                         }
                     });
@@ -1247,6 +1260,9 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                         !yearSignedPicker.getText().toString().isEmpty()) {
                         Log.d(LOG_TAG, "Validation successful. Proceeding to update player.");
 
+                        // Disable to prevent duplicate taps
+                        savePlayerButton.setEnabled(false);
+
                         ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -1303,7 +1319,11 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                     .show();
                                                         }
                                                     })
-                                                    .addOnFailureListener(e -> Log.e(LOG_TAG, "Error updating player in Firestore.", e));
+                                                    .addOnFailureListener(e -> {
+                                                        Log.e(LOG_TAG, "Error updating player in Firestore.", e);
+                                                        editDialog.dismiss();
+                                                        savePlayerButton.setEnabled(true);
+                                                    });
                                         } else {
                                             Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
                                         }

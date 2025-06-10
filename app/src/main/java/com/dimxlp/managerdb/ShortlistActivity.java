@@ -28,6 +28,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -302,6 +303,8 @@ public class ShortlistActivity extends AppCompatActivity {
                         !team.getText().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty()) {
                     Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
+                    // Disable to prevent duplicate taps
+                    createButton.setEnabled(false);
                     createPlayer();
                 } else {
                     Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
@@ -418,7 +421,14 @@ public class ShortlistActivity extends AppCompatActivity {
                         Log.d(LOG_TAG, "ShortlistPlayersActivity started, and ShortlistActivity finished.");
                     }
                 })
-                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding player to Firestore.", e));
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(LOG_TAG, "Error creating player", e);
+                        createDialog.dismiss();
+                        createButton.setEnabled(true);
+                    }
+                });
     }
 
     private void setUpDrawerContent(NavigationView navView) {

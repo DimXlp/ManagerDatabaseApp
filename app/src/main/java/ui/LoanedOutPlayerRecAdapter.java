@@ -490,6 +490,9 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                             !yearLoaned.getText().toString().isEmpty()) {
                         Log.d(LOG_TAG, "Validation successful. Proceeding to update player.");
 
+                        // Disable to prevent duplicate taps
+                        editPlayerButton.setEnabled(false);
+
                         loPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -547,7 +550,11 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
 
                                                         }
                                                     })
-                                                    .addOnFailureListener(e -> Log.e(LOG_TAG, "Error updating player in Firestore.", e));
+                                                    .addOnFailureListener(e -> {
+                                                        Log.e(LOG_TAG, "Error updating player in Firestore.", e);
+                                                        editDialog.dismiss();
+                                                        editPlayerButton.setEnabled(true);
+                                                    });
                                         } else {
                                             Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
                                         }

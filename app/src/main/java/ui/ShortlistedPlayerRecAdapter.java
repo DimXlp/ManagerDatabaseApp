@@ -28,6 +28,7 @@ import com.dimxlp.managerdb.R;
 import com.dimxlp.managerdb.ShortlistActivity;
 import com.dimxlp.managerdb.ShortlistPlayersActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -397,6 +398,8 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                 public void onClick(View v) {
                                     if (!yearSigned.getText().toString().isEmpty() &&
                                             !typeOfTransferPicker.getText().toString().isEmpty()) {
+                                        // Disable to prevent duplicate taps
+                                        transferButton.setEnabled(false);
                                         transferPlayer(playerList.get(getAdapterPosition()), true);
                                     } else {
                                         Toast.makeText(context, "Transfer Type & Year Signed are required!", Toast.LENGTH_LONG).show();
@@ -546,6 +549,8 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                 public void onClick(View v) {
                                     if (!yearSigned.getText().toString().isEmpty() &&
                                         !typeOfTransferPicker.getText().toString().isEmpty()) {
+                                        // Disable to prevent duplicate taps
+                                        transferButton.setEnabled(false);
                                         transferPlayer(playerList.get(getAdapterPosition()), false);
                                     } else {
                                         Toast.makeText(context, "Transfer Type & Year Signed are required!", Toast.LENGTH_LONG).show();
@@ -828,6 +833,14 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                             }
                                                         });
                                             }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.e(LOG_TAG, "Error transferring player", e);
+                                                transferDialog.dismiss();
+                                                transferButton.setEnabled(true);;
+                                            }
                                         });
                             }
                         }
@@ -951,6 +964,10 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                         !positionPicker.getText().toString().isEmpty() &&
                         !teamText.getText().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty()) {
+
+                        // Disable to prevent duplicate taps
+                        editPlayerButton.setEnabled(false);
+
                         shPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
                                 .get()
@@ -1001,6 +1018,14 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                             ((Activity) context).finish();
                                                             Toast.makeText(context, "Player updated!", Toast.LENGTH_LONG)
                                                                     .show();
+                                                        }
+                                                    })
+                                                    .addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            Log.e(LOG_TAG, "Error editing shortlisted player", e);
+                                                            createDialog.dismiss();
+                                                            editPlayerButton.setEnabled(true);;
                                                         }
                                                     });
 

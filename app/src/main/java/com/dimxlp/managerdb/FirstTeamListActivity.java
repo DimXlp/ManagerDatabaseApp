@@ -31,6 +31,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -414,6 +415,8 @@ public class FirstTeamListActivity extends AppCompatActivity {
                         !positionPicker.getText().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty() &&
                         !yearSigned.getText().toString().isEmpty()) {
+                    // Disable to prevent duplicate taps
+                    createPlayerButton.setEnabled(false);
                     createPlayer();
                 } else {
                     Toast.makeText(FirstTeamListActivity.this, "Last Name/Nickname, Nationality, Position, Overall and Year Signed are required", Toast.LENGTH_LONG)
@@ -489,6 +492,14 @@ public class FirstTeamListActivity extends AppCompatActivity {
                         intent.putExtra("barYear", ySignedPlayer);
                         startActivity(intent);
                         finish();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(LOG_TAG, "Error creating player", e);
+                        createDialog.dismiss();
+                        createPlayerButton.setEnabled(true);
                     }
                 });
     }
