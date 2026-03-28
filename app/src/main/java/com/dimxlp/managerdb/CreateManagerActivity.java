@@ -23,12 +23,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdLoader;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.nativead.NativeAd;
-import com.google.android.gms.ads.nativead.NativeAdView;
+// import com.google.android.gms.ads.AdLoader;
+// import com.google.android.gms.ads.AdRequest;
+// import com.google.android.gms.ads.LoadAdError;
+// import com.google.android.gms.ads.MobileAds;
+// import com.google.android.gms.ads.nativead.NativeAd;
+// import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -150,40 +150,40 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
     }
 
 
-    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
-        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
-                .forNativeAd(ad -> {
-                    if (isDestroyed()) {
-                        ad.destroy();
-                        return;
-                    }
-                    nativeAdTop = ad;
-                    populateNativeAdView(ad, nativeAdView);
-                })
-                .withAdListener(new com.google.android.gms.ads.AdListener() {
-                    @Override
-                    public void onAdFailedToLoad(LoadAdError adError) {
-                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
-                    }
-                })
-                .build();
-
-        adLoader.loadAd(new AdRequest.Builder().build());
-    }
-
-    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        TextView headlineView = nativeAdView.findViewById(R.id.ad_headline_top);
-        nativeAdView.setHeadlineView(headlineView);
-
-        if (nativeAd.getHeadline() != null) {
-            headlineView.setText(nativeAd.getHeadline());
-            headlineView.setVisibility(View.VISIBLE);
-        } else {
-            headlineView.setVisibility(View.GONE);
-        }
-
-        nativeAdView.setNativeAd(nativeAd);
-    }
+    // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+    //     AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+    //             .forNativeAd(ad -> {
+    //                 if (isDestroyed()) {
+    //                     ad.destroy();
+    //                     return;
+    //                 }
+    //                 nativeAdTop = ad;
+    //                 populateNativeAdView(ad, nativeAdView);
+    //             })
+    //             .withAdListener(new com.google.android.gms.ads.AdListener() {
+    //                 @Override
+    //                 public void onAdFailedToLoad(LoadAdError adError) {
+    //                     Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
+    //                 }
+    //             })
+    //             .build();
+    //
+    //     adLoader.loadAd(new AdRequest.Builder().build());
+    // }
+    //
+    // private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+    //     TextView headlineView = nativeAdView.findViewById(R.id.ad_headline_top);
+    //     nativeAdView.setHeadlineView(headlineView);
+    //
+    //     if (nativeAd.getHeadline() != null) {
+    //         headlineView.setText(nativeAd.getHeadline());
+    //         headlineView.setVisibility(View.VISIBLE);
+    //     } else {
+    //         headlineView.setVisibility(View.GONE);
+    //     }
+    //
+    //     nativeAdView.setNativeAd(nativeAd);
+    // }
 
     @Override
     public void onClick(View v) {
@@ -370,7 +370,7 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
 
     @Override
     protected void onDestroy() {
-        if (nativeAdTop != null) nativeAdTop.destroy();
+        // if (nativeAdTop != null) nativeAdTop.destroy();
         Log.i(LOG_TAG, "CreateManagerActivity destroyed.");
         super.onDestroy();
     }

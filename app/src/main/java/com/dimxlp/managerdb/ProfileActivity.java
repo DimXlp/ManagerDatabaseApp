@@ -2,7 +2,6 @@ package com.dimxlp.managerdb;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -31,15 +30,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdLoader;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
-import com.google.android.gms.ads.nativead.NativeAd;
-import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -98,8 +88,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     private TextView managerNameHeader;
     private TextView teamHeader;
-    private NativeAd nativeAdTop, nativeAdBottom;
-    private NativeAdView nativeAdViewBottom;
+    // private NativeAd nativeAdTop, nativeAdBottom;
+    // private NativeAdView nativeAdViewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,23 +136,25 @@ public class ProfileActivity extends AppCompatActivity {
 
         Log.d(LOG_TAG, "Using managerId = " + managerId + ", team = " + team);
 
-        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+        // MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
+        //
+        // nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        // loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         // Load Interstitial Ad
-        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        interstitialAd.show(ProfileActivity.this);
-                        Log.d(LOG_TAG, "Interstitial ad loaded and displayed.");
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        Log.e(LOG_TAG, "Interstitial ad failed to load: " + loadAdError.getMessage());
-                    }
-                });
+        // InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+        //         new InterstitialAdLoadCallback() {
+        //             @Override
+        //             public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+        //                 interstitialAd.show(ProfileActivity.this);
+        //                 Log.d(LOG_TAG, "Interstitial ad loaded and displayed.");
+        //             }
+        //
+        //             @Override
+        //             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+        //                 Log.e(LOG_TAG, "Interstitial ad failed to load: " + loadAdError.getMessage());
+        //             }
+        //         });
 
 
         ViewPager2 viewPager = findViewById(R.id.view_pager);
@@ -184,45 +176,45 @@ public class ProfileActivity extends AppCompatActivity {
         outState.putString("team", team);
     }
 
-    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
-        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
-                .forNativeAd(ad -> {
-                    if (isDestroyed()) {
-                        ad.destroy();
-                        return;
-                    }
-                    nativeAdBottom = ad;
-                    populateNativeAdView(ad, nativeAdView);
-                })
-                .withAdListener(new com.google.android.gms.ads.AdListener() {
-                    @Override
-                    public void onAdFailedToLoad(LoadAdError adError) {
-
-                    }
-                })
-                .build();
-
-        adLoader.loadAd(new AdRequest.Builder().build());
-    }
-
-    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        int headlineId = R.id.ad_headline_bottom;
-        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
-
-        if (nativeAd.getHeadline() != null) {
-            headlineView.setText(nativeAd.getHeadline());
-            headlineView.setVisibility(View.VISIBLE);
-        } else {
-            headlineView.setVisibility(View.GONE);
-        }
-
-        // Remove body and CTA for compact layout
-        nativeAdView.setBodyView(null);
-        nativeAdView.setCallToActionView(null);
-
-        nativeAdView.setNativeAd(nativeAd);
-    }
+    // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+    //     AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+    //             .forNativeAd(ad -> {
+    //                 if (isDestroyed()) {
+    //                     ad.destroy();
+    //                     return;
+    //                 }
+    //                 nativeAdBottom = ad;
+    //                 populateNativeAdView(ad, nativeAdView);
+    //             })
+    //             .withAdListener(new com.google.android.gms.ads.AdListener() {
+    //                 @Override
+    //                 public void onAdFailedToLoad(LoadAdError adError) {
+    //
+    //                 }
+    //             })
+    //             .build();
+    //
+    //     adLoader.loadAd(new AdRequest.Builder().build());
+    // }
+    //
+    // private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+    //     int headlineId = R.id.ad_headline_bottom;
+    //     nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+    //     TextView headlineView = (TextView) nativeAdView.getHeadlineView();
+    //
+    //     if (nativeAd.getHeadline() != null) {
+    //         headlineView.setText(nativeAd.getHeadline());
+    //         headlineView.setVisibility(View.VISIBLE);
+    //     } else {
+    //         headlineView.setVisibility(View.GONE);
+    //     }
+    //
+    //     // Remove body and CTA for compact layout
+    //     nativeAdView.setBodyView(null);
+    //     nativeAdView.setCallToActionView(null);
+    //
+    //     nativeAdView.setNativeAd(nativeAd);
+    // }
 
     private void setUpDrawerContent(NavigationView navView) {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -434,7 +426,7 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         Log.d(LOG_TAG, "onDestroy called: Cleaning up resources.");
-        if (nativeAdBottom != null) nativeAdBottom.destroy();
+        // if (nativeAdBottom != null) nativeAdBottom.destroy();
         super.onDestroy();
     }
 }

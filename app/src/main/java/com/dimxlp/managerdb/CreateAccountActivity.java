@@ -105,13 +105,13 @@ public class CreateAccountActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.e(LOG_TAG, "Failed to initialize reCAPTCHA.", e));
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
-
-        // Load Native Ads
-        nativeAdViewTop = findViewById(R.id.native_ad_view_top);
-        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+        // MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
+        //
+        // // Load Native Ads
+        // nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+        // nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        // loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
+        // loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -178,70 +178,70 @@ public class CreateAccountActivity extends AppCompatActivity {
 
     }
 
-    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
-        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
-                .forNativeAd(ad -> {
-                    if (isDestroyed()) {
-                        ad.destroy();
-                        return;
-                    }
-                    if (nativeAdView == nativeAdViewTop) {
-                        nativeAdTop = ad;
-                    } else {
-                        nativeAdBottom = ad;
-                    }
-                    populateNativeAdView(ad, nativeAdView);
-                })
-                .withAdListener(new com.google.android.gms.ads.AdListener() {
-                    @Override
-                    public void onAdFailedToLoad(LoadAdError adError) {
-
-                    }
-                })
-                .build();
-
-        adLoader.loadAd(new AdRequest.Builder().build());
-    }
-
-    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-
-        // Dynamically identify view IDs based on the nativeAdView
-        int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
-        int bodyId = nativeAdView == nativeAdViewTop ? R.id.ad_body_top : R.id.ad_body_bottom;
-        int callToActionId = nativeAdView == nativeAdViewTop ? R.id.ad_call_to_action_top : R.id.ad_call_to_action_bottom;
-
-        // Set the views for the NativeAdView
-        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-        nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
-        nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
-
-        // Populate the Headline
-        if (nativeAd.getHeadline() != null) {
-            ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
-            nativeAdView.getHeadlineView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getHeadlineView().setVisibility(View.GONE);
-        }
-
-        // Populate the Body
-        if (nativeAd.getBody() != null) {
-            ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
-            nativeAdView.getBodyView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getBodyView().setVisibility(View.GONE);
-        }
-
-        // Populate the Call-to-Action
-        if (nativeAd.getCallToAction() != null) {
-            ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
-            nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
-        } else {
-            nativeAdView.getCallToActionView().setVisibility(View.GONE);
-        }
-
-        // Bind the NativeAd object to the NativeAdView
-        nativeAdView.setNativeAd(nativeAd);
-    }
+    // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+    //     AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+    //             .forNativeAd(ad -> {
+    //                 if (isDestroyed()) {
+    //                     ad.destroy();
+    //                     return;
+    //                 }
+    //                 if (nativeAdView == nativeAdViewTop) {
+    //                     nativeAdTop = ad;
+    //                 } else {
+    //                     nativeAdBottom = ad;
+    //                 }
+    //                 populateNativeAdView(ad, nativeAdView);
+    //             })
+    //             .withAdListener(new com.google.android.gms.ads.AdListener() {
+    //                 @Override
+    //                 public void onAdFailedToLoad(LoadAdError adError) {
+    //
+    //                 }
+    //             })
+    //             .build();
+    //
+    //     adLoader.loadAd(new AdRequest.Builder().build());
+    // }
+    //
+    // private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+    //
+    //     // Dynamically identify view IDs based on the nativeAdView
+    //     int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
+    //     int bodyId = nativeAdView == nativeAdViewTop ? R.id.ad_body_top : R.id.ad_body_bottom;
+    //     int callToActionId = nativeAdView == nativeAdViewTop ? R.id.ad_call_to_action_top : R.id.ad_call_to_action_bottom;
+    //
+    //     // Set the views for the NativeAdView
+    //     nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+    //     nativeAdView.setBodyView(nativeAdView.findViewById(bodyId));
+    //     nativeAdView.setCallToActionView(nativeAdView.findViewById(callToActionId));
+    //
+    //     // Populate the Headline
+    //     if (nativeAd.getHeadline() != null) {
+    //         ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
+    //         nativeAdView.getHeadlineView().setVisibility(View.VISIBLE);
+    //     } else {
+    //         nativeAdView.getHeadlineView().setVisibility(View.GONE);
+    //     }
+    //
+    //     // Populate the Body
+    //     if (nativeAd.getBody() != null) {
+    //         ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
+    //         nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+    //     } else {
+    //         nativeAdView.getBodyView().setVisibility(View.GONE);
+    //     }
+    //
+    //     // Populate the Call-to-Action
+    //     if (nativeAd.getCallToAction() != null) {
+    //         ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
+    //         nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
+    //     } else {
+    //         nativeAdView.getCallToActionView().setVisibility(View.GONE);
+    //     }
+    //
+    //     // Bind the NativeAd object to the NativeAdView
+    //     nativeAdView.setNativeAd(nativeAd);
+    // }
 
     private void verifyRecaptchaAndCreateAccount(final String username, String email, String password) {
 

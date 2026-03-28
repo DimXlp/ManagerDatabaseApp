@@ -24,13 +24,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdLoader;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.nativead.NativeAd;
-import com.google.android.gms.ads.nativead.NativeAdView;
+// import com.google.android.gms.ads.AdLoader;
+// import com.google.android.gms.ads.AdRequest;
+// import com.google.android.gms.ads.AdView;
+// import com.google.android.gms.ads.LoadAdError;
+// import com.google.android.gms.ads.MobileAds;
+// import com.google.android.gms.ads.nativead.NativeAd;
+// import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -113,8 +113,8 @@ public class YouthTeamListActivity extends AppCompatActivity {
     private TextView teamHeader;
     private String minYearText;
     private String barYear;
-    private NativeAd nativeAdBottom;
-    private NativeAdView nativeAdViewBottom;
+    // private NativeAd nativeAdBottom;
+    // private NativeAdView nativeAdViewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -214,10 +214,10 @@ public class YouthTeamListActivity extends AppCompatActivity {
             }
         });
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
-
-        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+        // MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
+        //
+        // nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        // loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         View.OnClickListener prevYearListener = new View.OnClickListener() {
             @Override
@@ -256,45 +256,45 @@ public class YouthTeamListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
-        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
-                .forNativeAd(ad -> {
-                    if (isDestroyed()) {
-                        ad.destroy();
-                        return;
-                    }
-                    populateNativeAdView(ad, nativeAdView);
-                    Log.d(LOG_TAG, "Native ad loaded successfully.");
-                })
-                .withAdListener(new com.google.android.gms.ads.AdListener() {
-                    @Override
-                    public void onAdFailedToLoad(LoadAdError adError) {
-                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
-                    }
-                })
-                .build();
-
-        adLoader.loadAd(new AdRequest.Builder().build());
-    }
-
-    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        int headlineId =  R.id.ad_headline_bottom;
-        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
-
-        if (nativeAd.getHeadline() != null) {
-            headlineView.setText(nativeAd.getHeadline());
-            headlineView.setVisibility(View.VISIBLE);
-        } else {
-            headlineView.setVisibility(View.GONE);
-        }
-
-        // Remove body and CTA for compact layout
-        nativeAdView.setBodyView(null);
-        nativeAdView.setCallToActionView(null);
-
-        nativeAdView.setNativeAd(nativeAd);
-    }
+    // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+    //     AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+    //             .forNativeAd(ad -> {
+    //                 if (isDestroyed()) {
+    //                     ad.destroy();
+    //                     return;
+    //                 }
+    //                 populateNativeAdView(ad, nativeAdView);
+    //                 Log.d(LOG_TAG, "Native ad loaded successfully.");
+    //             })
+    //             .withAdListener(new com.google.android.gms.ads.AdListener() {
+    //                 @Override
+    //                 public void onAdFailedToLoad(LoadAdError adError) {
+    //                     Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
+    //                 }
+    //             })
+    //             .build();
+    //
+    //     adLoader.loadAd(new AdRequest.Builder().build());
+    // }
+    //
+    // private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+    //     int headlineId =  R.id.ad_headline_bottom;
+    //     nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+    //     TextView headlineView = (TextView) nativeAdView.getHeadlineView();
+    //
+    //     if (nativeAd.getHeadline() != null) {
+    //         headlineView.setText(nativeAd.getHeadline());
+    //         headlineView.setVisibility(View.VISIBLE);
+    //     } else {
+    //         headlineView.setVisibility(View.GONE);
+    //     }
+    //
+    //     // Remove body and CTA for compact layout
+    //     nativeAdView.setBodyView(null);
+    //     nativeAdView.setCallToActionView(null);
+    //
+    //     nativeAdView.setNativeAd(nativeAd);
+    // }
 
     private static void animateYearButtons(View v) {
         v.animate()
@@ -789,7 +789,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (nativeAdBottom != null) nativeAdBottom.destroy();
+        // if (nativeAdBottom != null) nativeAdBottom.destroy();
         Log.i(LOG_TAG, "YouthTeamListActivity destroyed.");
         super.onDestroy();
     }

@@ -37,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "RAFI|Main";
     private Button getStartedButton;
-    private NativeAd nativeAdTop, nativeAdBottom;
-    private NativeAdView nativeAdViewTop, nativeAdViewBottom;
+    // private NativeAd nativeAdTop, nativeAdBottom;
+    // private NativeAdView nativeAdViewTop, nativeAdViewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,13 +117,13 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
-
-        // Load Native Ads
-        nativeAdViewTop = findViewById(R.id.native_ad_view_top);
-        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+        // MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
+        //
+        // // Load Native Ads
+        // nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+        // nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        // loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
+        // loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         getStartedButton = findViewById(R.id.get_started_button);
         getStartedButton.setOnClickListener(new View.OnClickListener() {
@@ -148,49 +148,49 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
-        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
-                .forNativeAd(ad -> {
-                    if (isDestroyed()) {
-                        ad.destroy();
-                        return;
-                    }
-                    if (nativeAdView == nativeAdViewTop) {
-                        nativeAdTop = ad;
-                    } else {
-                        nativeAdBottom = ad;
-                    }
-                    populateNativeAdView(ad, nativeAdView);
-                })
-                .withAdListener(new com.google.android.gms.ads.AdListener() {
-                    @Override
-                    public void onAdFailedToLoad(LoadAdError adError) {
-
-                    }
-                })
-                .build();
-
-        adLoader.loadAd(new AdRequest.Builder().build());
-    }
-
-    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
-        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
-
-        if (nativeAd.getHeadline() != null) {
-            headlineView.setText(nativeAd.getHeadline());
-            headlineView.setVisibility(View.VISIBLE);
-        } else {
-            headlineView.setVisibility(View.GONE);
-        }
-
-        // Remove body and CTA for compact layout
-        nativeAdView.setBodyView(null);
-        nativeAdView.setCallToActionView(null);
-
-        nativeAdView.setNativeAd(nativeAd);
-    }
+    // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+    //     AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+    //             .forNativeAd(ad -> {
+    //                 if (isDestroyed()) {
+    //                     ad.destroy();
+    //                     return;
+    //                 }
+    //                 if (nativeAdView == nativeAdViewTop) {
+    //                     nativeAdTop = ad;
+    //                 } else {
+    //                     nativeAdBottom = ad;
+    //                 }
+    //                 populateNativeAdView(ad, nativeAdView);
+    //             })
+    //             .withAdListener(new com.google.android.gms.ads.AdListener() {
+    //                 @Override
+    //                 public void onAdFailedToLoad(LoadAdError adError) {
+    //
+    //                 }
+    //             })
+    //             .build();
+    //
+    //     adLoader.loadAd(new AdRequest.Builder().build());
+    // }
+    //
+    // private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+    //     int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
+    //     nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+    //     TextView headlineView = (TextView) nativeAdView.getHeadlineView();
+    //
+    //     if (nativeAd.getHeadline() != null) {
+    //         headlineView.setText(nativeAd.getHeadline());
+    //         headlineView.setVisibility(View.VISIBLE);
+    //     } else {
+    //         headlineView.setVisibility(View.GONE);
+    //     }
+    //
+    //     // Remove body and CTA for compact layout
+    //     nativeAdView.setBodyView(null);
+    //     nativeAdView.setCallToActionView(null);
+    //
+    //     nativeAdView.setNativeAd(nativeAd);
+    // }
 
     private void checkAndShowFeedbackPopup() {
         Log.d(LOG_TAG, "Checking if feedback popup should be shown.");
@@ -255,13 +255,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (nativeAdTop != null) {
-            nativeAdTop.destroy();
-        }
-        if (nativeAdBottom != null) {
-            nativeAdBottom.destroy();
-        }
+        // if (nativeAdTop != null) {
+        //     nativeAdTop.destroy();
+        // }
+        // if (nativeAdBottom != null) {
+        //     nativeAdBottom.destroy();
+        // }
         super.onDestroy();
-        Log.d(LOG_TAG, "MainActivity destroyed.");
+    }
     }
 }

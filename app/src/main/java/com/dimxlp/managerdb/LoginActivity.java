@@ -25,16 +25,17 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.ads.AdLoader;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.nativead.NativeAd;
-import com.google.android.gms.ads.nativead.NativeAdView;
+// import com.google.android.gms.ads.AdLoader;
+// import com.google.android.gms.ads.AdRequest;
+// import com.google.android.gms.ads.AdView;
+// import com.google.android.gms.ads.LoadAdError;
+// import com.google.android.gms.ads.MobileAds;
+// import com.google.android.gms.ads.nativead.NativeAd;
+// import com.google.android.gms.ads.nativead.NativeAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.recaptcha.Recaptcha;
 import com.google.android.recaptcha.RecaptchaAction;
 import com.google.android.recaptcha.RecaptchaTasksClient;
@@ -81,8 +82,8 @@ public class LoginActivity extends AppCompatActivity {
     private BiometricPrompt biometricPrompt;
     private BiometricPrompt.PromptInfo promptInfo;
     private boolean isBiometricsSupported = false;
-    private NativeAd nativeAdTop, nativeAdBottom;
-    private NativeAdView nativeAdViewTop, nativeAdViewBottom;
+    // private NativeAd nativeAdTop, nativeAdBottom;
+    // private NativeAdView nativeAdViewTop, nativeAdViewBottom;
     private RecaptchaTasksClient recaptchaClient;
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final long BLOCK_TIME_MS = 5 * 60 * 1000; // Block for 5 minutes
@@ -129,13 +130,13 @@ public class LoginActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.login_progress_bar);
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
-
-        // Load Native Ads
-        nativeAdViewTop = findViewById(R.id.native_ad_view_top);
-        nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
+        // MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
+        //
+        // // Load Native Ads
+        // nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+        // nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
+        // loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
+        // loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,49 +165,49 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
-        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
-                .forNativeAd(ad -> {
-                    if (isDestroyed()) {
-                        ad.destroy();
-                        return;
-                    }
-                    if (nativeAdView == nativeAdViewTop) {
-                        nativeAdTop = ad;
-                    } else {
-                        nativeAdBottom = ad;
-                    }
-                    populateNativeAdView(ad, nativeAdView);
-                })
-                .withAdListener(new com.google.android.gms.ads.AdListener() {
-                    @Override
-                    public void onAdFailedToLoad(LoadAdError adError) {
-
-                    }
-                })
-                .build();
-
-        adLoader.loadAd(new AdRequest.Builder().build());
-    }
-
-    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
-        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
-
-        if (nativeAd.getHeadline() != null) {
-            headlineView.setText(nativeAd.getHeadline());
-            headlineView.setVisibility(View.VISIBLE);
-        } else {
-            headlineView.setVisibility(View.GONE);
-        }
-
-        // Remove body and CTA for compact layout
-        nativeAdView.setBodyView(null);
-        nativeAdView.setCallToActionView(null);
-
-        nativeAdView.setNativeAd(nativeAd);
-    }
+    // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+    //     AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+    //             .forNativeAd(ad -> {
+    //                 if (isDestroyed()) {
+    //                     ad.destroy();
+    //                     return;
+    //                 }
+    //                 if (nativeAdView == nativeAdViewTop) {
+    //                     nativeAdTop = ad;
+    //                 } else {
+    //                     nativeAdBottom = ad;
+    //                 }
+    //                 populateNativeAdView(ad, nativeAdView);
+    //             })
+    //             .withAdListener(new com.google.android.gms.ads.AdListener() {
+    //                 @Override
+    //                 public void onAdFailedToLoad(LoadAdError adError) {
+    //
+    //                 }
+    //             })
+    //             .build();
+    //
+    //     adLoader.loadAd(new AdRequest.Builder().build());
+    // }
+    //
+    // private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+    //     int headlineId = nativeAdView == nativeAdViewTop ? R.id.ad_headline_top : R.id.ad_headline_bottom;
+    //     nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+    //     TextView headlineView = (TextView) nativeAdView.getHeadlineView();
+    //
+    //     if (nativeAd.getHeadline() != null) {
+    //         headlineView.setText(nativeAd.getHeadline());
+    //         headlineView.setVisibility(View.VISIBLE);
+    //     } else {
+    //         headlineView.setVisibility(View.GONE);
+    //     }
+    //
+    //     // Remove body and CTA for compact layout
+    //     nativeAdView.setBodyView(null);
+    //     nativeAdView.setCallToActionView(null);
+    //
+    //     nativeAdView.setNativeAd(nativeAd);
+    // }
 
     private void setupBiometricPrompt() {
         Executor executor = ContextCompat.getMainExecutor(this);
@@ -433,6 +434,8 @@ public class LoginActivity extends AppCompatActivity {
                             FirebaseUser user = firebaseAuth.getCurrentUser();
                             assert user != null;
 
+                            checkEmailVerification(user);
+
 //                            if (!user.isEmailVerified()) {
 //                                Log.w(LOG_TAG, "User email not verified. Login aborted.");
 //                                Toast.makeText(LoginActivity.this,
@@ -474,6 +477,23 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             progressBar.setVisibility(View.INVISIBLE);
             Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void checkEmailVerification(FirebaseUser user) {
+        if (user != null && !user.isEmailVerified()) {
+            // Show snackbar with "Resend" button
+            Snackbar.make(findViewById(android.R.id.content), "Email not verified.", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Resend", v -> {
+                        user.sendEmailVerification()
+                                .addOnCompleteListener(verificationTask -> {
+                                    if (verificationTask.isSuccessful()) {
+                                        Toast.makeText(LoginActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(LoginActivity.this, "Failed to send email: " + verificationTask.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                    }).show();
         }
     }
 
@@ -566,13 +586,13 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (nativeAdTop != null) {
-            nativeAdTop.destroy();
-        }
-        if (nativeAdBottom != null) {
-            nativeAdBottom.destroy();
-        }
+        // if (nativeAdTop != null) {
+        //     nativeAdTop.destroy();
+        // }
+        // if (nativeAdBottom != null) {
+        //     nativeAdBottom.destroy();
+        // }
         super.onDestroy();
-        Log.d(LOG_TAG, "LoginActivity destroyed.");
     }
+}
 }

@@ -78,8 +78,8 @@ public class ManageTeamActivity extends AppCompatActivity {
 
     private TextView managerNameHeader;
     private TextView teamHeader;
-    private NativeAd nativeAdTop;
-    private NativeAdView nativeAdViewTop;
+    // private NativeAd nativeAdTop;
+    // private NativeAdView nativeAdViewTop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +104,7 @@ public class ManageTeamActivity extends AppCompatActivity {
             Log.w(LOG_TAG, "No user authenticated.");
         }
 
-        loadTopNativeAd();
+        // loadTopNativeAd();
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -137,54 +137,54 @@ public class ManageTeamActivity extends AppCompatActivity {
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
 
         // Initialize Mobile Ads SDK
-        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
-
-        // Load Interstitial Ad
-        InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        interstitialAd.show(ManageTeamActivity.this);
-                        Log.d(LOG_TAG, "Interstitial ad loaded and displayed.");
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        Log.e(LOG_TAG, "Interstitial ad failed to load: " + loadAdError.getMessage());
-                    }
-                });
+        // MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
+        //
+        // // Load Interstitial Ad
+        // InterstitialAd.load(this, "ca-app-pub-3940256099942544/1033173712", new AdRequest.Builder().build(),
+        //         new InterstitialAdLoadCallback() {
+        //             @Override
+        //             public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+        //                 interstitialAd.show(ManageTeamActivity.this);
+        //                 Log.d(LOG_TAG, "Interstitial ad loaded and displayed.");
+        //             }
+        //
+        //             @Override
+        //             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+        //                 Log.e(LOG_TAG, "Interstitial ad failed to load: " + loadAdError.getMessage());
+        //             }
+        //         });
 
     }
 
-    private void loadTopNativeAd() {
-        NativeAdView nativeAdView = findViewById(R.id.native_ad_view_top);
-        AdLoader adLoader = new AdLoader.Builder(this, "ca-app-pub-3940256099942544/2247696110")
-                .forNativeAd(nativeAd -> {
-                    if (isDestroyed()) {
-                        nativeAd.destroy();
-                        return;
-                    }
-                    TextView headlineView = nativeAdView.findViewById(R.id.ad_headline_top);
-                    if (headlineView != null && nativeAd.getHeadline() != null) {
-                        headlineView.setText(nativeAd.getHeadline());
-                        headlineView.setVisibility(View.VISIBLE);
-                        nativeAdView.setHeadlineView(headlineView);
-                    }
-
-                    nativeAdView.setBodyView(null);
-                    nativeAdView.setCallToActionView(null);
-                    nativeAdView.setNativeAd(nativeAd);
-                })
-                .withAdListener(new com.google.android.gms.ads.AdListener() {
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError adError) {
-                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
-                    }
-                })
-                .build();
-
-        adLoader.loadAd(new AdRequest.Builder().build());
-    }
+    // private void loadTopNativeAd() {
+    //     NativeAdView nativeAdView = findViewById(R.id.native_ad_view_top);
+    //     AdLoader adLoader = new AdLoader.Builder(this, "ca-app-pub-3940256099942544/2247696110")
+    //             .forNativeAd(nativeAd -> {
+    //                 if (isDestroyed()) {
+    //                     nativeAd.destroy();
+    //                     return;
+    //                 }
+    //                 TextView headlineView = nativeAdView.findViewById(R.id.ad_headline_top);
+    //                 if (headlineView != null && nativeAd.getHeadline() != null) {
+    //                     headlineView.setText(nativeAd.getHeadline());
+    //                     headlineView.setVisibility(View.VISIBLE);
+    //                     nativeAdView.setHeadlineView(headlineView);
+    //                 }
+    //
+    //                 nativeAdView.setBodyView(null);
+    //                 nativeAdView.setCallToActionView(null);
+    //                 nativeAdView.setNativeAd(nativeAd);
+    //             })
+    //             .withAdListener(new com.google.android.gms.ads.AdListener() {
+    //                 @Override
+    //                 public void onAdFailedToLoad(@NonNull LoadAdError adError) {
+    //                     Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
+    //                 }
+    //             })
+    //             .build();
+    //
+    //     adLoader.loadAd(new AdRequest.Builder().build());
+    // }
 
 
     private void setUpDrawerContent(NavigationView navView) {
