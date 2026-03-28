@@ -683,8 +683,9 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                         !overall.getText().toString().isEmpty() &&
                         !yearScoutedPicker.getText().toString().isEmpty()) {
 
-                        // Disable to prevent duplicate taps
+                        // Disable to prevent duplicate taps and show feedback
                         savePlayerButton.setEnabled(false);
+                        savePlayerButton.setText("Saving...");
 
                         ytPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
@@ -724,25 +725,38 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Successfully updated player: " + player.getFullName());
-                                                            notifyItemChanged(getAdapterPosition(), player);
-                                                            if (editDialog != null && editDialog.isShowing()) {
-                                                                editDialog.dismiss();
+                                                            try {
+                                                                if (editDialog != null && editDialog.isShowing()) {
+                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
+                                                                    editDialog.dismiss();
+                                                                }
+                                                                notifyItemChanged(getAdapterPosition());
+                                                                Toast.makeText(context, "Player updated!", Toast.LENGTH_SHORT).show();
+                                                                
+                                                                // Refresh the activity data if it's YouthTeamListActivity
+                                                                if (context instanceof YouthTeamListActivity) {
+                                                                    ((YouthTeamListActivity) context).refreshPlayerList();
+                                                                }
+                                                            } catch (Exception e) {
+                                                                Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                                                                Toast.makeText(context, "Player updated but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                                             }
-                                                            Intent intent = new Intent(context, YouthTeamListActivity.class);
-                                                            intent.putExtra("managerId", managerId);
-                                                            intent.putExtra("team", team);
-                                                            intent.putExtra("barYear", barYear);
-                                                            context.startActivity(intent);
-                                                            ((Activity) context).finish();
-                                                            Toast.makeText(context, "Player updated!", Toast.LENGTH_LONG)
-                                                                    .show();
                                                         }
                                                     })
                                                     .addOnFailureListener(e -> {
                                                         Log.e(LOG_TAG, "Failed to update player: " + e.getMessage());
-                                                        editDialog.dismiss();
+                                                        if (editDialog != null && editDialog.isShowing()) {
+                                                            editDialog.dismiss();
+                                                        }
+                                                        savePlayerButton.setText("SAVE PLAYER");
                                                         savePlayerButton.setEnabled(true);
+                                                        Toast.makeText(context, "Failed to update player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                                     });
+                                        } else {
+                                            Log.e(LOG_TAG, "Error fetching Youth Team players.", task.getException());
+                                            savePlayerButton.setText("SAVE PLAYER");
+                                            savePlayerButton.setEnabled(true);
+                                            Toast.makeText(context, "Failed to fetch player data", Toast.LENGTH_LONG).show();
                                         }
                                     }
                                 });

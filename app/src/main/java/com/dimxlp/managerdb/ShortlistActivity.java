@@ -305,6 +305,7 @@ public class ShortlistActivity extends AppCompatActivity {
                     Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
                     // Disable to prevent duplicate taps
                     createButton.setEnabled(false);
+                    createButton.setText("Saving...");
                     createPlayer();
                 } else {
                     Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
@@ -375,58 +376,68 @@ public class ShortlistActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.i(LOG_TAG, "Player successfully added to Firestore: " + documentReference.getId());
-                        if (createDialog != null && createDialog.isShowing()) {
-                            createDialog.dismiss();
-                        }
-                        Intent intent = new Intent(ShortlistActivity.this, ShortlistPlayersActivity.class);
-                        intent.putExtra("managerId", managerId);
-                        intent.putExtra("team", myTeam);
-                        switch (positionPlayer) {
-                            case "GK":
-                                barPosition = "Goalkeepers";
-                                break;
-                            case "CB":
-                                barPosition = "Center Backs";
-                                break;
-                            case "RB", "RWB":
-                                barPosition = "Right Backs";
-                                break;
-                            case "LB", "LWB":
-                                barPosition = "Left Backs";
-                                break;
-                            case "CDM":
-                                barPosition = "Center Defensive Mids";
-                                break;
-                            case "CM":
-                                barPosition = "Center Midfielders";
-                                break;
-                            case "CAM":
-                                barPosition = "Center Attacking Mids";
-                                break;
-                            case "RM", "RW":
-                                barPosition = "Right Wingers";
-                                break;
-                            case "LM", "LW":
-                                barPosition = "Left Wingers";
-                                break;
-                            case "ST", "CF", "RF", "LF":
-                                barPosition = "Strikers";
-                                break;
+                        try {
+                            if (createDialog != null && createDialog.isShowing()) {
+                                Log.d(LOG_TAG, "Dismissing create dialog.");
+                                createDialog.dismiss();
+                            }
+                            Intent intent = new Intent(ShortlistActivity.this, ShortlistPlayersActivity.class);
+                            intent.putExtra("managerId", managerId);
+                            intent.putExtra("team", myTeam);
+                            switch (positionPlayer) {
+                                case "GK":
+                                    barPosition = "Goalkeepers";
+                                    break;
+                                case "CB":
+                                    barPosition = "Center Backs";
+                                    break;
+                                case "RB", "RWB":
+                                    barPosition = "Right Backs";
+                                    break;
+                                case "LB", "LWB":
+                                    barPosition = "Left Backs";
+                                    break;
+                                case "CDM":
+                                    barPosition = "Center Defensive Mids";
+                                    break;
+                                case "CM":
+                                    barPosition = "Center Midfielders";
+                                    break;
+                                case "CAM":
+                                    barPosition = "Center Attacking Mids";
+                                    break;
+                                case "RM", "RW":
+                                    barPosition = "Right Wingers";
+                                    break;
+                                case "LM", "LW":
+                                    barPosition = "Left Wingers";
+                                    break;
+                                case "ST", "CF", "RF", "LF":
+                                    barPosition = "Strikers";
+                                    break;
 
+                            }
+                            Log.d(LOG_TAG, "Bar position determined: " + barPosition);
+                            intent.putExtra("barPosition", barPosition);
+                            startActivity(intent);
+                            finish();
+                            Log.d(LOG_TAG, "ShortlistPlayersActivity started, and ShortlistActivity finished.");
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                            Toast.makeText(ShortlistActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
-                        Log.d(LOG_TAG, "Bar position determined: " + barPosition);
-                        intent.putExtra("barPosition", barPosition);
-                        startActivity(intent);
-                        finish();
-                        Log.d(LOG_TAG, "ShortlistPlayersActivity started, and ShortlistActivity finished.");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(LOG_TAG, "Error creating player", e);
-                        createDialog.dismiss();
+                        if (createDialog != null && createDialog.isShowing()) {
+                            createDialog.dismiss();
+                        }
+                        createButton.setText("CREATE PLAYER");
                         createButton.setEnabled(true);
+                        Toast.makeText(ShortlistActivity.this, "Failed to create player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
     }

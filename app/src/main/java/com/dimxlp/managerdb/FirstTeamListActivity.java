@@ -309,6 +309,11 @@ public class FirstTeamListActivity extends AppCompatActivity {
                 });
     }
 
+    public void refreshPlayerList() {
+        Log.d(LOG_TAG, "refreshPlayerList called");
+        listPlayers(0);
+    }
+
     private void listPlayers(final int buttonInt) {
         playerList.clear();
 
@@ -417,6 +422,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
                         !yearSigned.getText().toString().isEmpty()) {
                     // Disable to prevent duplicate taps
                     createPlayerButton.setEnabled(false);
+                    createPlayerButton.setText("Saving...");
                     createPlayer();
                 } else {
                     Toast.makeText(FirstTeamListActivity.this, "Last Name/Nickname, Nationality, Position, Overall and Year Signed are required", Toast.LENGTH_LONG)
@@ -483,23 +489,32 @@ public class FirstTeamListActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
-                        if (createDialog != null && createDialog.isShowing()) {
-                            createDialog.dismiss();
+                        Log.i(LOG_TAG, "Player successfully added to Firestore. Document ID: " + documentReference.getId());
+                        try {
+                            if (createDialog != null && createDialog.isShowing()) {
+                                Log.d(LOG_TAG, "Dismissing create dialog.");
+                                createDialog.dismiss();
+                            }
+                            // Refresh the current activity instead of restarting
+                            Toast.makeText(FirstTeamListActivity.this, "Player created successfully!", Toast.LENGTH_SHORT).show();
+                            // Trigger refresh to reload data
+                            refreshPlayerList();
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                            Toast.makeText(FirstTeamListActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
-                        Intent intent = new Intent(FirstTeamListActivity.this, FirstTeamListActivity.class);
-                        intent.putExtra("managerId", managerId);
-                        intent.putExtra("team", team);
-                        intent.putExtra("barYear", ySignedPlayer);
-                        startActivity(intent);
-                        finish();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(LOG_TAG, "Error creating player", e);
-                        createDialog.dismiss();
+                        if (createDialog != null && createDialog.isShowing()) {
+                            createDialog.dismiss();
+                        }
+                        createPlayerButton.setText("CREATE PLAYER");
                         createPlayerButton.setEnabled(true);
+                        Toast.makeText(FirstTeamListActivity.this, "Failed to create player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
     }

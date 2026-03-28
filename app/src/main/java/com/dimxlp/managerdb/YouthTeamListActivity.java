@@ -309,6 +309,11 @@ public class YouthTeamListActivity extends AppCompatActivity {
                 });
     }
 
+    public void refreshPlayerList() {
+        Log.d(LOG_TAG, "refreshPlayerList called");
+        listPlayers(0);
+    }
+
     private void listPlayers(final int buttonInt) {
         Log.d(LOG_TAG, "Listing players for year: " + currentYear + ", buttonInt: " + buttonInt);
 
@@ -411,6 +416,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
                     Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
                     // Disable to prevent duplicate taps
                     createPlayerButton.setEnabled(false);
+                    createPlayerButton.setText("Saving...");
                     createPlayer();
                 } else {
                     Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
@@ -477,22 +483,30 @@ public class YouthTeamListActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.i(LOG_TAG, "Player successfully added to Firestore: Document ID = " + documentReference.getId());
-                        dialog.dismiss();
-                        Intent intent = new Intent(YouthTeamListActivity.this, YouthTeamListActivity.class);
-                        intent.putExtra("managerId", managerId);
-                        intent.putExtra("team", team);
-                        intent.putExtra("barYear", yScoutedPlayer);
-                        startActivity(intent);
-                        finish();
-                        Log.d(LOG_TAG, "YouthTeamListActivity restarted. Current activity finished.");
+                        try {
+                            if (dialog != null && dialog.isShowing()) {
+                                Log.d(LOG_TAG, "Dismissing create dialog.");
+                                dialog.dismiss();
+                            }
+                            // Refresh the current activity instead of restarting
+                            Toast.makeText(YouthTeamListActivity.this, "Player created successfully!", Toast.LENGTH_SHORT).show();
+                            refreshPlayerList();
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                            Toast.makeText(YouthTeamListActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(LOG_TAG, "Error creating player", e);
-                        dialog.dismiss();
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                        createPlayerButton.setText("CREATE PLAYER");
                         createPlayerButton.setEnabled(true);
+                        Toast.makeText(YouthTeamListActivity.this, "Failed to create player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
     }

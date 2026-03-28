@@ -490,8 +490,9 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                             !yearLoaned.getText().toString().isEmpty()) {
                         Log.d(LOG_TAG, "Validation successful. Proceeding to update player.");
 
-                        // Disable to prevent duplicate taps
+                        // Disable to prevent duplicate taps and show feedback
                         editPlayerButton.setEnabled(false);
+                        editPlayerButton.setText("Saving...");
 
                         loPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
@@ -538,25 +539,39 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Player successfully updated in Firestore: " + player.getFullName());
-                                                            notifyItemChanged(getAdapterPosition(), player);
-                                                            editDialog.dismiss();
-                                                            Intent intent = new Intent(context, LoanedOutPlayersActivity.class);
-                                                            intent.putExtra("managerId", managerId);
-                                                            intent.putExtra("team", team);
-                                                            context.startActivity(intent);
-                                                            ((Activity) context).finish();
-                                                            Toast.makeText(context, "Player edited! You should also edit the corresponding transfer deal!", Toast.LENGTH_LONG)
-                                                                    .show();
+                                                            try {
+                                                                if (editDialog != null && editDialog.isShowing()) {
+                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
+                                                                    editDialog.dismiss();
+                                                                }
+                                                                notifyItemChanged(getAdapterPosition());
+                                                                Toast.makeText(context, "Player updated! You should also edit the corresponding transfer deal!", Toast.LENGTH_SHORT).show();
+                                                                
+                                                                // Refresh the activity data if it's LoanedOutPlayersActivity
+                                                                if (context instanceof LoanedOutPlayersActivity) {
+                                                                    ((LoanedOutPlayersActivity) context).refreshPlayerList();
+                                                                }
+                                                            } catch (Exception e) {
+                                                                Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                                                                Toast.makeText(context, "Player updated but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                                            }
 
                                                         }
                                                     })
                                                     .addOnFailureListener(e -> {
                                                         Log.e(LOG_TAG, "Error updating player in Firestore.", e);
-                                                        editDialog.dismiss();
+                                                        if (editDialog != null && editDialog.isShowing()) {
+                                                            editDialog.dismiss();
+                                                        }
+                                                        editPlayerButton.setText("EDIT PLAYER");
                                                         editPlayerButton.setEnabled(true);
+                                                        Toast.makeText(context, "Failed to update player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                                     });
                                         } else {
-                                            Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
+                                            Log.e(LOG_TAG, "Error fetching Loaned Out players.", task.getException());
+                                            editPlayerButton.setText("EDIT PLAYER");
+                                            editPlayerButton.setEnabled(true);
+                                            Toast.makeText(context, "Failed to fetch player data", Toast.LENGTH_LONG).show();
                                         }
                                     }
                                 });

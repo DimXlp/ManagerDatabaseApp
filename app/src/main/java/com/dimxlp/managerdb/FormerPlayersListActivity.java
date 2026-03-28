@@ -261,6 +261,15 @@ public class FormerPlayersListActivity extends AppCompatActivity {
         }
     }
 
+    public void refreshPlayerList() {
+        Log.d(LOG_TAG, "refreshPlayerList called");
+        if (barTeam != null && barTeam.equals("Youth Team")) {
+            listFormerYouthTeamPlayers(0);
+        } else {
+            listFormerFirstTeamPlayers(0);
+        }
+    }
+
     private void listFormerYouthTeamPlayers(final int buttonInt) {
         Log.d(LOG_TAG, "Listing former Youth Team players.");
         ytPlayerList.clear();

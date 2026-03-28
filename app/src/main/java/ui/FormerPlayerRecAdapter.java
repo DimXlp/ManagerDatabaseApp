@@ -503,8 +503,9 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                             !yearScouted.getText().toString().isEmpty() &&
                             !yearLeft.getText().toString().isEmpty()) {
 
-                        // Disable to prevent duplicate taps
+                        // Disable to prevent duplicate taps and show feedback
                         editPlayerButton.setEnabled(false);
+                        editPlayerButton.setText("Saving...");
 
                         frmPlayerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
@@ -548,25 +549,38 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Player successfully updated: " + player.getFullName());
-                                                            notifyItemChanged(getAdapterPosition(), player);
-                                                            editDialog.dismiss();
-                                                            Intent intent = new Intent(context, FormerPlayersListActivity.class);
-                                                            intent.putExtra("managerId", managerId);
-                                                            intent.putExtra("team", team);
-                                                            intent.putExtra("barTeam", barTeam);
-                                                            context.startActivity(intent);
-                                                            ((Activity) context).finish();
-                                                            Toast.makeText(context, "Player edited!", Toast.LENGTH_LONG)
-                                                                    .show();
+                                                            try {
+                                                                if (editDialog != null && editDialog.isShowing()) {
+                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
+                                                                    editDialog.dismiss();
+                                                                }
+                                                                notifyItemChanged(getAdapterPosition());
+                                                                Toast.makeText(context, "Player updated!", Toast.LENGTH_SHORT).show();
+                                                                
+                                                                // Refresh the activity data if it's FormerPlayersListActivity
+                                                                if (context instanceof FormerPlayersListActivity) {
+                                                                    ((FormerPlayersListActivity) context).refreshPlayerList();
+                                                                }
+                                                            } catch (Exception e) {
+                                                                Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                                                                Toast.makeText(context, "Player updated but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                                            }
                                                         }
                                                     })
                                                     .addOnFailureListener(e -> {
                                                         Log.e(LOG_TAG, "Error updating player.", e);
-                                                        editDialog.dismiss();
+                                                        if (editDialog != null && editDialog.isShowing()) {
+                                                            editDialog.dismiss();
+                                                        }
+                                                        editPlayerButton.setText("EDIT PLAYER");
                                                         editPlayerButton.setEnabled(true);
+                                                        Toast.makeText(context, "Failed to update player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                                     });
                                         } else {
                                             Log.e(LOG_TAG, "Error fetching FormerPlayer collection.", task.getException());
+                                            editPlayerButton.setText("EDIT PLAYER");
+                                            editPlayerButton.setEnabled(true);
+                                            Toast.makeText(context, "Failed to fetch player data", Toast.LENGTH_LONG).show();
                                         }
                                     }
                                 });
@@ -671,8 +685,9 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                             !yearLeft.getText().toString().isEmpty()) {
                         Log.d(LOG_TAG, "Validation successful. Proceeding to update player.");
 
-                        // Disable to prevent duplicate taps
+                        // Disable to prevent duplicate taps and show feedback
                         editPlayerButton.setEnabled(false);
+                        editPlayerButton.setText("Saving...");
 
                         frmPlayerColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
@@ -716,25 +731,38 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Player successfully updated: " + player.getFullName());
-                                                            notifyItemChanged(getAdapterPosition(), player);
-                                                            editDialog.dismiss();
-                                                            Intent intent = new Intent(context, FormerPlayersListActivity.class);
-                                                            intent.putExtra("managerId", managerId);
-                                                            intent.putExtra("team", team);
-                                                            intent.putExtra("barTeam", barTeam);
-                                                            context.startActivity(intent);
-                                                            ((Activity) context).finish();
-                                                            Toast.makeText(context, "Player edited!", Toast.LENGTH_LONG)
-                                                                    .show();
+                                                            try {
+                                                                if (editDialog != null && editDialog.isShowing()) {
+                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
+                                                                    editDialog.dismiss();
+                                                                }
+                                                                notifyItemChanged(getAdapterPosition());
+                                                                Toast.makeText(context, "Player updated!", Toast.LENGTH_SHORT).show();
+                                                                
+                                                                // Refresh the activity data if it's FormerPlayersListActivity
+                                                                if (context instanceof FormerPlayersListActivity) {
+                                                                    ((FormerPlayersListActivity) context).refreshPlayerList();
+                                                                }
+                                                            } catch (Exception e) {
+                                                                Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                                                                Toast.makeText(context, "Player updated but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                                            }
                                                         }
                                                     })
                                                     .addOnFailureListener(e -> {
                                                         Log.e(LOG_TAG, "Error updating player.", e);
-                                                        editDialog.dismiss();
+                                                        if (editDialog != null && editDialog.isShowing()) {
+                                                            editDialog.dismiss();
+                                                        }
+                                                        editPlayerButton.setText("EDIT PLAYER");
                                                         editPlayerButton.setEnabled(true);
+                                                        Toast.makeText(context, "Failed to update player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                                     });
                                         } else {
                                             Log.e(LOG_TAG, "Error fetching FormerPlayer collection.", task.getException());
+                                            editPlayerButton.setText("EDIT PLAYER");
+                                            editPlayerButton.setEnabled(true);
+                                            Toast.makeText(context, "Failed to fetch player data", Toast.LENGTH_LONG).show();
                                         }
                                     }
                                 });

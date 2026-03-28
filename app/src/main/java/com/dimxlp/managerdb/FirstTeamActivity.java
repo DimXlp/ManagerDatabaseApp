@@ -294,6 +294,7 @@ public class FirstTeamActivity extends AppCompatActivity {
                     !yearSigned.getText().toString().isEmpty()) {
                     // Disable to prevent duplicate taps
                     createPlayerButton.setEnabled(false);
+                    createPlayerButton.setText("Saving...");
                     createPlayer();
                 } else {
                     Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
@@ -366,23 +367,33 @@ public class FirstTeamActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.i(LOG_TAG, "Player successfully added to Firestore. Document ID: " + documentReference.getId());
-                        if (createDialog != null && createDialog.isShowing()) {
-                            createDialog.dismiss();
+                        try {
+                            if (createDialog != null && createDialog.isShowing()) {
+                                Log.d(LOG_TAG, "Dismissing create dialog.");
+                                createDialog.dismiss();
+                            }
+                            Intent intent = new Intent(FirstTeamActivity.this, FirstTeamListActivity.class);
+                            intent.putExtra("managerId", managerId);
+                            intent.putExtra("team", team);
+                            intent.putExtra("barYear", ySignedPlayer);
+                            startActivity(intent);
+                            finish();
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                            Toast.makeText(FirstTeamActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
-                        Intent intent = new Intent(FirstTeamActivity.this, FirstTeamListActivity.class);
-                        intent.putExtra("managerId", managerId);
-                        intent.putExtra("team", team);
-                        intent.putExtra("barYear", ySignedPlayer);
-                        startActivity(intent);
-                        finish();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(LOG_TAG, "Error creating player", e);
-                        createDialog.dismiss();
+                        if (createDialog != null && createDialog.isShowing()) {
+                            createDialog.dismiss();
+                        }
+                        createPlayerButton.setText("CREATE PLAYER");
                         createPlayerButton.setEnabled(true);
+                        Toast.makeText(FirstTeamActivity.this, "Failed to create player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
     }

@@ -68,6 +68,7 @@ public class YouthTeamActivity extends AppCompatActivity {
 
     private AlertDialog.Builder builder;
     private AlertDialog dialog;
+    private BottomSheetDialog createDialog;
 
     private EditText firstName;
     private EditText lastName;
@@ -228,7 +229,7 @@ public class YouthTeamActivity extends AppCompatActivity {
     private void createPopupDialog() {
         Log.d(LOG_TAG, "Creating popup dialog for adding a youth team player.");
 
-        BottomSheetDialog createDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+        createDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.create_youth_team_player_popup, null);
         createDialog.setContentView(view);
 
@@ -283,6 +284,7 @@ public class YouthTeamActivity extends AppCompatActivity {
                     Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
                     // Disable to prevent duplicate taps
                     createPlayerButton.setEnabled(false);
+                    createPlayerButton.setText("Saving...");
                     createPlayer();
                 } else {
                     Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
@@ -349,21 +351,34 @@ public class YouthTeamActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.i(LOG_TAG, "Player successfully added to Firestore. Document ID: " + documentReference.getId());
-                        Intent intent = new Intent(YouthTeamActivity.this, YouthTeamListActivity.class);
-                        intent.putExtra("managerId", managerId);
-                        intent.putExtra("team", team);
-                        intent.putExtra("barYear", yScoutedPlayer);
-                        startActivity(intent);
-                        finish();
-                        Log.d(LOG_TAG, "YouthTeamListActivity started. Current activity finished.");
+                        try {
+                            if (createDialog != null && createDialog.isShowing()) {
+                                Log.d(LOG_TAG, "Dismissing create dialog.");
+                                createDialog.dismiss();
+                            }
+                            Intent intent = new Intent(YouthTeamActivity.this, YouthTeamListActivity.class);
+                            intent.putExtra("managerId", managerId);
+                            intent.putExtra("team", team);
+                            intent.putExtra("barYear", yScoutedPlayer);
+                            startActivity(intent);
+                            finish();
+                            Log.d(LOG_TAG, "YouthTeamListActivity started. Current activity finished.");
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                            Toast.makeText(YouthTeamActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(LOG_TAG, "Error creating player", e);
-                        dialog.dismiss();
+                        if (createDialog != null && createDialog.isShowing()) {
+                            createDialog.dismiss();
+                        }
+                        createPlayerButton.setText("CREATE PLAYER");
                         createPlayerButton.setEnabled(true);
+                        Toast.makeText(YouthTeamActivity.this, "Failed to create player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
     }

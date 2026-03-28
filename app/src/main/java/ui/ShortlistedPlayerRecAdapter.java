@@ -965,8 +965,9 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                         !teamText.getText().toString().isEmpty() &&
                         !overall.getText().toString().isEmpty()) {
 
-                        // Disable to prevent duplicate taps
+                        // Disable to prevent duplicate taps and show feedback
                         editPlayerButton.setEnabled(false);
+                        editPlayerButton.setText("Saving...");
 
                         shPlayersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
@@ -1008,27 +1009,42 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Player successfully updated: " + player.getFullName());
-                                                            notifyItemChanged(getAdapterPosition(), player);
-                                                            createDialog.dismiss();
-                                                            Intent intent = new Intent(context, ShortlistPlayersActivity.class);
-                                                            intent.putExtra("managerId", managerId);
-                                                            intent.putExtra("team", team);
-                                                            intent.putExtra("barPosition", position);
-                                                            context.startActivity(intent);
-                                                            ((Activity) context).finish();
-                                                            Toast.makeText(context, "Player updated!", Toast.LENGTH_LONG)
-                                                                    .show();
+                                                            try {
+                                                                if (createDialog != null && createDialog.isShowing()) {
+                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
+                                                                    createDialog.dismiss();
+                                                                }
+                                                                notifyItemChanged(getAdapterPosition());
+                                                                Toast.makeText(context, "Player updated!", Toast.LENGTH_SHORT).show();
+                                                                
+                                                                // Refresh the activity data if it's ShortlistPlayersActivity
+                                                                if (context instanceof ShortlistPlayersActivity) {
+                                                                    ((ShortlistPlayersActivity) context).refreshPlayerList();
+                                                                }
+                                                            } catch (Exception e) {
+                                                                Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                                                                Toast.makeText(context, "Player updated but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                                            }
                                                         }
                                                     })
                                                     .addOnFailureListener(new OnFailureListener() {
                                                         @Override
                                                         public void onFailure(@NonNull Exception e) {
                                                             Log.e(LOG_TAG, "Error editing shortlisted player", e);
-                                                            createDialog.dismiss();
-                                                            editPlayerButton.setEnabled(true);;
+                                                            if (createDialog != null && createDialog.isShowing()) {
+                                                                createDialog.dismiss();
+                                                            }
+                                                            editPlayerButton.setText("EDIT PLAYER");
+                                                            editPlayerButton.setEnabled(true);
+                                                            Toast.makeText(context, "Failed to update player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                                         }
                                                     });
 
+                                        } else {
+                                            Log.e(LOG_TAG, "Error fetching shortlisted players.", task.getException());
+                                            editPlayerButton.setText("EDIT PLAYER");
+                                            editPlayerButton.setEnabled(true);
+                                            Toast.makeText(context, "Failed to fetch player data", Toast.LENGTH_LONG).show();
                                         }
                                     }
                                 });

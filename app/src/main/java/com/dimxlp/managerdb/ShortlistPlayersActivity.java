@@ -452,6 +452,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                     Log.d(LOG_TAG, "Validation successful. Proceeding to create player.");
                     // Disable to prevent duplicate taps
                     createButton.setEnabled(false);
+                    createButton.setText("Saving...");
                     createPlayer();
                 } else {
                     Log.w(LOG_TAG, "Validation failed: Required fields are missing.");
@@ -522,59 +523,75 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.i(LOG_TAG, "Player successfully added to Firestore: " + documentReference.getId());
-                        if (createDialog != null && createDialog.isShowing()) {
-                            createDialog.dismiss();
+                        try {
+                            if (createDialog != null && createDialog.isShowing()) {
+                                Log.d(LOG_TAG, "Dismissing create dialog.");
+                                createDialog.dismiss();
+                            }
+                            // Determine bar position for refresh
+                            switch (positionPlayer) {
+                                case "GK":
+                                    barPosition = PositionEnum.GK.getCategory();
+                                    break;
+                                case "CB":
+                                    barPosition = PositionEnum.CB.getCategory();
+                                    break;
+                                case "RB", "RWB":
+                                    barPosition = PositionEnum.RB.getCategory();
+                                    break;
+                                case "LB", "LWB":
+                                    barPosition = PositionEnum.LB.getCategory();
+                                    break;
+                                case "CDM":
+                                    barPosition = PositionEnum.CDM.getCategory();
+                                    break;
+                                case "CM":
+                                    barPosition = PositionEnum.CM.getCategory();
+                                    break;
+                                case "CAM":
+                                    barPosition = PositionEnum.CAM.getCategory();
+                                    break;
+                                case "RM", "RW":
+                                    barPosition = PositionEnum.RW.getCategory();
+                                    break;
+                                case "LM", "LW":
+                                    barPosition = PositionEnum.LW.getCategory();
+                                    break;
+                                case "ST", "CF", "RF", "LF":
+                                    barPosition = PositionEnum.ST.getCategory();
+                                    break;
+                            }
+                            Log.d(LOG_TAG, "Bar position determined: " + barPosition);
+                            // Refresh the current activity instead of restarting
+                            Toast.makeText(ShortlistPlayersActivity.this, "Player created successfully!", Toast.LENGTH_SHORT).show();
+                            refreshPlayerList();
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                            Toast.makeText(ShortlistPlayersActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
-                        Intent intent = new Intent(ShortlistPlayersActivity.this, ShortlistPlayersActivity.class);
-                        intent.putExtra("managerId", managerId);
-                        intent.putExtra("team", myTeam);
-                        switch (positionPlayer) {
-                            case "GK":
-                                barPosition = PositionEnum.GK.getCategory();
-                                break;
-                            case "CB":
-                                barPosition = PositionEnum.CB.getCategory();
-                                break;
-                            case "RB", "RWB":
-                                barPosition = PositionEnum.RB.getCategory();
-                                break;
-                            case "LB", "LWB":
-                                barPosition = PositionEnum.LB.getCategory();
-                                break;
-                            case "CDM":
-                                barPosition = PositionEnum.CDM.getCategory();
-                                break;
-                            case "CM":
-                                barPosition = PositionEnum.CM.getCategory();
-                                break;
-                            case "CAM":
-                                barPosition = PositionEnum.CAM.getCategory();
-                                break;
-                            case "RM", "RW":
-                                barPosition = PositionEnum.RW.getCategory();
-                                break;
-                            case "LM", "LW":
-                                barPosition = PositionEnum.LW.getCategory();
-                                break;
-                            case "ST", "CF", "RF", "LF":
-                                barPosition = PositionEnum.ST.getCategory();
-                                break;
-                        }
-                        Log.d(LOG_TAG, "Bar position determined: " + barPosition);
-                        intent.putExtra("barPosition", barPosition);
-                        startActivity(intent);
-                        finish();
-                        Log.d(LOG_TAG, "ShortlistPlayersActivity restarted, and current activity finished.");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(LOG_TAG, "Error creating player", e);
-                        createDialog.dismiss();
+                        if (createDialog != null && createDialog.isShowing()) {
+                            createDialog.dismiss();
+                        }
+                        createButton.setText("CREATE PLAYER");
                         createButton.setEnabled(true);
+                        Toast.makeText(ShortlistPlayersActivity.this, "Failed to create player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    public void refreshPlayerList() {
+        Log.d(LOG_TAG, "refreshPlayerList called");
+        if (barPosition != null) {
+            listPlayers(barPosition, 0);
+        } else {
+            listPlayers(PositionEnum.GK.getCategory(), 0);
+        }
     }
 
     private void listPlayers(final String position, final int buttonInt) {

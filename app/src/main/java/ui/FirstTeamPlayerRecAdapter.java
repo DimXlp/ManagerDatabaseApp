@@ -1260,8 +1260,9 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                         !yearSignedPicker.getText().toString().isEmpty()) {
                         Log.d(LOG_TAG, "Validation successful. Proceeding to update player.");
 
-                        // Disable to prevent duplicate taps
+                        // Disable to prevent duplicate taps and show feedback
                         savePlayerButton.setEnabled(false);
+                        savePlayerButton.setText("Saving...");
 
                         ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                                 .whereEqualTo("managerId", managerId)
@@ -1307,25 +1308,39 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                         @Override
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Player successfully updated in Firestore: " + player.getFullName());
-                                                            notifyItemChanged(getAdapterPosition(), player);
-                                                            editDialog.dismiss();
-                                                            Intent intent = new Intent(context, FirstTeamListActivity.class);
-                                                            intent.putExtra("managerId", managerId);
-                                                            intent.putExtra("team", team);
-                                                            intent.putExtra("barYear", barYear);
-                                                            context.startActivity(intent);
-                                                            ((Activity)context).finish();
-                                                            Toast.makeText(context, "Player updated!", Toast.LENGTH_LONG)
-                                                                    .show();
+                                                            try {
+                                                                if (editDialog != null && editDialog.isShowing()) {
+                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
+                                                                    editDialog.dismiss();
+                                                                }
+                                                                // Refresh the list instead of restarting activity
+                                                                notifyItemChanged(getAdapterPosition());
+                                                                Toast.makeText(context, "Player updated!", Toast.LENGTH_SHORT).show();
+                                                                
+                                                                // Refresh the activity data if it's FirstTeamListActivity
+                                                                if (context instanceof FirstTeamListActivity) {
+                                                                    ((FirstTeamListActivity) context).refreshPlayerList();
+                                                                }
+                                                            } catch (Exception e) {
+                                                                Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                                                                Toast.makeText(context, "Player updated but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                                            }
                                                         }
                                                     })
                                                     .addOnFailureListener(e -> {
                                                         Log.e(LOG_TAG, "Error updating player in Firestore.", e);
-                                                        editDialog.dismiss();
+                                                        if (editDialog != null && editDialog.isShowing()) {
+                                                            editDialog.dismiss();
+                                                        }
+                                                        savePlayerButton.setText("SAVE PLAYER");
                                                         savePlayerButton.setEnabled(true);
+                                                        Toast.makeText(context, "Failed to update player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                                     });
                                         } else {
                                             Log.e(LOG_TAG, "Error fetching First Team players.", task.getException());
+                                            savePlayerButton.setText("SAVE PLAYER");
+                                            savePlayerButton.setEnabled(true);
+                                            Toast.makeText(context, "Failed to fetch player data: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                                         }
                                     }
                                 });

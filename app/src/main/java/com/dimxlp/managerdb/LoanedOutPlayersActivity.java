@@ -303,6 +303,36 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void refreshPlayerList() {
+        Log.d(LOG_TAG, "refreshPlayerList called");
+        playerList.clear();
+        lopColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                .whereEqualTo("managerId", managerId)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            for (QueryDocumentSnapshot doc: queryDocumentSnapshots) {
+                                LoanedOutPlayer player = doc.toObject(LoanedOutPlayer.class);
+                                if (player.getId() == 0) {
+                                    player.setId(maxId+1);
+                                    lopColRef.document(doc.getId()).update("id", player.getId());
+                                    maxId++;
+                                }
+                                playerList.add(player);
+                            }
+                            loanedOutPlayerRecAdapter.notifyDataSetChanged();
+                            loanedOutPlayerCount.setText(playerList.size() + " players");
+                            Log.d(LOG_TAG, "Loaned out players refreshed successfully.");
+                        } else {
+                            loanedOutPlayerCount.setText(playerList.size() + " players");
+                            Log.w(LOG_TAG, "No loaned out players found.");
+                        }
+                    }
+                });
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
