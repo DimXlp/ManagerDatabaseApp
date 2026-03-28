@@ -79,8 +79,8 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
 
     private CollectionReference collectionReference = db.collection("Managers");
     private long maxId;
-    private NativeAd nativeAdTop;
-    private NativeAdView nativeAdViewTop;
+    // private NativeAd nativeAdTop;
+    // private NativeAdView nativeAdViewTop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,9 +111,9 @@ public class CreateManagerActivity extends AppCompatActivity implements View.OnC
         selectedCurrencyText = findViewById(R.id.selected_currency);
         create_button = findViewById(R.id.manager_create_button);
 
-        MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
-        nativeAdViewTop = findViewById(R.id.native_ad_view_top);
-        loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
+        // MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
+        // nativeAdViewTop = findViewById(R.id.native_ad_view_top);
+        // loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
 
         selectedCurrencyText.setOnClickListener(v -> showCurrencyBottomSheet());
         uploadButton.setOnClickListener(this);

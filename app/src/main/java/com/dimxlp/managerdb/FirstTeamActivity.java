@@ -575,6 +575,5 @@ public class FirstTeamActivity extends AppCompatActivity {
         // }
         super.onDestroy();
     }
-}
 
 }

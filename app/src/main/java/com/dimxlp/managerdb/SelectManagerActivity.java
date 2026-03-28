@@ -86,46 +86,48 @@ public class SelectManagerActivity extends AppCompatActivity {
         // loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewTop);
     }
 
-    // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
-    //     AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
-    //             .forNativeAd(ad -> {
-    //                 if (isDestroyed()) {
-    //                     ad.destroy();
-    //                     return;
-    //                 }
-    //                 nativeAdTop = ad;
-    //                 populateNativeAdView(ad, nativeAdView);
-    //                 Log.d(LOG_TAG, "Native ad loaded successfully.");
-    //             })
-    //             .withAdListener(new com.google.android.gms.ads.AdListener() {
-    //                 @Override
-    //                 public void onAdFailedToLoad(LoadAdError adError) {
-    //                     Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
-    //                 }
-    //             })
-    //             .build();
-    //
-    //     adLoader.loadAd(new AdRequest.Builder().build());
-    // }
-    //
-    // private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-    //     int headlineId =  R.id.ad_headline_top;
-    //     nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
-    //     TextView headlineView = (TextView) nativeAdView.getHeadlineView();
-    //
-    //     if (nativeAd.getHeadline() != null) {
-    //         headlineView.setText(nativeAd.getHeadline());
-    //         headlineView.setVisibility(View.VISIBLE);
-    //     } else {
-    //         headlineView.setVisibility(View.GONE);
-    //     }
-    //
-    //     // Remove body and CTA for compact layout
-    //     nativeAdView.setBodyView(null);
-    //     nativeAdView.setCallToActionView(null);
-    //
-    //     nativeAdView.setNativeAd(nativeAd);
-    // }
+    /*
+    private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
+        AdLoader adLoader = new AdLoader.Builder(this, adUnitId)
+                .forNativeAd(ad -> {
+                    if (isDestroyed()) {
+                        ad.destroy();
+                        return;
+                    }
+                    nativeAdTop = ad;
+                    populateNativeAdView(ad, nativeAdView);
+                    Log.d(LOG_TAG, "Native ad loaded successfully.");
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Log.e(LOG_TAG, "Native ad failed to load: " + adError.getMessage());
+                    }
+                })
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
+        int headlineId =  R.id.ad_headline_top;
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(headlineId));
+        TextView headlineView = (TextView) nativeAdView.getHeadlineView();
+
+        if (nativeAd.getHeadline() != null) {
+            headlineView.setText(nativeAd.getHeadline());
+            headlineView.setVisibility(View.VISIBLE);
+        } else {
+            headlineView.setVisibility(View.GONE);
+        }
+
+        // Remove body and CTA for compact layout
+        nativeAdView.setBodyView(null);
+        nativeAdView.setCallToActionView(null);
+
+        nativeAdView.setNativeAd(nativeAd);
+    }
+    */
 
     @Override
     protected void onStart() {

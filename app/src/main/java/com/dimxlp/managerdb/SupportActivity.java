@@ -70,9 +70,9 @@ public class SupportActivity extends AppCompatActivity {
     private boolean ftPlayersExist;
     private boolean ytPlayersExist;
     private boolean shPlayersExist;
-    private InterstitialAd interstitialAd;
-    private NativeAd nativeAdBottom;
-    private NativeAdView nativeAdViewBottom;
+    // private InterstitialAd interstitialAd;
+    // private NativeAd nativeAdBottom;
+    // private NativeAdView nativeAdViewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
