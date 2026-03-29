@@ -94,6 +94,12 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
         this.buttonInt = buttonInt;
     }
 
+    // Method to update metadata without recreating adapter
+    public void updateMetadata(String position, int buttonInt) {
+        this.position = position;
+        this.buttonInt = buttonInt;
+    }
+
     @NonNull
     @Override
     public ShortlistedPlayerRecAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

@@ -89,6 +89,12 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
         this.buttonInt = buttonInt;
     }
 
+    // Method to update metadata without recreating adapter
+    public void updateMetadata(String barYear, int buttonInt) {
+        this.barYear = barYear;
+        this.buttonInt = buttonInt;
+    }
+
     @NonNull
     @Override
     public YouthTeamPlayerRecAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

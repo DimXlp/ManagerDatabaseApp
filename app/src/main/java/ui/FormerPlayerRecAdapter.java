@@ -84,6 +84,13 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
         this.buttonInt = buttonInt;
     }
 
+    // Method to update metadata and list reference without recreating adapter
+    public void updateData(List<FormerPlayer> newList, String barTeam, int buttonInt) {
+        this.formerPlayerList = newList;
+        this.barTeam = barTeam;
+        this.buttonInt = buttonInt;
+    }
+
     @NonNull
     @Override
     public FormerPlayerRecAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

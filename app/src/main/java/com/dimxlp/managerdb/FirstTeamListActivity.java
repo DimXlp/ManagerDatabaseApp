@@ -254,6 +254,10 @@ public class FirstTeamListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rec_view_ftp);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        
+        // Initialize adapter once here
+        firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(this, playerList, managerId, team, currentYear != null ? currentYear : "", 0, 0);
+        recyclerView.setAdapter(firstTeamPlayerRecAdapter);
     }
 
     // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
@@ -350,9 +354,12 @@ public class FirstTeamListActivity extends AppCompatActivity {
                                 }
                             });
                             yearText.setText(currentYear);
-                            firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(FirstTeamListActivity.this, playerList, managerId, team, currentYear, buttonInt, maxId);
-                            recyclerView.setAdapter(firstTeamPlayerRecAdapter);
-                            firstTeamPlayerRecAdapter.notifyDataSetChanged();
+                            
+                            // Update adapter metadata instead of creating new instance
+                            if (firstTeamPlayerRecAdapter != null) {
+                                firstTeamPlayerRecAdapter.updateMetadata(currentYear, buttonInt, maxId);
+                                firstTeamPlayerRecAdapter.notifyDataSetChanged();
+                            }
                             yearPlayerCount.setText(playerList.size() + " players");
                         }
                     }

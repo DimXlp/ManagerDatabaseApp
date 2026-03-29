@@ -196,6 +196,10 @@ public class FormerPlayersListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rec_view_fpl);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        
+        // Initialize adapter once here with empty list
+        formerPlayerRecAdapter = new FormerPlayerRecAdapter(this, formerPlayerList, managerId, team, barTeam != null ? barTeam : "First Team", 0);
+        recyclerView.setAdapter(formerPlayerRecAdapter);
     }
 
     // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
@@ -293,9 +297,12 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                                     return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                 }
                             });
-                            formerPlayerRecAdapter = new FormerPlayerRecAdapter(FormerPlayersListActivity.this, ytPlayerList, managerId, team, "Youth Team", buttonInt);
-                            recyclerView.setAdapter(formerPlayerRecAdapter);
-                            formerPlayerRecAdapter.notifyDataSetChanged();
+                            
+                            // Update adapter data instead of creating new instance
+                            if (formerPlayerRecAdapter != null) {
+                                formerPlayerRecAdapter.updateData(ytPlayerList, "Youth Team", buttonInt);
+                                formerPlayerRecAdapter.notifyDataSetChanged();
+                            }
                             teamPlayerCount.setText(ytPlayerList.size() + " players");
                             Log.d(LOG_TAG, "Former Youth Team players listed successfully.");
                         } else {
@@ -330,9 +337,12 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                                     return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                 }
                             });
-                            formerPlayerRecAdapter = new FormerPlayerRecAdapter(FormerPlayersListActivity.this, ftPlayerList, managerId, team, "First Team", buttonInt);
-                            recyclerView.setAdapter(formerPlayerRecAdapter);
-                            formerPlayerRecAdapter.notifyDataSetChanged();
+                            
+                            // Update adapter data instead of creating new instance
+                            if (formerPlayerRecAdapter != null) {
+                                formerPlayerRecAdapter.updateData(ftPlayerList, "First Team", buttonInt);
+                                formerPlayerRecAdapter.notifyDataSetChanged();
+                            }
                             teamPlayerCount.setText(ftPlayerList.size() + " players");
                             Log.d(LOG_TAG, "Former First Team players listed successfully.");
                         } else {
@@ -562,9 +572,11 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                                         return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                     }
                                 });
-                                formerPlayerRecAdapter = new FormerPlayerRecAdapter(FormerPlayersListActivity.this, ftPlayerList, managerId, team, "First Team", 0);
-                                recyclerView.setAdapter(formerPlayerRecAdapter);
-                                formerPlayerRecAdapter.notifyDataSetChanged();
+                                // Update adapter instead of creating new instance
+                                if (formerPlayerRecAdapter != null) {
+                                    formerPlayerRecAdapter.updateData(ftPlayerList, "First Team", 0);
+                                    formerPlayerRecAdapter.notifyDataSetChanged();
+                                }
                                 teamPlayerCount.setText(ftPlayerList.size() + " players");
                             } else {
                                 Collections.sort(ytPlayerList, new Comparator<FormerPlayer>() {
@@ -573,9 +585,11 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                                         return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                     }
                                 });
-                                formerPlayerRecAdapter = new FormerPlayerRecAdapter(FormerPlayersListActivity.this, ytPlayerList, managerId, team, "Youth Team", 0);
-                                recyclerView.setAdapter(formerPlayerRecAdapter);
-                                formerPlayerRecAdapter.notifyDataSetChanged();
+                                // Update adapter instead of creating new instance
+                                if (formerPlayerRecAdapter != null) {
+                                    formerPlayerRecAdapter.updateData(ytPlayerList, "Youth Team", 0);
+                                    formerPlayerRecAdapter.notifyDataSetChanged();
+                                }
                                 teamPlayerCount.setText(ytPlayerList.size() + " players");
                             }
                         } else {

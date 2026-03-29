@@ -254,6 +254,10 @@ public class YouthTeamListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rec_view_ytp);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        
+        // Initialize adapter once here
+        youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(this, playerList, managerId, team, currentYear != null ? currentYear : "", 0);
+        recyclerView.setAdapter(youthTeamPlayerRecAdapter);
     }
 
     // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
@@ -311,6 +315,18 @@ public class YouthTeamListActivity extends AppCompatActivity {
 
     public void refreshPlayerList() {
         Log.d(LOG_TAG, "refreshPlayerList called");
+        // Ensure currentYear is initialized before refreshing
+        if (currentYear == null) {
+            if (barYear != null) {
+                currentYear = barYear;
+            } else if (minYearText != null) {
+                currentYear = minYearText;
+            } else {
+                Log.w(LOG_TAG, "Unable to refresh: currentYear is null");
+                Toast.makeText(this, "Unable to refresh. Please reopen the activity.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
         listPlayers(0);
     }
 
@@ -346,9 +362,12 @@ public class YouthTeamListActivity extends AppCompatActivity {
                             Log.d(LOG_TAG, "Player list sorted by time added.");
 
                             yearText.setText(currentYear);
-                            youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(YouthTeamListActivity.this, playerList, managerId, team, currentYear, buttonInt);
-                            recyclerView.setAdapter(youthTeamPlayerRecAdapter);
-                            youthTeamPlayerRecAdapter.notifyDataSetChanged();
+                            
+                            // Update adapter metadata instead of creating new instance
+                            if (youthTeamPlayerRecAdapter != null) {
+                                youthTeamPlayerRecAdapter.updateMetadata(currentYear, buttonInt);
+                                youthTeamPlayerRecAdapter.notifyDataSetChanged();
+                            }
                             yearPlayerCount.setText(playerList.size() + " players");
                         } else {
                             Log.w(LOG_TAG, "No players found for year: " + currentYear);
@@ -728,15 +747,19 @@ public class YouthTeamListActivity extends AppCompatActivity {
                             });
                             if (barYear == null || barYear.equals(minYearText)) {
                                 yearText.setText(minYearText);
-                                youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(YouthTeamListActivity.this, playerList, managerId, team, minYearText, 0);
-                                recyclerView.setAdapter(youthTeamPlayerRecAdapter);
-                                youthTeamPlayerRecAdapter.notifyDataSetChanged();
+                                // Update adapter instead of creating new instance
+                                if (youthTeamPlayerRecAdapter != null) {
+                                    youthTeamPlayerRecAdapter.updateMetadata(minYearText, 0);
+                                    youthTeamPlayerRecAdapter.notifyDataSetChanged();
+                                }
                                 yearPlayerCount.setText(playerList.size() + " players");
                             } else {
                                 yearText.setText(barYear);
-                                youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(YouthTeamListActivity.this, playerList, managerId, team, barYear, 0);
-                                recyclerView.setAdapter(youthTeamPlayerRecAdapter);
-                                youthTeamPlayerRecAdapter.notifyDataSetChanged();
+                                // Update adapter instead of creating new instance
+                                if (youthTeamPlayerRecAdapter != null) {
+                                    youthTeamPlayerRecAdapter.updateMetadata(barYear, 0);
+                                    youthTeamPlayerRecAdapter.notifyDataSetChanged();
+                                }
                                 yearPlayerCount.setText(playerList.size() + " players");
                             }
 

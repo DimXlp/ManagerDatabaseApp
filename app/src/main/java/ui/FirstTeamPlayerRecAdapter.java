@@ -106,6 +106,13 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
         this.maxId = maxId;
     }
 
+
+    // Method to update metadata without recreating adapter
+    public void updateMetadata(String barYear, int buttonInt, long maxId) {
+        this.barYear = barYear;
+        this.buttonInt = buttonInt;
+        this.maxId = maxId;
+    }
     @NonNull
     @Override
     public FirstTeamPlayerRecAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

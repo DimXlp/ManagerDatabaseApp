@@ -152,6 +152,10 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rec_view_shp);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        
+        // Initialize adapter once here
+        shortlistedPlayerRecAdapter = new ShortlistedPlayerRecAdapter(this, playerList, managerId, myTeam, PositionEnum.GK.getCategory(), 0);
+        recyclerView.setAdapter(shortlistedPlayerRecAdapter);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -660,9 +664,11 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                             });
                             Log.d(LOG_TAG, "Player list sorted by time added.");
 
-                            shortlistedPlayerRecAdapter = new ShortlistedPlayerRecAdapter(ShortlistPlayersActivity.this, playerList, managerId, myTeam, position, buttonInt);
-                            recyclerView.setAdapter(shortlistedPlayerRecAdapter);
-                            shortlistedPlayerRecAdapter.notifyDataSetChanged();
+                            // Update adapter metadata instead of creating new instance
+                            if (shortlistedPlayerRecAdapter != null) {
+                                shortlistedPlayerRecAdapter.updateMetadata(position, buttonInt);
+                                shortlistedPlayerRecAdapter.notifyDataSetChanged();
+                            }
                             positionPlayerCount.setText(playerList.size() + " player(s)");
                             Log.d(LOG_TAG, "RecyclerView updated with shortlisted players.");
                         } else {
@@ -893,13 +899,19 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
 
                             if (barPosition == null) {
                                 positionText.setText(PositionEnum.GK.getCategory());
-                                shortlistedPlayerRecAdapter = new ShortlistedPlayerRecAdapter(ShortlistPlayersActivity.this, playerList, managerId, myTeam, PositionEnum.GK.getCategory(), 0);
+                                // Update adapter instead of creating new instance
+                                if (shortlistedPlayerRecAdapter != null) {
+                                    shortlistedPlayerRecAdapter.updateMetadata(PositionEnum.GK.getCategory(), 0);
+                                    shortlistedPlayerRecAdapter.notifyDataSetChanged();
+                                }
                             } else {
                                 positionText.setText(barPosition);
-                                shortlistedPlayerRecAdapter = new ShortlistedPlayerRecAdapter(ShortlistPlayersActivity.this, playerList, managerId, myTeam, barPosition, 0);
+                                // Update adapter instead of creating new instance
+                                if (shortlistedPlayerRecAdapter != null) {
+                                    shortlistedPlayerRecAdapter.updateMetadata(barPosition, 0);
+                                    shortlistedPlayerRecAdapter.notifyDataSetChanged();
+                                }
                             }
-                            recyclerView.setAdapter(shortlistedPlayerRecAdapter);
-                            shortlistedPlayerRecAdapter.notifyDataSetChanged();
                             positionPlayerCount.setText(playerList.size() + " player(s)");
                             Log.d(LOG_TAG, "RecyclerView updated with shortlisted players.");
                         } else {
