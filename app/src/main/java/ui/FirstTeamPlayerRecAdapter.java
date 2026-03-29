@@ -665,12 +665,10 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
                                                                         Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + task.getResult().size());
-                                                                        Intent intent = new Intent(context, FirstTeamListActivity.class);
-                                                                        intent.putExtra("managerId", managerId);
-                                                                        intent.putExtra("team", team);
-                                                                        intent.putExtra("barYear", barYear);
-                                                                        context.startActivity(intent);
-                                                                        ((Activity)context).finish();
+                                                                        // Refresh list instead of restarting activity
+                                                                        if (context instanceof FirstTeamListActivity) {
+                                                                            ((FirstTeamListActivity) context).refreshPlayerList();
+                                                                        }
                                                                     } else {
                                                                         Log.d(LOG_TAG, "No players left in First Team. Navigating to FirstTeamActivity.");
                                                                         Intent intent = new Intent(context, FirstTeamActivity.class);
@@ -782,18 +780,15 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                             @Override
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
+                                                                    loanDialog.dismiss();
                                                                     if (task.getResult().size() > 0) {
                                                                         Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + task.getResult().size());
-                                                                        loanDialog.dismiss();
-                                                                        Intent intent = new Intent(context, FirstTeamListActivity.class);
-                                                                        intent.putExtra("managerId", managerId);
-                                                                        intent.putExtra("team", team);
-                                                                        intent.putExtra("barYear", barYear);
-                                                                        context.startActivity(intent);
-                                                                        ((Activity)context).finish();
+                                                                        // Refresh list instead of restarting activity
+                                                                        if (context instanceof FirstTeamListActivity) {
+                                                                            ((FirstTeamListActivity) context).refreshPlayerList();
+                                                                        }
                                                                     } else {
                                                                         Log.d(LOG_TAG, "No players left in First Team. Navigating to FirstTeamActivity.");
-                                                                        loanDialog.dismiss();
                                                                         Intent intent = new Intent(context, FirstTeamActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -857,12 +852,10 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
                                                                         Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + task.getResult().size());
-                                                                        Intent intent = new Intent(context, FirstTeamListActivity.class);
-                                                                        intent.putExtra("managerId", managerId);
-                                                                        intent.putExtra("team", team);
-                                                                        intent.putExtra("barYear", barYear);
-                                                                        context.startActivity(intent);
-                                                                        ((Activity)context).finish();
+                                                                        // Refresh list instead of restarting activity
+                                                                        if (context instanceof FirstTeamListActivity) {
+                                                                            ((FirstTeamListActivity) context).refreshPlayerList();
+                                                                        }
                                                                     } else {
                                                                         Log.d(LOG_TAG, "No players left in First Team. Navigating to FirstTeamActivity.");
                                                                         Intent intent = new Intent(context, FirstTeamActivity.class);
@@ -986,18 +979,15 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                                 @Override
                                                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                     if (task.isSuccessful()) {
+                                                                        departDialog.dismiss();
                                                                         if (!task.getResult().isEmpty()) {
                                                                             Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + task.getResult().size());
-                                                                            departDialog.dismiss();
-                                                                            Intent intent = new Intent(context, FirstTeamListActivity.class);
-                                                                            intent.putExtra("managerId", managerId);
-                                                                            intent.putExtra("team", team);
-                                                                            intent.putExtra("barYear", barYear);
-                                                                            context.startActivity(intent);
-                                                                            ((Activity) context).finish();
+                                                                            // Refresh list instead of restarting activity
+                                                                            if (context instanceof FirstTeamListActivity) {
+                                                                                ((FirstTeamListActivity) context).refreshPlayerList();
+                                                                            }
                                                                         } else {
                                                                             Log.d(LOG_TAG, "No players left in First Team. Navigating to FirstTeamActivity.");
-                                                                            departDialog.dismiss();
                                                                             Intent intent = new Intent(context, FirstTeamActivity.class);
                                                                             intent.putExtra("managerId", managerId);
                                                                             intent.putExtra("team", team);

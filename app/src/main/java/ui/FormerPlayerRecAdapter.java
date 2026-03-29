@@ -354,12 +354,11 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                         Log.d(LOG_TAG, "Player added to ShortlistedPlayers: " + shPlayer.getFullName());
                                                         Toast.makeText(context, "Player added to the shortlist!", Toast.LENGTH_LONG)
                                                                 .show();
-                                                        Intent intent = new Intent(context, FormerPlayersListActivity.class);
-                                                        intent.putExtra("managerId", managerId);
-                                                        intent.putExtra("team", team);
-                                                        intent.putExtra("barTeam", barTeam);
-                                                        context.startActivity(intent);
-                                                        ((Activity)context).finish();}
+                                                        // Refresh list instead of restarting activity
+                                                        if (context instanceof FormerPlayersListActivity) {
+                                                            ((FormerPlayersListActivity) context).refreshPlayerList();
+                                                        }
+                                                    }
                                                 })
                                                 .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding player to ShortlistedPlayers.", e));
                                     }
@@ -399,12 +398,10 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                 Log.d(LOG_TAG, "Player successfully deleted: " + player.getFullName());
                                                 Toast.makeText(context, "Player deleted!", Toast.LENGTH_LONG)
                                                         .show();
-                                                Intent intent = new Intent(context, FormerPlayersListActivity.class);
-                                                intent.putExtra("managerId", managerId);
-                                                intent.putExtra("team", team);
-                                                intent.putExtra("barTeam", barTeam);
-                                                context.startActivity(intent);
-                                                ((Activity) context).finish();
+                                                // Refresh list instead of restarting activity
+                                                if (context instanceof FormerPlayersListActivity) {
+                                                    ((FormerPlayersListActivity) context).refreshPlayerList();
+                                                }
                                             }
                                         })
                                         .addOnFailureListener(e -> Log.e(LOG_TAG, "Error deleting player.", e));

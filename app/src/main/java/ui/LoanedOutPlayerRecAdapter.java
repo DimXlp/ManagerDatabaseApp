@@ -293,11 +293,10 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                                 Log.d(LOG_TAG, "Player successfully deleted: " + player.getFullName());
                                                 Toast.makeText(context, "Player deleted!", Toast.LENGTH_LONG)
                                                         .show();
-                                                Intent intent = new Intent(context, LoanedOutPlayersActivity.class);
-                                                intent.putExtra("managerId", managerId);
-                                                intent.putExtra("team", team);
-                                                context.startActivity(intent);
-                                                ((Activity)context).finish();
+                                                // Refresh list instead of restarting activity
+                                                if (context instanceof LoanedOutPlayersActivity) {
+                                                    ((LoanedOutPlayersActivity) context).refreshPlayerList();
+                                                }
                                             }
                                         })
                                         .addOnFailureListener(e -> Log.e(LOG_TAG, "Error deleting player.", e));
@@ -371,11 +370,10 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                                         })
                                                         .addOnFailureListener(e -> Log.e(LOG_TAG, "Error returning player to First Team.", e));
 
-                                                Intent intent = new Intent(context, LoanedOutPlayersActivity.class);
-                                                intent.putExtra("managerId", managerId);
-                                                intent.putExtra("team", team);
-                                                context.startActivity(intent);
-                                                ((Activity)context).finish();
+                                                // Refresh list instead of restarting activity
+                                                if (context instanceof LoanedOutPlayersActivity) {
+                                                    ((LoanedOutPlayersActivity) context).refreshPlayerList();
+                                                }
                                             }
                                         })
                                         .addOnFailureListener(e -> Log.e(LOG_TAG, "Error terminating loan deal.", e));

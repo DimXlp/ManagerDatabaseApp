@@ -628,13 +628,11 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
-                                                                        Log.d(LOG_TAG, "Navigating to ShortlistPlayersActivity.");
-                                                                        Intent intent = new Intent(context, ShortlistPlayersActivity.class);
-                                                                        intent.putExtra("managerId", managerId);
-                                                                        intent.putExtra("team", team);
-                                                                        intent.putExtra("barPosition", position);
-                                                                        context.startActivity(intent);
-                                                                        ((Activity)context).finish();
+                                                                        Log.d(LOG_TAG, "Refreshing ShortlistPlayersActivity.");
+                                                                        // Refresh list instead of restarting activity
+                                                                        if (context instanceof ShortlistPlayersActivity) {
+                                                                            ((ShortlistPlayersActivity) context).refreshPlayerList();
+                                                                        }
                                                                     } else {
                                                                         Log.d(LOG_TAG, "Navigating to ShortlistActivity.");
                                                                         Intent intent = new Intent(context, ShortlistActivity.class);
@@ -817,18 +815,15 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                             @Override
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
+                                                                    transferDialog.dismiss();
                                                                     if (task.getResult().size() > 0) {
-                                                                        Log.d(LOG_TAG, "Navigating to ShortlistPlayersActivity.");
-                                                                        transferDialog.dismiss();
-                                                                        Intent intent = new Intent(context, ShortlistPlayersActivity.class);
-                                                                        intent.putExtra("managerId", managerId);
-                                                                        intent.putExtra("team", team);
-                                                                        intent.putExtra("barPosition", position);
-                                                                        context.startActivity(intent);
-                                                                        ((Activity)context).finish();
+                                                                        Log.d(LOG_TAG, "Refreshing ShortlistPlayersActivity.");
+                                                                        // Refresh list instead of restarting activity
+                                                                        if (context instanceof ShortlistPlayersActivity) {
+                                                                            ((ShortlistPlayersActivity) context).refreshPlayerList();
+                                                                        }
                                                                     } else {
                                                                         Log.d(LOG_TAG, "Navigating to ShortlistActivity.");
-                                                                        transferDialog.dismiss();
                                                                         Intent intent = new Intent(context, ShortlistActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);

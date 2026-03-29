@@ -423,16 +423,14 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                             @Override
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
+                                                                    departDialog.dismiss();
                                                                     if (task.getResult().size() > 0) {
-                                                                        departDialog.dismiss();
-                                                                        Intent intent = new Intent(context, YouthTeamListActivity.class);
-                                                                        intent.putExtra("managerId", managerId);
-                                                                        intent.putExtra("team", team);
-                                                                        intent.putExtra("barYear", barYear);
-                                                                        context.startActivity(intent);
-                                                                        ((Activity)context).finish();
+                                                                        // Refresh list instead of restarting activity
+                                                                        if (context instanceof YouthTeamListActivity) {
+                                                                            ((YouthTeamListActivity) context).refreshPlayerList();
+                                                                        }
                                                                     } else {
-                                                                        departDialog.dismiss();
+                                                                        // Navigate to empty state activity
                                                                         Intent intent = new Intent(context, YouthTeamActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -520,16 +518,14 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                             @Override
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
+                                                                    promoteDialog.dismiss();
                                                                     if (task.getResult().size() > 0) {
-                                                                        promoteDialog.dismiss();
-                                                                        Intent intent = new Intent(context, YouthTeamListActivity.class);
-                                                                        intent.putExtra("managerId", managerId);
-                                                                        intent.putExtra("team", team);
-                                                                        intent.putExtra("barYear", barYear);
-                                                                        context.startActivity(intent);
-                                                                        ((Activity)context).finish();
+                                                                        // Refresh list instead of restarting activity
+                                                                        if (context instanceof YouthTeamListActivity) {
+                                                                            ((YouthTeamListActivity) context).refreshPlayerList();
+                                                                        }
                                                                     } else {
-                                                                        promoteDialog.dismiss();
+                                                                        // Navigate to empty state activity
                                                                         Intent intent = new Intent(context, YouthTeamActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
@@ -591,13 +587,12 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                 if (task.isSuccessful()) {
                                                                     if (task.getResult().size() > 0) {
-                                                                        Intent intent = new Intent(context, YouthTeamListActivity.class);
-                                                                        intent.putExtra("managerId", managerId);
-                                                                        intent.putExtra("team", team);
-                                                                        intent.putExtra("barYear", barYear);
-                                                                        context.startActivity(intent);
-                                                                        ((Activity)context).finish();
+                                                                        // Refresh list instead of restarting activity
+                                                                        if (context instanceof YouthTeamListActivity) {
+                                                                            ((YouthTeamListActivity) context).refreshPlayerList();
+                                                                        }
                                                                     } else {
+                                                                        // Navigate to empty state activity
                                                                         Intent intent = new Intent(context, YouthTeamActivity.class);
                                                                         intent.putExtra("managerId", managerId);
                                                                         intent.putExtra("team", team);
