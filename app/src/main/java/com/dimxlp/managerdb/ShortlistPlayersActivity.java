@@ -568,9 +568,19 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                             Log.d(LOG_TAG, "Bar position determined: " + barPosition);
                             // Refresh the current activity instead of restarting
                             Toast.makeText(ShortlistPlayersActivity.this, "Player created successfully!", Toast.LENGTH_SHORT).show();
-                            refreshPlayerList();
+                            // Refresh and dismiss dialog after completion
+                            refreshPlayerList(() -> {
+                                // Dismiss dialog after refresh completes
+                                if (createDialog != null && createDialog.isShowing()) {
+                                    Log.d(LOG_TAG, "Dismissing create dialog after refresh.");
+                                    createDialog.dismiss();
+                                }
+                            });
                         } catch (Exception e) {
                             Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                            if (createDialog != null && createDialog.isShowing()) {
+                                createDialog.dismiss();
+                            }
                             Toast.makeText(ShortlistPlayersActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
                     }
@@ -590,15 +600,23 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
     }
 
     public void refreshPlayerList() {
+        refreshPlayerList(null);
+    }
+
+    public void refreshPlayerList(Runnable onComplete) {
         Log.d(LOG_TAG, "refreshPlayerList called");
         if (barPosition != null) {
-            listPlayers(barPosition, 0);
+            listPlayers(barPosition, 0, onComplete);
         } else {
-            listPlayers(PositionEnum.GK.getCategory(), 0);
+            listPlayers(PositionEnum.GK.getCategory(), 0, onComplete);
         }
     }
 
     private void listPlayers(final String position, final int buttonInt) {
+        listPlayers(position, buttonInt, null);
+    }
+
+    private void listPlayers(final String position, final int buttonInt, Runnable onComplete) {
         Log.d(LOG_TAG, "Listing players for position: " + position + ", buttonInt: " + buttonInt);
 
         playerList.clear();
@@ -671,12 +689,27 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                             }
                             positionPlayerCount.setText(playerList.size() + " player(s)");
                             Log.d(LOG_TAG, "RecyclerView updated with shortlisted players.");
+                            
+                            // Call completion callback if provided
+                            if (onComplete != null) {
+                                onComplete.run();
+                            }
                         } else {
                             Log.w(LOG_TAG, "No players found for userId=" + UserApi.getInstance().getUserId() + ", managerId=" + managerId);
+                            // Call completion callback even if no players found
+                            if (onComplete != null) {
+                                onComplete.run();
+                            }
                         }
                     }
                 })
-                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching players from Firestore.", e));
+                .addOnFailureListener(e -> {
+                    Log.e(LOG_TAG, "Error fetching players from Firestore.", e);
+                    // Call completion callback on failure too
+                    if (onComplete != null) {
+                        onComplete.run();
+                    }
+                });
     }
 
     private void setUpDrawerContent(NavigationView navView) {

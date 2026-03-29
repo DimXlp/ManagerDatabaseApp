@@ -314,11 +314,19 @@ public class FirstTeamListActivity extends AppCompatActivity {
     }
 
     public void refreshPlayerList() {
+        refreshPlayerList(null);
+    }
+
+    public void refreshPlayerList(Runnable onComplete) {
         Log.d(LOG_TAG, "refreshPlayerList called");
-        listPlayers(0);
+        listPlayers(0, onComplete);
     }
 
     private void listPlayers(final int buttonInt) {
+        listPlayers(buttonInt, null);
+    }
+
+    private void listPlayers(final int buttonInt, Runnable onComplete) {
         playerList.clear();
 
         // Ensure currentYear is initialized
@@ -361,7 +369,19 @@ public class FirstTeamListActivity extends AppCompatActivity {
                                 firstTeamPlayerRecAdapter.notifyDataSetChanged();
                             }
                             yearPlayerCount.setText(playerList.size() + " players");
+                            
+                            // Call completion callback if provided
+                            if (onComplete != null) {
+                                onComplete.run();
+                            }
                         }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(LOG_TAG, "Error fetching players from Firestore.", e);
+                    // Call completion callback on failure too
+                    if (onComplete != null) {
+                        onComplete.run();
                     }
                 });
     }
@@ -498,16 +518,23 @@ public class FirstTeamListActivity extends AppCompatActivity {
                     public void onSuccess(DocumentReference documentReference) {
                         Log.i(LOG_TAG, "Player successfully added to Firestore. Document ID: " + documentReference.getId());
                         try {
-                            if (createDialog != null && createDialog.isShowing()) {
-                                Log.d(LOG_TAG, "Dismissing create dialog.");
-                                createDialog.dismiss();
-                            }
-                            // Refresh the current activity instead of restarting
+                            // Update currentYear to the created player's year before refreshing
+                            currentYear = ySignedPlayer;
+                            // Show success message
                             Toast.makeText(FirstTeamListActivity.this, "Player created successfully!", Toast.LENGTH_SHORT).show();
-                            // Trigger refresh to reload data
-                            refreshPlayerList();
+                            // Trigger refresh and dismiss dialog after completion
+                            refreshPlayerList(() -> {
+                                // Dismiss dialog after refresh completes
+                                if (createDialog != null && createDialog.isShowing()) {
+                                    Log.d(LOG_TAG, "Dismissing create dialog after refresh.");
+                                    createDialog.dismiss();
+                                }
+                            });
                         } catch (Exception e) {
                             Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                            if (createDialog != null && createDialog.isShowing()) {
+                                createDialog.dismiss();
+                            }
                             Toast.makeText(FirstTeamListActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
                     }

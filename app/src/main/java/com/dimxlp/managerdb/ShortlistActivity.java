@@ -9,6 +9,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -320,6 +322,12 @@ public class ShortlistActivity extends AppCompatActivity {
 
     private void createPlayer() {
         Log.d(LOG_TAG, "Creating a new shortlisted player.");
+        
+        if (createDialog == null || !createDialog.isShowing()) {
+            Log.e(LOG_TAG, "Dialog is null or not showing when createPlayer called!");
+            Toast.makeText(this, "Dialog error. Please try again.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         String firstNamePlayer = firstName.getText().toString().trim();
         String lastNamePlayer = lastName.getText().toString().trim();
@@ -370,68 +378,144 @@ public class ShortlistActivity extends AppCompatActivity {
         player.setUserId(UserApi.getInstance().getUserId());
         player.setTimeAdded(new Timestamp(new Date()));
         Log.d(LOG_TAG, "Player object created: " + player);
+        Log.d(LOG_TAG, "Player data - UserId: " + player.getUserId() + ", ManagerId: " + player.getManagerId());
+        Log.d(LOG_TAG, "Starting Firestore add operation to collection: ShortlistedPlayers");
 
-        shortlistColRef.add(player)
+        // Set up a timeout to detect if operation hangs
+        final Handler timeoutHandler = new Handler(Looper.getMainLooper());
+        final boolean[] operationCompleted = {false};
+        final long startTime = System.currentTimeMillis();
+        
+        Runnable timeoutRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!operationCompleted[0]) {
+                    long elapsed = System.currentTimeMillis() - startTime;
+                    Log.e(LOG_TAG, "Firestore operation timed out after " + elapsed + "ms");
+                    Log.e(LOG_TAG, "This suggests a network or Firestore connection issue");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ShortlistActivity.this, 
+                                "Operation timed out. Please check your internet connection.", 
+                                Toast.LENGTH_LONG).show();
+                            createButton.setText("CREATE PLAYER");
+                            createButton.setEnabled(true);
+                            if (createDialog != null && createDialog.isShowing()) {
+                                createDialog.dismiss();
+                            }
+                        }
+                    });
+                }
+            }
+        };
+        timeoutHandler.postDelayed(timeoutRunnable, 10000); // 10 second timeout
+
+        Log.d(LOG_TAG, "Adding player to Firestore...");
+        Task<DocumentReference> addTask = shortlistColRef.add(player);
+        
+        // Add complete listener that fires regardless of success/failure
+        addTask.addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentReference> task) {
+                long elapsed = System.currentTimeMillis() - startTime;
+                Log.i(LOG_TAG, "COMPLETE CALLBACK FIRED after " + elapsed + "ms");
+                Log.i(LOG_TAG, "Task successful: " + task.isSuccessful());
+                
+                if (!operationCompleted[0]) {
+                    operationCompleted[0] = true;
+                    timeoutHandler.removeCallbacks(timeoutRunnable);
+                    
+                    if (task.isSuccessful()) {
+                        Log.i(LOG_TAG, "Player queued/added to Firestore successfully");
+                    } else {
+                        Log.e(LOG_TAG, "Task failed: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"));
+                    }
+                }
+            }
+        });
+        
+        addTask
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        long elapsed = System.currentTimeMillis() - startTime;
+                        Log.i(LOG_TAG, "SUCCESS CALLBACK FIRED after " + elapsed + "ms");
                         Log.i(LOG_TAG, "Player successfully added to Firestore: " + documentReference.getId());
-                        try {
-                            if (createDialog != null && createDialog.isShowing()) {
-                                Log.d(LOG_TAG, "Dismissing create dialog.");
-                                createDialog.dismiss();
-                            }
-                            Intent intent = new Intent(ShortlistActivity.this, ShortlistPlayersActivity.class);
-                            intent.putExtra("managerId", managerId);
-                            intent.putExtra("team", myTeam);
-                            switch (positionPlayer) {
-                                case "GK":
-                                    barPosition = "Goalkeepers";
-                                    break;
-                                case "CB":
-                                    barPosition = "Center Backs";
-                                    break;
-                                case "RB", "RWB":
-                                    barPosition = "Right Backs";
-                                    break;
-                                case "LB", "LWB":
-                                    barPosition = "Left Backs";
-                                    break;
-                                case "CDM":
-                                    barPosition = "Center Defensive Mids";
-                                    break;
-                                case "CM":
-                                    barPosition = "Center Midfielders";
-                                    break;
-                                case "CAM":
-                                    barPosition = "Center Attacking Mids";
-                                    break;
-                                case "RM", "RW":
-                                    barPosition = "Right Wingers";
-                                    break;
-                                case "LM", "LW":
-                                    barPosition = "Left Wingers";
-                                    break;
-                                case "ST", "CF", "RF", "LF":
-                                    barPosition = "Strikers";
-                                    break;
-
-                            }
-                            Log.d(LOG_TAG, "Bar position determined: " + barPosition);
-                            intent.putExtra("barPosition", barPosition);
-                            startActivity(intent);
-                            finish();
-                            Log.d(LOG_TAG, "ShortlistPlayersActivity started, and ShortlistActivity finished.");
-                        } catch (Exception e) {
-                            Log.e(LOG_TAG, "Error in onSuccess callback", e);
-                            Toast.makeText(ShortlistActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        
+                        operationCompleted[0] = true;
+                        timeoutHandler.removeCallbacks(timeoutRunnable);
+                        
+                        Log.d(LOG_TAG, "Running success UI updates");
+                        
+                        // Dismiss dialog immediately
+                        if (createDialog != null && createDialog.isShowing()) {
+                            Log.d(LOG_TAG, "Dismissing create dialog.");
+                            createDialog.dismiss();
+                        } else {
+                            Log.w(LOG_TAG, "Dialog is null or not showing - cannot dismiss");
                         }
+                        
+                        // Show success message
+                        Toast.makeText(ShortlistActivity.this, "Player created successfully!", Toast.LENGTH_SHORT).show();
+                        
+                        // Navigate to ShortlistPlayersActivity
+                        Log.d(LOG_TAG, "Preparing to navigate to ShortlistPlayersActivity");
+                        Intent intent = new Intent(ShortlistActivity.this, ShortlistPlayersActivity.class);
+                        intent.putExtra("managerId", managerId);
+                        intent.putExtra("team", myTeam);
+                        switch (positionPlayer) {
+                            case "GK":
+                                barPosition = "Goalkeepers";
+                                break;
+                            case "CB":
+                                barPosition = "Center Backs";
+                                break;
+                            case "RB", "RWB":
+                                barPosition = "Right Backs";
+                                break;
+                            case "LB", "LWB":
+                                barPosition = "Left Backs";
+                                break;
+                            case "CDM":
+                                barPosition = "Center Defensive Mids";
+                                break;
+                            case "CM":
+                                barPosition = "Center Midfielders";
+                                break;
+                            case "CAM":
+                                barPosition = "Center Attacking Mids";
+                                break;
+                            case "RM", "RW":
+                                barPosition = "Right Wingers";
+                                break;
+                            case "LM", "LW":
+                                barPosition = "Left Wingers";
+                                break;
+                            case "ST", "CF", "RF", "LF":
+                                barPosition = "Strikers";
+                                break;
+                        }
+                        Log.d(LOG_TAG, "Bar position determined: " + barPosition);
+                        intent.putExtra("barPosition", barPosition);
+                        Log.d(LOG_TAG, "Starting ShortlistPlayersActivity...");
+                        startActivity(intent);
+                        finish();
+                        Log.d(LOG_TAG, "ShortlistActivity finished.");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(LOG_TAG, "Error creating player", e);
+                        long elapsed = System.currentTimeMillis() - startTime;
+                        Log.e(LOG_TAG, "FAILURE CALLBACK FIRED after " + elapsed + "ms");
+                        Log.e(LOG_TAG, "Error creating player: " + e.getClass().getName() + " - " + e.getMessage());
+                        e.printStackTrace();
+                        
+                        operationCompleted[0] = true;
+                        timeoutHandler.removeCallbacks(timeoutRunnable);
+                        
+                        Log.d(LOG_TAG, "Running failure UI updates");
                         if (createDialog != null && createDialog.isShowing()) {
                             createDialog.dismiss();
                         }

@@ -538,17 +538,40 @@ public class LoanedOutPlayerRecAdapter extends RecyclerView.Adapter<LoanedOutPla
                                                         public void onSuccess(Void aVoid) {
                                                             Log.d(LOG_TAG, "Player successfully updated in Firestore: " + player.getFullName());
                                                             try {
+                                                                // Update the player object in the list
+                                                                int position = getAdapterPosition();
+                                                                if (position != RecyclerView.NO_POSITION) {
+                                                                    player.setFirstName(firstName.getText().toString().trim());
+                                                                    player.setLastName(lastName.getText().toString().trim());
+                                                                    player.setFullName(firstName.getText().toString().trim() + " " + lastName.getText().toString().trim());
+                                                                    player.setPosition(positionPicker.getText().toString().trim());
+                                                                    String no = number.getText().toString().trim();
+                                                                    player.setNumber((!no.isEmpty()) ? Integer.parseInt(no) : 99);
+                                                                    String nationalityPlayer = nationality.getText().toString().trim();
+                                                                    Map<String, String> variantMap = NationalityFlagUtil.getVariantToStandardMap();
+                                                                    String nationalityInput = variantMap.getOrDefault(nationalityPlayer, nationalityPlayer);
+                                                                    player.setNationality(nationalityInput);
+                                                                    player.setOverall(Integer.parseInt(overall.getText().toString().trim()));
+                                                                    String ptlLow = potentialLow.getText().toString().trim();
+                                                                    String ptlHi = potentialHigh.getText().toString().trim();
+                                                                    player.setPotentialLow((!ptlLow.isEmpty()) ? Integer.parseInt(ptlLow) : 0);
+                                                                    player.setPotentialHigh((!ptlHi.isEmpty()) ? Integer.parseInt(ptlHi) : 0);
+                                                                    player.setYearSigned(yearSigned.getText().toString().trim());
+                                                                    String yScouted = yearScouted.getText().toString().trim();
+                                                                    player.setYearScouted(yScouted);
+                                                                    player.setTeam(teamText.getText().toString().trim());
+                                                                    player.setYearLoanedOut(yearLoaned.getText().toString().trim());
+                                                                    player.setTypeOfLoan(typeOfLoanPicker.getText().toString().trim());
+                                                                    
+                                                                    // Notify only this item changed
+                                                                    notifyItemChanged(position);
+                                                                }
+                                                                
                                                                 if (editDialog != null && editDialog.isShowing()) {
                                                                     Log.d(LOG_TAG, "Dismissing edit dialog.");
                                                                     editDialog.dismiss();
                                                                 }
-                                                                notifyItemChanged(getAdapterPosition());
                                                                 Toast.makeText(context, "Player updated! You should also edit the corresponding transfer deal!", Toast.LENGTH_SHORT).show();
-                                                                
-                                                                // Refresh the activity data if it's LoanedOutPlayersActivity
-                                                                if (context instanceof LoanedOutPlayersActivity) {
-                                                                    ((LoanedOutPlayersActivity) context).refreshPlayerList();
-                                                                }
                                                             } catch (Exception e) {
                                                                 Log.e(LOG_TAG, "Error in onSuccess callback", e);
                                                                 Toast.makeText(context, "Player updated but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();

@@ -314,6 +314,10 @@ public class YouthTeamListActivity extends AppCompatActivity {
     }
 
     public void refreshPlayerList() {
+        refreshPlayerList(null);
+    }
+
+    public void refreshPlayerList(Runnable onComplete) {
         Log.d(LOG_TAG, "refreshPlayerList called");
         // Ensure currentYear is initialized before refreshing
         if (currentYear == null) {
@@ -324,13 +328,18 @@ public class YouthTeamListActivity extends AppCompatActivity {
             } else {
                 Log.w(LOG_TAG, "Unable to refresh: currentYear is null");
                 Toast.makeText(this, "Unable to refresh. Please reopen the activity.", Toast.LENGTH_SHORT).show();
+                if (onComplete != null) onComplete.run();
                 return;
             }
         }
-        listPlayers(0);
+        listPlayers(0, onComplete);
     }
 
     private void listPlayers(final int buttonInt) {
+        listPlayers(buttonInt, null);
+    }
+
+    private void listPlayers(final int buttonInt, Runnable onComplete) {
         Log.d(LOG_TAG, "Listing players for year: " + currentYear + ", buttonInt: " + buttonInt);
 
         playerList.clear();
@@ -369,12 +378,27 @@ public class YouthTeamListActivity extends AppCompatActivity {
                                 youthTeamPlayerRecAdapter.notifyDataSetChanged();
                             }
                             yearPlayerCount.setText(playerList.size() + " players");
+                            
+                            // Call completion callback if provided
+                            if (onComplete != null) {
+                                onComplete.run();
+                            }
                         } else {
                             Log.w(LOG_TAG, "No players found for year: " + currentYear);
+                            // Call completion callback even if no players found
+                            if (onComplete != null) {
+                                onComplete.run();
+                            }
                         }
                     }
                 })
-                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching players from Firestore.", e));
+                .addOnFailureListener(e -> {
+                    Log.e(LOG_TAG, "Error fetching players from Firestore.", e);
+                    // Call completion callback on failure too
+                    if (onComplete != null) {
+                        onComplete.run();
+                    }
+                });
     }
 
     private void createPopupDialog() {
@@ -503,15 +527,23 @@ public class YouthTeamListActivity extends AppCompatActivity {
                     public void onSuccess(DocumentReference documentReference) {
                         Log.i(LOG_TAG, "Player successfully added to Firestore: Document ID = " + documentReference.getId());
                         try {
-                            if (dialog != null && dialog.isShowing()) {
-                                Log.d(LOG_TAG, "Dismissing create dialog.");
-                                dialog.dismiss();
-                            }
-                            // Refresh the current activity instead of restarting
+                            // Update currentYear to the created player's year before refreshing
+                            currentYear = yScoutedPlayer;
+                            // Show success message
                             Toast.makeText(YouthTeamListActivity.this, "Player created successfully!", Toast.LENGTH_SHORT).show();
-                            refreshPlayerList();
+                            // Refresh and dismiss dialog after completion
+                            refreshPlayerList(() -> {
+                                // Dismiss dialog after refresh completes
+                                if (dialog != null && dialog.isShowing()) {
+                                    Log.d(LOG_TAG, "Dismissing create dialog after refresh.");
+                                    dialog.dismiss();
+                                }
+                            });
                         } catch (Exception e) {
                             Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                            if (dialog != null && dialog.isShowing()) {
+                                dialog.dismiss();
+                            }
                             Toast.makeText(YouthTeamListActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
                     }
