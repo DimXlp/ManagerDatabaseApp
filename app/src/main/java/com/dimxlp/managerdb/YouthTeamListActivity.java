@@ -328,7 +328,9 @@ public class YouthTeamListActivity extends AppCompatActivity {
             } else {
                 Log.w(LOG_TAG, "Unable to refresh: currentYear is null");
                 Toast.makeText(this, "Unable to refresh. Please reopen the activity.", Toast.LENGTH_SHORT).show();
-                if (onComplete != null) onComplete.run();
+                if (onComplete != null) {
+                    onComplete.run();
+                }
                 return;
             }
         }
@@ -474,6 +476,8 @@ public class YouthTeamListActivity extends AppCompatActivity {
 
     private void createPlayer() {
         Log.d(LOG_TAG, "Creating a new youth team player.");
+        Log.d(LOG_TAG, "Dialog state before creation: " + (dialog != null ? "exists" : "null") + ", showing: " + (dialog != null && dialog.isShowing()));
+        Log.d(LOG_TAG, "Button state: enabled=" + createPlayerButton.isEnabled() + ", text=" + createPlayerButton.getText());
 
         String firstNamePlayer = firstName.getText().toString().trim();
         String lastNamePlayer = lastName.getText().toString().trim();
@@ -520,44 +524,84 @@ public class YouthTeamListActivity extends AppCompatActivity {
         player.setUserId(currentUserId);
         player.setTimeAdded(new Timestamp(new Date()));
         Log.d(LOG_TAG, "YouthTeamPlayer object created: " + player);
+        Log.d(LOG_TAG, "Initiating Firestore add operation...");
 
         collectionReference.add(player)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
-                        Log.i(LOG_TAG, "Player successfully added to Firestore: Document ID = " + documentReference.getId());
+                        Log.i(LOG_TAG, "***SUCCESS CALLBACK INVOKED*** Player successfully added to Firestore: Document ID = " + documentReference.getId());
+                        Log.d(LOG_TAG, "Activity state: isFinishing=" + isFinishing() + ", isDestroyed=" + isDestroyed());
+                        Log.d(LOG_TAG, "Dialog state: " + (dialog != null ? "exists" : "null") + ", showing: " + (dialog != null && dialog.isShowing()));
+                        
+                        if (isFinishing() || isDestroyed()) {
+                            Log.w(LOG_TAG, "Activity is finishing or destroyed, skipping UI updates");
+                            return;
+                        }
                         try {
+                            Log.d(LOG_TAG, "Updating currentYear to: " + yScoutedPlayer);
                             // Update currentYear to the created player's year before refreshing
                             currentYear = yScoutedPlayer;
+                            
+                            Log.d(LOG_TAG, "Showing success toast...");
                             // Show success message
                             Toast.makeText(YouthTeamListActivity.this, "Player created successfully!", Toast.LENGTH_SHORT).show();
-                            // Refresh and dismiss dialog after completion
-                            refreshPlayerList(() -> {
-                                // Dismiss dialog after refresh completes
-                                if (dialog != null && dialog.isShowing()) {
-                                    Log.d(LOG_TAG, "Dismissing create dialog after refresh.");
-                                    dialog.dismiss();
-                                }
-                            });
-                        } catch (Exception e) {
-                            Log.e(LOG_TAG, "Error in onSuccess callback", e);
+                            
+                            Log.d(LOG_TAG, "Attempting to dismiss dialog...");
+                            // Dismiss dialog immediately after successful save
                             if (dialog != null && dialog.isShowing()) {
+                                Log.d(LOG_TAG, "Dismissing create dialog after successful save.");
                                 dialog.dismiss();
+                                Log.d(LOG_TAG, "Dialog dismissed successfully.");
+                            } else {
+                                Log.w(LOG_TAG, "Dialog is null or not showing, cannot dismiss.");
                             }
-                            Toast.makeText(YouthTeamListActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            
+                            Log.d(LOG_TAG, "Initiating player list refresh...");
+                            // Refresh player list after dialog is dismissed
+                            refreshPlayerList();
+                            Log.d(LOG_TAG, "Success callback completed.");
+                        } catch (Exception e) {
+                            Log.e(LOG_TAG, "***EXCEPTION IN SUCCESS CALLBACK***", e);
+                            Log.e(LOG_TAG, "Exception type: " + e.getClass().getName());
+                            Log.e(LOG_TAG, "Exception message: " + e.getMessage());
+                            try {
+                                if (dialog != null && dialog.isShowing()) {
+                                    dialog.dismiss();
+                                    Log.d(LOG_TAG, "Dialog dismissed after exception.");
+                                }
+                                Toast.makeText(YouthTeamListActivity.this, "Player created but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            } catch (Exception toastException) {
+                                Log.e(LOG_TAG, "Error showing toast or dismissing dialog", toastException);
+                            }
                         }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(LOG_TAG, "Error creating player", e);
-                        if (dialog != null && dialog.isShowing()) {
-                            dialog.dismiss();
+                        Log.e(LOG_TAG, "***FAILURE CALLBACK INVOKED*** Error creating player", e);
+                        Log.e(LOG_TAG, "Failure exception type: " + e.getClass().getName());
+                        Log.e(LOG_TAG, "Failure exception message: " + e.getMessage());
+                        Log.d(LOG_TAG, "Activity state: isFinishing=" + isFinishing() + ", isDestroyed=" + isDestroyed());
+                        
+                        if (isFinishing() || isDestroyed()) {
+                            Log.w(LOG_TAG, "Activity is finishing or destroyed, skipping UI updates");
+                            return;
                         }
-                        createPlayerButton.setText("CREATE PLAYER");
-                        createPlayerButton.setEnabled(true);
-                        Toast.makeText(YouthTeamListActivity.this, "Failed to create player: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        try {
+                            Log.d(LOG_TAG, "Re-enabling create button...");
+                            // Re-enable button on failure
+                            createPlayerButton.setEnabled(true);
+                            createPlayerButton.setText("CREATE PLAYER");
+                            Log.d(LOG_TAG, "Button re-enabled.");
+                            
+                            // Show error and keep dialog open so user can retry
+                            Toast.makeText(YouthTeamListActivity.this, "Failed to create player: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            Log.d(LOG_TAG, "Failure callback completed.");
+                        } catch (Exception uiException) {
+                            Log.e(LOG_TAG, "Error updating UI on failure", uiException);
+                        }
                     }
                 });
     }
