@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#F7F8FA">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="⚡ Quick Add Player"
+        android:fontFamily="@font/chivo"
+        android:textSize="22sp"
+        android:textColor="#1F1F20"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Enter minimal details - edit later if needed"
+        android:fontFamily="@font/chivo"
+        android:textSize="12sp"
+        android:textColor="#666666"
+        android:layout_marginBottom="16dp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/full_name_til_quick"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Player Name *"
+        app:boxStrokeColor="#D4AF37"
+        app:boxStrokeWidth="2dp"
+        app:startIconDrawable="@drawable/ic_baseline_person_24"
+        app:endIconMode="custom"
+        app:endIconDrawable="@drawable/ic_baseline_mic_24">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/full_name_quick"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/chivo"
+            android:inputType="textPersonName"
+            android:textColor="@android:color/black"
+            android:maxLines="1"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="Overall *"
+            android:layout_marginEnd="4dp"
+            app:boxStrokeColor="#D4AF37"
+            app:boxStrokeWidth="2dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/overall_quick"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/chivo"
+                android:inputType="number"
+                android:textColor="@android:color/black"
+                android:maxLines="1"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_weight="1.5"
+            android:layout_height="wrap_content"
+            android:hint="Position"
+            android:layout_marginStart="4dp"
+            app:boxStrokeColor="#D4AF37"
+            app:boxStrokeWidth="2dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/position_picker_quick"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:clickable="true"
+                android:inputType="none"
+                android:drawableEnd="@drawable/ic_arrow_drop_down"
+                android:fontFamily="@font/chivo"
+                android:textColor="@android:color/black"/>
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Team"
+        app:boxStrokeColor="#D4AF37"
+        app:boxStrokeWidth="2dp"
+        app:endIconMode="custom"
+        app:endIconDrawable="@drawable/ic_baseline_mic_24">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/team_quick"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/chivo"
+            android:inputType="text"
+            android:textColor="@android:color/black"
+            android:maxLines="1"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Nationality"
+        app:boxStrokeColor="#D4AF37"
+        app:boxStrokeWidth="2dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/nationality_quick"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/chivo"
+            android:inputType="textAutoComplete"
+            android:textColor="@android:color/black"
+            android:maxLines="1"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/quick_add_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="⚡ QUICK ADD"
+        android:fontFamily="@font/chivo"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:backgroundTint="#D4AF37"
+        android:textColor="@android:color/white"
+        android:padding="12dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Tip: You can edit full details later"
+        android:fontFamily="@font/chivo"
+        android:textSize="11sp"
+        android:textColor="#999999"
+        android:layout_marginTop="8dp"/>
+
+</LinearLayout>
+

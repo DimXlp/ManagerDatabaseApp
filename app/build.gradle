@@ -22,6 +22,7 @@ android {
         buildConfigField "String", "FIREBASE_AUTH_API_KEY", "\"${FIREBASE_AUTH_API_KEY}\""
         buildConfigField "String", "DEFAULT_RESTRICTED_API_KEY", "\"${DEFAULT_RESTRICTED_API_KEY}\""
         buildConfigField "String", "RECAPTCHA_API_KEY", "\"${RECAPTCHA_API_KEY}\""
+        buildConfigField "String", "GEMINI_API_KEY", "\"${GEMINI_API_KEY}\""
     }
 
     buildTypes {
@@ -41,6 +42,10 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
     implementation 'androidx.cardview:cardview:1.0.0'
+    
+    // Google Gemini AI SDK
+    implementation 'com.google.ai.client.generativeai:generativeai:0.9.0'
+    
     implementation 'com.google.android.gms:play-services-safetynet:18.1.0'
     implementation 'com.google.firebase:firebase-appcheck-playintegrity:18.0.0'
     implementation 'com.google.firebase:firebase-appcheck-debug:18.0.0'
