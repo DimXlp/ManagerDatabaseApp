@@ -209,6 +209,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                 builder.setItems(positionCategories.toArray(new String[0]), (dialog, which) -> {
                     String category = positionCategories.get(which);
                     positionText.setText(category);
+                    barPosition = category; // Update barPosition to stay in sync
                     listPlayers(category, 0);
                 });
                 builder.show();
@@ -253,6 +254,46 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         return Arrays.stream(PositionEnum.values())
                 .map(p -> p.getCategory())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Get position category from position initials (e.g., "LB" -> "Left Backs")
+     */
+    private String getPositionCategory(String positionInitials) {
+        if (positionInitials == null || positionInitials.isEmpty()) {
+            return PositionEnum.GK.getCategory(); // Default to GK
+        }
+        
+        String pos = positionInitials.trim();
+        
+        // Match position initials to categories
+        if (pos.equals(PositionEnum.GK.getInitials())) {
+            return PositionEnum.GK.getCategory();
+        } else if (pos.equals(PositionEnum.CB.getInitials())) {
+            return PositionEnum.CB.getCategory();
+        } else if (pos.equals(PositionEnum.RB.getInitials()) || pos.equals(PositionEnum.RWB.getInitials())) {
+            return PositionEnum.RB.getCategory();
+        } else if (pos.equals(PositionEnum.LB.getInitials()) || pos.equals(PositionEnum.LWB.getInitials())) {
+            return PositionEnum.LB.getCategory();
+        } else if (pos.equals(PositionEnum.CDM.getInitials())) {
+            return PositionEnum.CDM.getCategory();
+        } else if (pos.equals(PositionEnum.CM.getInitials())) {
+            return PositionEnum.CM.getCategory();
+        } else if (pos.equals(PositionEnum.CAM.getInitials())) {
+            return PositionEnum.CAM.getCategory();
+        } else if (pos.equals(PositionEnum.RM.getInitials()) || pos.equals(PositionEnum.RW.getInitials())) {
+            return PositionEnum.RW.getCategory();
+        } else if (pos.equals(PositionEnum.LM.getInitials()) || pos.equals(PositionEnum.LW.getInitials())) {
+            return PositionEnum.LW.getCategory();
+        } else if (pos.equals(PositionEnum.ST.getInitials()) || 
+                   pos.equals(PositionEnum.CF.getInitials()) || 
+                   pos.equals(PositionEnum.RF.getInitials()) || 
+                   pos.equals(PositionEnum.LF.getInitials())) {
+            return PositionEnum.ST.getCategory();
+        }
+        
+        // Default to GK if no match
+        return PositionEnum.GK.getCategory();
     }
 
     // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
@@ -334,6 +375,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                 return;
         }
         pos = positionText.getText().toString();
+        barPosition = pos; // Update barPosition to stay in sync
         Log.d(LOG_TAG, "Position updated to next: " + pos);
         listPlayers(pos, 2);
     }
@@ -377,6 +419,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                 return;
         }
         pos = positionText.getText().toString();
+        barPosition = pos; // Update barPosition to stay in sync
         Log.d(LOG_TAG, "Position updated to previous: " + pos);
         listPlayers(pos, 1);
     }
@@ -565,44 +608,17 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                                 Log.d(LOG_TAG, "Dismissing create dialog.");
                                 createDialog.dismiss();
                             }
-                            // Determine bar position for refresh
-                            switch (positionPlayer) {
-                                case "GK":
-                                    barPosition = PositionEnum.GK.getCategory();
-                                    break;
-                                case "CB":
-                                    barPosition = PositionEnum.CB.getCategory();
-                                    break;
-                                case "RB", "RWB":
-                                    barPosition = PositionEnum.RB.getCategory();
-                                    break;
-                                case "LB", "LWB":
-                                    barPosition = PositionEnum.LB.getCategory();
-                                    break;
-                                case "CDM":
-                                    barPosition = PositionEnum.CDM.getCategory();
-                                    break;
-                                case "CM":
-                                    barPosition = PositionEnum.CM.getCategory();
-                                    break;
-                                case "CAM":
-                                    barPosition = PositionEnum.CAM.getCategory();
-                                    break;
-                                case "RM", "RW":
-                                    barPosition = PositionEnum.RW.getCategory();
-                                    break;
-                                case "LM", "LW":
-                                    barPosition = PositionEnum.LW.getCategory();
-                                    break;
-                                case "ST", "CF", "RF", "LF":
-                                    barPosition = PositionEnum.ST.getCategory();
-                                    break;
-                            }
-                            Log.d(LOG_TAG, "Bar position determined: " + barPosition);
-                            // Refresh the current activity instead of restarting
+                            
+                            // Jump to the newly created player's position category
+                            String newPlayerPositionCategory = getPositionCategory(positionPlayer);
+                            barPosition = newPlayerPositionCategory;
+                            positionText.setText(newPlayerPositionCategory);
+                            Log.d(LOG_TAG, "Jumping to new player's position: " + newPlayerPositionCategory);
+                            
+                            // Refresh the new position view
                             Toast.makeText(ShortlistPlayersActivity.this, "Player created successfully!", Toast.LENGTH_SHORT).show();
                             // Refresh and dismiss dialog after completion
-                            refreshPlayerList(() -> {
+                            listPlayers(newPlayerPositionCategory, 0, () -> {
                                 // Dismiss dialog after refresh completes
                                 if (createDialog != null && createDialog.isShowing()) {
                                     Log.d(LOG_TAG, "Dismissing create dialog after refresh.");
