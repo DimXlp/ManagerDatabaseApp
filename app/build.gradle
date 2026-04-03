@@ -45,7 +45,7 @@ dependencies {
     
     // Google Gemini AI SDK
     implementation 'com.google.ai.client.generativeai:generativeai:0.9.0'
-    
+
     implementation 'com.google.android.gms:play-services-safetynet:18.1.0'
     implementation 'com.google.firebase:firebase-appcheck-playintegrity:18.0.0'
     implementation 'com.google.firebase:firebase-appcheck-debug:18.0.0'

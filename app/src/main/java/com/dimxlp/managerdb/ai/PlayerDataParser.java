@@ -1,29 +1,33 @@
 package com.dimxlp.managerdb.ai;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.dimxlp.managerdb.BuildConfig;
-import com.google.ai.client.generativeai.GenerativeModel;
-import com.google.ai.client.generativeai.java.GenerativeModelFutures;
-import com.google.ai.client.generativeai.type.Content;
-import com.google.ai.client.generativeai.type.GenerateContentResponse;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
  * Helper class to parse player information from voice input using Google Gemini AI
+ * Uses direct REST API calls for better compatibility
  */
 public class PlayerDataParser {
     private static final String TAG = "PlayerDataParser";
-    private final GenerativeModelFutures model;
+    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    private final Context context;
     private final Executor executor;
+    private final Handler mainHandler;
 
     public interface PlayerDataCallback {
         void onSuccess(PlayerData playerData);
@@ -68,51 +72,97 @@ public class PlayerDataParser {
     }
 
     public PlayerDataParser(Context context) {
-        // Initialize Gemini AI model
-        GenerativeModel gm = new GenerativeModel(
-                "gemini-1.5-flash",
-                BuildConfig.GEMINI_API_KEY
-        );
-        this.model = GenerativeModelFutures.from(gm);
+        this.context = context;
         this.executor = Executors.newSingleThreadExecutor();
+        this.mainHandler = new Handler(Looper.getMainLooper());
     }
 
     /**
-     * Parse player information from voice transcript using Gemini AI
-     * @param transcript The voice input transcript
-     * @param callback Callback to receive parsed player data or error
+     * Parse player information from voice transcript using Gemini AI REST API
      */
     public void parsePlayerData(String transcript, PlayerDataCallback callback) {
-        String prompt = buildPrompt(transcript);
-
-        Content content = new Content.Builder()
-                .addText(prompt)
-                .build();
-
-        ListenableFuture<GenerateContentResponse> response = model.generateContent(content);
-
-        Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
-            @Override
-            public void onSuccess(GenerateContentResponse result) {
-                try {
-                    String responseText = result.getText();
-                    Log.d(TAG, "Gemini response: " + responseText);
-                    
-                    // Parse the JSON response
-                    PlayerData playerData = parseJsonResponse(responseText);
-                    callback.onSuccess(playerData);
-                } catch (Exception e) {
-                    Log.e(TAG, "Error parsing Gemini response", e);
-                    callback.onError("Failed to parse player data: " + e.getMessage());
+        executor.execute(() -> {
+            try {
+                String prompt = buildPrompt(transcript);
+                String response = callGeminiAPI(prompt);
+                PlayerData playerData = parseJsonResponse(response);
+                
+                mainHandler.post(() -> callback.onSuccess(playerData));
+            } catch (Exception e) {
+                Log.e(TAG, "Error calling Gemini API", e);
+                mainHandler.post(() -> callback.onError("AI processing failed: " + e.getMessage()));
+            }
+        });
+    }
+    
+    /**
+     * Call Gemini REST API directly
+     */
+    private String callGeminiAPI(String prompt) throws Exception {
+        URL url = new URL(GEMINI_API_URL + "?key=" + BuildConfig.GEMINI_API_KEY);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        
+        try {
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(30000);
+            
+            // Build request body
+            JSONObject requestBody = new JSONObject();
+            JSONArray contents = new JSONArray();
+            JSONObject content = new JSONObject();
+            JSONArray parts = new JSONArray();
+            JSONObject part = new JSONObject();
+            part.put("text", prompt);
+            parts.put(part);
+            content.put("parts", parts);
+            contents.put(content);
+            requestBody.put("contents", contents);
+            
+            // Send request
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = requestBody.toString().getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+            
+            // Read response
+            int responseCode = conn.getResponseCode();
+            if (responseCode != 200) {
+                BufferedReader errorReader = new BufferedReader(
+                    new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                StringBuilder errorResponse = new StringBuilder();
+                String line;
+                while ((line = errorReader.readLine()) != null) {
+                    errorResponse.append(line);
                 }
+                throw new Exception("API Error " + responseCode + ": " + errorResponse.toString());
             }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.e(TAG, "Gemini API error", t);
-                callback.onError("AI processing failed: " + t.getMessage());
+            
+            BufferedReader br = new BufferedReader(
+                new InputStreamReader(conn.getInputStream(), "utf-8"));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                response.append(line.trim());
             }
-        }, executor);
+            
+            // Extract text from response
+            JSONObject responseJson = new JSONObject(response.toString());
+            JSONArray candidates = responseJson.getJSONArray("candidates");
+            JSONObject candidate = candidates.getJSONObject(0);
+            JSONObject contentObj = candidate.getJSONObject("content");
+            JSONArray partsArray = contentObj.getJSONArray("parts");
+            JSONObject partObj = partsArray.getJSONObject(0);
+            String text = partObj.getString("text");
+            
+            Log.d(TAG, "Gemini API response: " + text);
+            return text;
+            
+        } finally {
+            conn.disconnect();
+        }
     }
 
     /**

@@ -31,11 +31,53 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="16dp"/>
 
+            <!-- Voice Input Section -->
+            <LinearLayout
+                android:id="@+id/voice_input_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/create_sh_player"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:padding="12dp"
+                android:background="@drawable/round_button"
+                android:backgroundTint="#E8F5E9"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:id="@+id/voice_icon"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_baseline_mic_24"
+                    app:tint="#4CAF50"
+                    android:contentDescription="Voice input icon"/>
+
+                <TextView
+                    android:id="@+id/voice_status_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:text="🎤 Voice Input - Say player details"
+                    android:textSize="14sp"
+                    android:textColor="#2E7D32"
+                    android:fontFamily="@font/chivo"
+                    android:textStyle="bold"/>
+
+                <ProgressBar
+                    android:id="@+id/voice_progress"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:visibility="gone"
+                    android:indeterminateTint="#4CAF50"/>
+
+            </LinearLayout>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/first_name_til_shp_create"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/create_sh_player"
+                android:layout_below="@+id/voice_input_container"
                 android:hint="@string/first_name_text"
                 app:boxStrokeColor="#D4AF37"
                 app:boxStrokeWidth="2dp">

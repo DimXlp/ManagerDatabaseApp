@@ -10,19 +10,26 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dimxlp.managerdb.ai.PlayerDataParser;
+import com.dimxlp.managerdb.voice.VoicePlayerDataManager;
+import com.dimxlp.managerdb.voice.VoiceInputTestMode;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -108,6 +115,14 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
     private long managerId;
     private String myTeam;
     private String barPosition;
+
+    // Voice input components
+    private VoicePlayerDataManager voiceManager;
+    private LinearLayout voiceInputContainer;
+    private ImageView voiceIcon;
+    private TextView voiceStatusText;
+    private ProgressBar voiceProgress;
+    private ObjectAnimator pulseAnimator;
 
     private TextView managerNameHeader;
     private TextView teamHeader;
@@ -384,6 +399,24 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         createDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.create_shortlisted_player_popup, null);
         createDialog.setContentView(view);
+
+        // Initialize voice manager
+        voiceManager = new VoicePlayerDataManager(this);
+
+        // Initialize voice UI components
+        voiceInputContainer = view.findViewById(R.id.voice_input_container);
+        voiceIcon = view.findViewById(R.id.voice_icon);
+        voiceStatusText = view.findViewById(R.id.voice_status_text);
+        voiceProgress = view.findViewById(R.id.voice_progress);
+
+        // Setup voice input button click
+        voiceInputContainer.setOnClickListener(v -> startVoiceInput());
+        
+        // Setup long-press for test mode (bypasses voice recognition)
+        voiceInputContainer.setOnLongClickListener(v -> {
+            startTestMode();
+            return true;
+        });
 
         firstName = view.findViewById(R.id.first_name_shp_create);
         lastName = view.findViewById(R.id.last_name_shp_create);
@@ -1027,8 +1060,348 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         playerList.clear();
     }
 
+    /**
+     * Test mode - bypasses voice recognition and uses sample transcript
+     * Useful when emulator audio is not working
+     * Trigger by LONG-PRESSING the voice button
+     */
+    private void startTestMode() {
+        Log.d(LOG_TAG, "Test mode activated - bypassing voice recognition.");
+        
+        // Show options for different test samples
+        String[] testOptions = {
+                "Mbappe (Complete data)",
+                "Haaland (Complete data)",
+                "Vinicius Jr (Partial data)",
+                "Bellingham (Casual speech)",
+                "Harry Kane (Natural speech)"
+        };
+        
+        new AlertDialog.Builder(this)
+                .setTitle("🧪 Test Mode - Select Sample")
+                .setItems(testOptions, (dialog, which) -> {
+                    runOnUiThread(() -> setVoiceUIState(VoiceUIState.PROCESSING));
+                    
+                    VoiceInputTestMode.testWithSample(this, which, new PlayerDataParser.PlayerDataCallback() {
+                        @Override
+                        public void onSuccess(PlayerDataParser.PlayerData data) {
+                            Log.d(LOG_TAG, "Test mode: AI parsed successfully: " + data.toString());
+                            runOnUiThread(() -> {
+                                setVoiceUIState(VoiceUIState.SUCCESS);
+                                fillFormWithVoiceData(data);
+                                Toast.makeText(ShortlistPlayersActivity.this,
+                                        "🧪 Test Mode: Data loaded! (No voice used)",
+                                        Toast.LENGTH_LONG).show();
+                            });
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e(LOG_TAG, "Test mode: AI parsing error: " + error);
+                            runOnUiThread(() -> {
+                                setVoiceUIState(VoiceUIState.ERROR);
+                                Toast.makeText(ShortlistPlayersActivity.this,
+                                        "Test Error: " + error,
+                                        Toast.LENGTH_LONG).show();
+                            });
+                        }
+                    });
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    /**
+     * Start voice input process
+     */
+    private void startVoiceInput() {
+        Log.d(LOG_TAG, "Voice input button clicked.");
+        voiceManager.startVoiceInput(new VoicePlayerDataManager.PlayerDataResultCallback() {
+            @Override
+            public void onPlayerDataParsed(PlayerDataParser.PlayerData data) {
+                Log.d(LOG_TAG, "Voice data parsed successfully: " + data.toString());
+                runOnUiThread(() -> {
+                    setVoiceUIState(VoiceUIState.SUCCESS);
+                    fillFormWithVoiceData(data);
+                    Toast.makeText(ShortlistPlayersActivity.this,
+                            "✓ Player data loaded! Please review and save.",
+                            Toast.LENGTH_LONG).show();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(LOG_TAG, "Voice input error: " + error);
+                runOnUiThread(() -> {
+                    setVoiceUIState(VoiceUIState.ERROR);
+                    Toast.makeText(ShortlistPlayersActivity.this,
+                            "Error: " + error + "\nTap to try again.",
+                            Toast.LENGTH_LONG).show();
+                });
+            }
+
+            @Override
+            public void onListeningStarted() {
+                Log.d(LOG_TAG, "Voice listening started.");
+                runOnUiThread(() -> setVoiceUIState(VoiceUIState.LISTENING));
+            }
+
+            @Override
+            public void onListeningEnded() {
+                Log.d(LOG_TAG, "Voice listening ended, processing...");
+                runOnUiThread(() -> setVoiceUIState(VoiceUIState.PROCESSING));
+            }
+        });
+    }
+
+    /**
+     * Fill form fields with voice-parsed data
+     */
+    private void fillFormWithVoiceData(PlayerDataParser.PlayerData data) {
+        Log.d(LOG_TAG, "Filling form with voice data...");
+        
+        // Parse name into first and last name
+        if (!data.name.isEmpty()) {
+            String[] nameParts = data.name.trim().split("\\s+", 2);
+            if (nameParts.length == 2) {
+                firstName.setText(nameParts[0]);
+                lastName.setText(nameParts[1]);
+            } else {
+                // If only one name, use it as last name
+                lastName.setText(nameParts[0]);
+            }
+        }
+        
+        // Map position abbreviations
+        if (!data.position.isEmpty()) {
+            String mappedPosition = mapPositionFromVoice(data.position);
+            positionPicker.setText(mappedPosition);
+        }
+        
+        if (!data.nationality.isEmpty()) {
+            nationality.setText(data.nationality);
+        }
+        
+        if (!data.overall.isEmpty()) {
+            overall.setText(data.overall);
+        }
+        
+        if (!data.potential.isEmpty()) {
+            // Use potential for both low and high if only one value provided
+            potLow.setText(data.potential);
+            potHigh.setText(data.potential);
+        }
+        
+        if (!data.value.isEmpty()) {
+            // Clean and format value (remove M, million, etc.)
+            String cleanValue = cleanMonetaryValue(data.value);
+            value.setText(cleanValue);
+        }
+        
+        if (!data.wage.isEmpty()) {
+            // Clean and format wage (remove K, thousand, etc.)
+            String cleanWage = cleanMonetaryValue(data.wage);
+            wage.setText(cleanWage);
+        }
+        
+        if (!data.age.isEmpty()) {
+            // Age can be added to comments
+            String currentComments = comments.getText().toString();
+            if (!currentComments.isEmpty()) {
+                comments.setText(currentComments + "\nAge: " + data.age);
+            } else {
+                comments.setText("Age: " + data.age);
+            }
+        }
+        
+        Log.d(LOG_TAG, "Form filled successfully with voice data.");
+    }
+
+    /**
+     * Map position from voice input (e.g., "striker" -> "ST")
+     */
+    private String mapPositionFromVoice(String voicePosition) {
+        String lower = voicePosition.toLowerCase().trim();
+        
+        // Direct matches
+        if (lower.matches("gk|goalkeeper")) return "GK";
+        if (lower.matches("cb|center back|centre back")) return "CB";
+        if (lower.matches("rb|right back")) return "RB";
+        if (lower.matches("lb|left back")) return "LB";
+        if (lower.matches("rwb|right wing back")) return "RWB";
+        if (lower.matches("lwb|left wing back")) return "LWB";
+        if (lower.matches("cdm|defensive mid.*")) return "CDM";
+        if (lower.matches("cm|central mid.*|center mid.*")) return "CM";
+        if (lower.matches("cam|attacking mid.*")) return "CAM";
+        if (lower.matches("rm|right mid.*")) return "RM";
+        if (lower.matches("lm|left mid.*")) return "LM";
+        if (lower.matches("rw|right wing.*")) return "RW";
+        if (lower.matches("lw|left wing.*")) return "LW";
+        if (lower.matches("st|striker|center forward")) return "ST";
+        if (lower.matches("cf|forward")) return "CF";
+        if (lower.matches("rf|right forward")) return "RF";
+        if (lower.matches("lf|left forward")) return "LF";
+        
+        // Partial matches
+        if (lower.contains("winger") || lower.contains("wing")) {
+            if (lower.contains("right")) return "RW";
+            if (lower.contains("left")) return "LW";
+            return "RW"; // Default to right wing
+        }
+        if (lower.contains("midfielder") || lower.contains("mid")) {
+            if (lower.contains("defensive") || lower.contains("holding")) return "CDM";
+            if (lower.contains("attacking") || lower.contains("offensive")) return "CAM";
+            return "CM"; // Default to central midfielder
+        }
+        if (lower.contains("back") || lower.contains("defender")) {
+            if (lower.contains("right")) return "RB";
+            if (lower.contains("left")) return "LB";
+            if (lower.contains("center") || lower.contains("centre")) return "CB";
+            return "CB"; // Default to center back
+        }
+        
+        // Return as-is if no match (uppercase first 2 letters)
+        return voicePosition.length() >= 2 ? 
+                voicePosition.substring(0, 2).toUpperCase() : 
+                voicePosition.toUpperCase();
+    }
+
+    /**
+     * Clean monetary values (remove M, K, million, thousand, etc.)
+     */
+    private String cleanMonetaryValue(String value) {
+        String cleaned = value.toUpperCase()
+                .replaceAll("[MK]$", "") // Remove M or K at end
+                .replaceAll("MILLION|THOUSAND|EUROS?|POUNDS?|DOLLARS?", "")
+                .replaceAll("[^0-9.]", "")
+                .trim();
+        
+        // Convert M to millions, K to thousands
+        if (value.toUpperCase().contains("M")) {
+            try {
+                double num = Double.parseDouble(cleaned);
+                return String.valueOf((int)(num * 1_000_000));
+            } catch (NumberFormatException e) {
+                return cleaned;
+            }
+        } else if (value.toUpperCase().contains("K")) {
+            try {
+                double num = Double.parseDouble(cleaned);
+                return String.valueOf((int)(num * 1_000));
+            } catch (NumberFormatException e) {
+                return cleaned;
+            }
+        }
+        
+        return cleaned;
+    }
+
+    /**
+     * Voice UI states
+     */
+    private enum VoiceUIState {
+        IDLE, LISTENING, PROCESSING, SUCCESS, ERROR
+    }
+
+    /**
+     * Update voice input UI based on current state
+     */
+    private void setVoiceUIState(VoiceUIState state) {
+        if (voiceInputContainer == null) return;
+        
+        // Stop any running animations
+        if (pulseAnimator != null && pulseAnimator.isRunning()) {
+            pulseAnimator.cancel();
+        }
+        
+        switch (state) {
+            case IDLE:
+                voiceInputContainer.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(0xFFE8F5E9));
+                voiceIcon.setVisibility(View.VISIBLE);
+                voiceIcon.setImageResource(R.drawable.ic_baseline_mic_24);
+                voiceIcon.setColorFilter(0xFF4CAF50);
+                voiceStatusText.setText("🎤 Voice Input - Say player details");
+                voiceStatusText.setTextColor(0xFF2E7D32);
+                voiceProgress.setVisibility(View.GONE);
+                voiceInputContainer.setClickable(true);
+                break;
+                
+            case LISTENING:
+                voiceInputContainer.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(0xFFFFF3E0));
+                voiceIcon.setVisibility(View.VISIBLE);
+                voiceIcon.setImageResource(R.drawable.ic_baseline_mic_24);
+                voiceIcon.setColorFilter(0xFFFF9800);
+                voiceStatusText.setText("🎙️ Listening... Speak now!");
+                voiceStatusText.setTextColor(0xFFE65100);
+                voiceProgress.setVisibility(View.GONE);
+                voiceInputContainer.setClickable(false);
+                
+                // Pulse animation on icon
+                pulseAnimator = ObjectAnimator.ofFloat(voiceIcon, "alpha", 1f, 0.3f, 1f);
+                pulseAnimator.setDuration(1000);
+                pulseAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+                pulseAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+                pulseAnimator.start();
+                break;
+                
+            case PROCESSING:
+                voiceInputContainer.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(0xFFE3F2FD));
+                voiceIcon.setVisibility(View.GONE);
+                voiceStatusText.setText("⚡ Processing with AI...");
+                voiceStatusText.setTextColor(0xFF1976D2);
+                voiceProgress.setVisibility(View.VISIBLE);
+                voiceInputContainer.setClickable(false);
+                break;
+                
+            case SUCCESS:
+                voiceInputContainer.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(0xFFE8F5E9));
+                voiceIcon.setVisibility(View.VISIBLE);
+                voiceIcon.setImageResource(R.drawable.ic_baseline_mic_24);
+                voiceIcon.setColorFilter(0xFF4CAF50);
+                voiceStatusText.setText("✓ Data loaded! Review and save below");
+                voiceStatusText.setTextColor(0xFF2E7D32);
+                voiceProgress.setVisibility(View.GONE);
+                voiceInputContainer.setClickable(true);
+                break;
+                
+            case ERROR:
+                voiceInputContainer.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(0xFFFFEBEE));
+                voiceIcon.setVisibility(View.VISIBLE);
+                voiceIcon.setImageResource(R.drawable.ic_baseline_mic_24);
+                voiceIcon.setColorFilter(0xFFD32F2F);
+                voiceStatusText.setText("❌ Error - Tap to try again");
+                voiceStatusText.setTextColor(0xFFC62828);
+                voiceProgress.setVisibility(View.GONE);
+                voiceInputContainer.setClickable(true);
+                break;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (voiceManager != null) {
+            voiceManager.onPermissionResult(requestCode, permissions, grantResults);
+        }
+    }
+
     @Override
     protected void onDestroy() {
+        // Cleanup voice manager
+        if (voiceManager != null) {
+            voiceManager.cleanup();
+        }
+        
+        // Stop any running animations
+        if (pulseAnimator != null && pulseAnimator.isRunning()) {
+            pulseAnimator.cancel();
+        }
+        
         // if (nativeAdBottom != null) nativeAdBottom.destroy();
         Log.i(LOG_TAG, "ShortlistPlayersActivity destroyed.");
         super.onDestroy();
