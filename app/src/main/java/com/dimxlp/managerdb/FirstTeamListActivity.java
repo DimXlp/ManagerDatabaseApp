@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,6 +81,8 @@ public class FirstTeamListActivity extends AppCompatActivity {
     private NavigationView navView;
 
     private List<FirstTeamPlayer> playerList;
+    private List<FirstTeamPlayer> fullPlayerList; // Store all players for filtering (current year)
+    private List<FirstTeamPlayer> allYearsPlayerList; // Store all players across all years
     private RecyclerView recyclerView;
     private FirstTeamPlayerRecAdapter firstTeamPlayerRecAdapter;
 
@@ -86,6 +91,12 @@ public class FirstTeamListActivity extends AppCompatActivity {
     private TextView yearText;
     private TextView yearPlayerCount;
     private Button addPlayerButton;
+    private EditText searchBar;
+    private LinearLayout yearNavigationContainer;
+    private LinearLayout searchBarContainer;
+    private ImageButton searchIconButton;
+    private ImageButton closeSearchButton;
+    private boolean isSearchMode = false;
 
     private AlertDialog.Builder builder;
     private BottomSheetDialog dialog;
@@ -158,6 +169,10 @@ public class FirstTeamListActivity extends AppCompatActivity {
         prevYearButton = findViewById(R.id.prev_year_button_ftp);
         nextYearButton = findViewById(R.id.next_year_button_ftp);
 
+        yearNavigationContainer = findViewById(R.id.year_navigation_container);
+        searchBarContainer = findViewById(R.id.search_bar_container);
+        searchIconButton = findViewById(R.id.search_icon_button);
+        closeSearchButton = findViewById(R.id.close_search_button);
         LinearLayout yearPickerLayout = findViewById(R.id.year_picker_container);
         yearText = findViewById(R.id.year_text_ftp);
         yearPlayerCount = findViewById(R.id.year_player_count);
@@ -251,6 +266,8 @@ public class FirstTeamListActivity extends AppCompatActivity {
         });
 
         playerList = new ArrayList<>();
+        fullPlayerList = new ArrayList<>();
+        allYearsPlayerList = new ArrayList<>();
         recyclerView = findViewById(R.id.rec_view_ftp);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -258,6 +275,126 @@ public class FirstTeamListActivity extends AppCompatActivity {
         // Initialize adapter once here
         firstTeamPlayerRecAdapter = new FirstTeamPlayerRecAdapter(this, playerList, managerId, team, currentYear != null ? currentYear : "", 0, 0);
         recyclerView.setAdapter(firstTeamPlayerRecAdapter);
+
+        // Initialize search bar
+        searchBar = findViewById(R.id.search_bar_ftp);
+        
+        // Search icon click - show search bar with slide animation
+        searchIconButton.setOnClickListener(v -> showSearchBar());
+        
+        // Close search button click - hide search bar with slide animation
+        closeSearchButton.setOnClickListener(v -> hideSearchBar());
+        
+        // Search bar text watcher
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString().trim();
+                
+                if (query.isEmpty()) {
+                    // Restore year-filtered view
+                    filterPlayersByYear();
+                } else {
+                    // Load all players if not already loaded
+                    if (allYearsPlayerList.isEmpty()) {
+                        loadAllPlayers(() -> filterPlayersAllYears(query));
+                    } else {
+                        filterPlayersAllYears(query);
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Not needed
+            }
+        });
+    }
+
+    /**
+     * Show search bar with animation
+     * - Search icon STAYS in place
+     * - Search bar fades in
+     * - Year selector slides to the right
+     */
+    private void showSearchBar() {
+        if (isSearchMode) return;
+        
+        isSearchMode = true;
+        
+        // Make search container visible
+        searchBarContainer.setVisibility(View.VISIBLE);
+        searchBarContainer.setAlpha(0f);
+        
+        // Animate year navigation sliding to the right (not hiding it, just moving it)
+        yearNavigationContainer.animate()
+                .translationX(yearNavigationContainer.getWidth())
+                .alpha(0f)
+                .setDuration(300);
+        
+        // Animate search bar fading in (no translation, just fade)
+        searchBarContainer.animate()
+                .alpha(1f)
+                .setDuration(300)
+                .withEndAction(() -> {
+                    // Focus on search bar and show keyboard
+                    searchBar.requestFocus();
+                    searchBar.postDelayed(() -> {
+                        android.view.inputmethod.InputMethodManager imm = 
+                            (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                        if (imm != null) {
+                            imm.showSoftInput(searchBar, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+                        }
+                    }, 100);
+                });
+        
+        Log.d(LOG_TAG, "Search bar shown - search icon stays in place");
+    }
+
+    /**
+     * Hide search bar with animation
+     * - Search bar fades out
+     * - Year selector slides back from the right
+     * - Search icon remains in place
+     */
+    private void hideSearchBar() {
+        if (!isSearchMode) return;
+        
+        isSearchMode = false;
+        
+        // Clear search text
+        searchBar.setText("");
+        
+        // Hide keyboard
+        android.view.inputmethod.InputMethodManager imm = 
+            (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+        }
+        
+        // Animate search bar fading out
+        searchBarContainer.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction(() -> {
+                    searchBarContainer.setVisibility(View.GONE);
+                });
+        
+        // Animate year navigation sliding back from right
+        yearNavigationContainer.animate()
+                .translationX(0f)
+                .alpha(1f)
+                .setDuration(300);
+        
+        // Restore year-based view
+        filterPlayersByYear();
+        
+        Log.d(LOG_TAG, "Search bar hidden - search icon stays in place");
     }
 
     // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
@@ -328,7 +465,13 @@ public class FirstTeamListActivity extends AppCompatActivity {
 
     private void listPlayers(final int buttonInt, Runnable onComplete) {
         playerList.clear();
+        fullPlayerList.clear();
 
+        // Close search mode when navigating years
+        if (isSearchMode) {
+            hideSearchBar();
+        }
+        
         // Ensure currentYear is initialized
         if (currentYear == null) {
             if (barYear != null) {
@@ -352,15 +495,20 @@ public class FirstTeamListActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 FirstTeamPlayer player = doc.toObject(FirstTeamPlayer.class);
                                 if (player.getYearSigned().equals(currentYear)) {
-                                    playerList.add(player);
+                                    fullPlayerList.add(player);
                                 }
                             }
-                            Collections.sort(playerList, new Comparator<FirstTeamPlayer>() {
+                            Collections.sort(fullPlayerList, new Comparator<FirstTeamPlayer>() {
                                 @Override
                                 public int compare(FirstTeamPlayer o1, FirstTeamPlayer o2) {
                                     return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                 }
                             });
+                            
+                            // Always show all players for the current year when listPlayers is called
+                            // (search bar is cleared when navigating years)
+                            playerList.addAll(fullPlayerList);
+                            
                             yearText.setText(currentYear);
                             
                             // Update adapter metadata instead of creating new instance
@@ -384,6 +532,115 @@ public class FirstTeamListActivity extends AppCompatActivity {
                         onComplete.run();
                     }
                 });
+    }
+
+    /**
+     * Load all players across all years from Firestore
+     */
+    private void loadAllPlayers(Runnable onComplete) {
+        allYearsPlayerList.clear();
+        
+        collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                .whereEqualTo("managerId", managerId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            FirstTeamPlayer player = doc.toObject(FirstTeamPlayer.class);
+                            allYearsPlayerList.add(player);
+                        }
+                        // Sort by time added
+                        Collections.sort(allYearsPlayerList, new Comparator<FirstTeamPlayer>() {
+                            @Override
+                            public int compare(FirstTeamPlayer o1, FirstTeamPlayer o2) {
+                                return o1.getTimeAdded().compareTo(o2.getTimeAdded());
+                            }
+                        });
+                        Log.d(LOG_TAG, "Loaded " + allYearsPlayerList.size() + " players across all years");
+                    }
+                    
+                    if (onComplete != null) {
+                        onComplete.run();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(LOG_TAG, "Error loading all players from Firestore.", e);
+                    if (onComplete != null) {
+                        onComplete.run();
+                    }
+                });
+    }
+
+    /**
+     * Filter players across all years based on search query
+     * Searches in: first name, last name, full name
+     */
+    private void filterPlayersAllYears(String query) {
+        playerList.clear();
+        
+        if (query == null || query.trim().isEmpty()) {
+            // If search is empty, restore year-based view
+            filterPlayersByYear();
+            return;
+        }
+        
+        // Filter players by query (case-insensitive)
+        String searchQuery = query.toLowerCase().trim();
+        for (FirstTeamPlayer player : allYearsPlayerList) {
+            boolean matches = false;
+            
+            // Search in first name
+            if (player.getFirstName() != null && 
+                player.getFirstName().toLowerCase().contains(searchQuery)) {
+                matches = true;
+            }
+            
+            // Search in last name
+            if (!matches && player.getLastName() != null && 
+                player.getLastName().toLowerCase().contains(searchQuery)) {
+                matches = true;
+            }
+            
+            // Search in full name
+            if (!matches && player.getFullName() != null && 
+                player.getFullName().toLowerCase().contains(searchQuery)) {
+                matches = true;
+            }
+            
+            if (matches) {
+                playerList.add(player);
+            }
+        }
+        
+        // Update adapter
+        if (firstTeamPlayerRecAdapter != null) {
+            firstTeamPlayerRecAdapter.notifyDataSetChanged();
+        }
+        
+        // Update player count
+        if (yearPlayerCount != null) {
+            yearPlayerCount.setText(playerList.size() + " players");
+        }
+        
+        Log.d(LOG_TAG, "Filtered " + playerList.size() + " players from all years for query: " + query);
+    }
+
+    /**
+     * Filter players by current year (restore year-based view)
+     */
+    private void filterPlayersByYear() {
+        playerList.clear();
+        playerList.addAll(fullPlayerList);
+        
+        // Update adapter
+        if (firstTeamPlayerRecAdapter != null) {
+            firstTeamPlayerRecAdapter.notifyDataSetChanged();
+        }
+        
+        // Update player count
+        if (yearPlayerCount != null) {
+            yearPlayerCount.setText(playerList.size() + " players");
+        }
     }
 
     private void createPopupDialog() {
