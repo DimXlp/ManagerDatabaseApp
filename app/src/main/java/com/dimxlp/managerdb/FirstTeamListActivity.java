@@ -228,6 +228,10 @@ public class FirstTeamListActivity extends AppCompatActivity {
         View.OnClickListener prevYearListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (currentYear == null || minYearText == null) {
+                    Toast.makeText(FirstTeamListActivity.this, "Please wait for data to load.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 animateYearButtons(v);
                 int cYear = Integer.parseInt(currentYear.substring(0, 4));
                 int minYear = Integer.parseInt(minYearText.substring(0, 4));
@@ -245,6 +249,10 @@ public class FirstTeamListActivity extends AppCompatActivity {
         View.OnClickListener nextYearListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (currentYear == null) {
+                    Toast.makeText(FirstTeamListActivity.this, "Please wait for data to load.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 animateYearButtons(v);
                 int cYear = Integer.parseInt(currentYear.substring(0, 4));
                 cYear++;
