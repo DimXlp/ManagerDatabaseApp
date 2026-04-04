@@ -21,8 +21,10 @@ import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -105,8 +107,8 @@ public class FirstTeamListActivity extends AppCompatActivity {
     
     // Filter state
     private String currentSortOption = "none";
-    private String currentPositionFilter = "all";
-    private String currentPositionCategoryFilter = "all";
+    private List<String> selectedPositions = new ArrayList<>(); // Multiple positions can be selected
+    private List<String> selectedPositionCategories = new ArrayList<>(); // Multiple categories can be selected
 
     private AlertDialog.Builder builder;
     private BottomSheetDialog dialog;
@@ -448,127 +450,164 @@ public class FirstTeamListActivity extends AppCompatActivity {
     }
 
     /**
-     * Show filter bottom sheet dialog
+     * Show filter bottom sheet dialog with expandable sections
      */
     private void showFilterDialog() {
-        // Store the current filter state to restore year navigation properly
-        final boolean wasFilterModeActive = isFilterMode;
-        
         BottomSheetDialog filterDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View view = getLayoutInflater().inflate(R.layout.filter_bottom_sheet, null);
         filterDialog.setContentView(view);
 
         // Get views from the bottom sheet
+        LinearLayout sortByHeader = view.findViewById(R.id.sort_by_header);
+        LinearLayout sortByContent = view.findViewById(R.id.sort_by_content);
+        ImageView sortByChevron = view.findViewById(R.id.sort_by_chevron);
+        TextView sortBySelection = view.findViewById(R.id.sort_by_selection);
+        
+        LinearLayout positionFilterHeader = view.findViewById(R.id.position_filter_header);
+        LinearLayout positionFilterContent = view.findViewById(R.id.position_filter_content);
+        ImageView positionFilterChevron = view.findViewById(R.id.position_filter_chevron);
+        TextView positionFilterSelection = view.findViewById(R.id.position_filter_selection);
+        
+        LinearLayout positionCategoryHeader = view.findViewById(R.id.position_category_header);
+        LinearLayout positionCategoryContent = view.findViewById(R.id.position_category_content);
+        ImageView positionCategoryChevron = view.findViewById(R.id.position_category_chevron);
+        TextView positionCategorySelection = view.findViewById(R.id.position_category_selection);
+        
         RadioGroup sortRadioGroup = view.findViewById(R.id.sort_radio_group);
         RadioButton sortNone = view.findViewById(R.id.sort_none);
         RadioButton sortName = view.findViewById(R.id.sort_name);
         RadioButton sortPosition = view.findViewById(R.id.sort_position);
         RadioButton sortOverallAsc = view.findViewById(R.id.sort_overall_asc);
         RadioButton sortOverallDesc = view.findViewById(R.id.sort_overall_desc);
-        TextView positionFilterPicker = view.findViewById(R.id.position_filter_picker);
-        TextView positionCategoryFilterPicker = view.findViewById(R.id.position_category_filter_picker);
+        
         Button clearFiltersButton = view.findViewById(R.id.clear_filters_button);
         Button applyFiltersButton = view.findViewById(R.id.apply_filters_button);
         
-        // Handle dialog dismissal - restore year navigation visibility if filter mode was active
+        // Handle dialog dismissal - keep year navigation hidden if filters active
         filterDialog.setOnDismissListener(dialog -> {
             if (isFilterMode) {
-                // Keep year navigation hidden if filters are still active
                 yearNavigationContainer.setVisibility(View.INVISIBLE);
                 yearNavigationContainer.setAlpha(0f);
                 yearNavigationContainer.setTranslationX(yearNavigationContainer.getWidth());
             }
         });
 
-        // Set current selections
+        // Set current sort selection
         switch (currentSortOption) {
             case "name":
                 sortName.setChecked(true);
+                sortBySelection.setText("Name");
                 break;
             case "position":
                 sortPosition.setChecked(true);
+                sortBySelection.setText("Position");
                 break;
             case "overall_asc":
                 sortOverallAsc.setChecked(true);
+                sortBySelection.setText("Overall ↑");
                 break;
             case "overall_desc":
                 sortOverallDesc.setChecked(true);
+                sortBySelection.setText("Overall ↓");
                 break;
             default:
                 sortNone.setChecked(true);
+                sortBySelection.setText("None");
                 break;
         }
 
-        // Update filter picker texts
-        if (!currentPositionFilter.equals("all")) {
-            positionFilterPicker.setText(currentPositionFilter);
-        }
-        if (!currentPositionCategoryFilter.equals("all")) {
-            positionCategoryFilterPicker.setText(currentPositionCategoryFilter);
-        }
-
-        // Position filter picker click
-        positionFilterPicker.setOnClickListener(v -> {
-            String[] positions = getResources().getStringArray(R.array.position_array);
-            String[] positionsWithAll = new String[positions.length + 1];
-            positionsWithAll[0] = "All Positions";
-            System.arraycopy(positions, 0, positionsWithAll, 1, positions.length);
-
-            new AlertDialog.Builder(this)
-                    .setTitle("Filter by Position")
-                    .setItems(positionsWithAll, (dialog, which) -> {
-                        if (which == 0) {
-                            currentPositionFilter = "all";
-                            positionFilterPicker.setText("All Positions");
-                        } else {
-                            currentPositionFilter = positions[which - 1];
-                            positionFilterPicker.setText(currentPositionFilter);
-                        }
-                    })
-                    .show();
+        // Update sort selection text when radio buttons change
+        sortRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.sort_name) {
+                sortBySelection.setText("Name");
+            } else if (checkedId == R.id.sort_position) {
+                sortBySelection.setText("Position");
+            } else if (checkedId == R.id.sort_overall_asc) {
+                sortBySelection.setText("Overall ↑");
+            } else if (checkedId == R.id.sort_overall_desc) {
+                sortBySelection.setText("Overall ↓");
+            } else {
+                sortBySelection.setText("None");
+            }
         });
 
-        // Position category filter picker click
-        positionCategoryFilterPicker.setOnClickListener(v -> {
-            String[] categories = new String[]{
-                    "All Categories",
-                    "Goalkeepers",
-                    "Center Backs",
-                    "Right Backs",
-                    "Left Backs",
-                    "Center Defensive Mids",
-                    "Center Midfielders",
-                    "Center Attacking Mids",
-                    "Right Wingers",
-                    "Left Wingers",
-                    "Strikers"
-            };
+        // Populate position checkboxes dynamically
+        String[] positions = getResources().getStringArray(R.array.position_array);
+        for (String position : positions) {
+            CheckBox checkBox = new CheckBox(this);
+            checkBox.setText(position);
+            checkBox.setTextColor(getResources().getColor(android.R.color.black));
+            checkBox.setChecked(selectedPositions.contains(position));
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    if (!selectedPositions.contains(position)) {
+                        selectedPositions.add(position);
+                    }
+                } else {
+                    selectedPositions.remove(position);
+                }
+                updatePositionSelectionText(positionFilterSelection);
+            });
+            positionFilterContent.addView(checkBox);
+        }
 
-            new AlertDialog.Builder(this)
-                    .setTitle("Filter by Position Category")
-                    .setItems(categories, (dialog, which) -> {
-                        if (which == 0) {
-                            currentPositionCategoryFilter = "all";
-                            positionCategoryFilterPicker.setText("All Categories");
-                        } else {
-                            currentPositionCategoryFilter = categories[which];
-                            positionCategoryFilterPicker.setText(currentPositionCategoryFilter);
-                        }
-                    })
-                    .show();
+        // Populate position category checkboxes dynamically
+        String[] categories = new String[]{
+                "Goalkeepers",
+                "Center Backs",
+                "Right Backs",
+                "Left Backs",
+                "Center Defensive Mids",
+                "Center Midfielders",
+                "Center Attacking Mids",
+                "Right Wingers",
+                "Left Wingers",
+                "Strikers"
+        };
+        
+        for (String category : categories) {
+            CheckBox checkBox = new CheckBox(this);
+            checkBox.setText(category);
+            checkBox.setTextColor(getResources().getColor(android.R.color.black));
+            checkBox.setChecked(selectedPositionCategories.contains(category));
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    if (!selectedPositionCategories.contains(category)) {
+                        selectedPositionCategories.add(category);
+                    }
+                } else {
+                    selectedPositionCategories.remove(category);
+                }
+                updatePositionCategorySelectionText(positionCategorySelection);
+            });
+            positionCategoryContent.addView(checkBox);
+        }
+
+        // Update selection texts
+        updatePositionSelectionText(positionFilterSelection);
+        updatePositionCategorySelectionText(positionCategorySelection);
+
+        // Sort By Header Click - Toggle expand/collapse with chevron animation
+        sortByHeader.setOnClickListener(v -> {
+            toggleSection(sortByContent, sortByChevron);
+        });
+
+        // Position Filter Header Click - Toggle expand/collapse with chevron animation
+        positionFilterHeader.setOnClickListener(v -> {
+            toggleSection(positionFilterContent, positionFilterChevron);
+        });
+
+        // Position Category Header Click - Toggle expand/collapse with chevron animation
+        positionCategoryHeader.setOnClickListener(v -> {
+            toggleSection(positionCategoryContent, positionCategoryChevron);
         });
 
         // Clear filters button
         clearFiltersButton.setOnClickListener(v -> {
             currentSortOption = "none";
-            currentPositionFilter = "all";
-            currentPositionCategoryFilter = "all";
+            selectedPositions.clear();
+            selectedPositionCategories.clear();
             isFilterMode = false;
-            
-            // Reset UI
-            sortNone.setChecked(true);
-            positionFilterPicker.setText("All Positions");
-            positionCategoryFilterPicker.setText("All Categories");
             
             filterDialog.dismiss();
             
@@ -600,8 +639,8 @@ public class FirstTeamListActivity extends AppCompatActivity {
 
             // Check if any filters/sorts are active
             boolean hasActiveFilters = !currentSortOption.equals("none") || 
-                                       !currentPositionFilter.equals("all") || 
-                                       !currentPositionCategoryFilter.equals("all");
+                                       !selectedPositions.isEmpty() || 
+                                       !selectedPositionCategories.isEmpty();
             
             boolean wasFilterMode = isFilterMode;
             isFilterMode = hasActiveFilters;
@@ -640,6 +679,47 @@ public class FirstTeamListActivity extends AppCompatActivity {
     }
 
     /**
+     * Toggle section visibility with animated chevron rotation
+     */
+    private void toggleSection(LinearLayout content, ImageView chevron) {
+        if (content.getVisibility() == View.VISIBLE) {
+            // Collapse
+            content.setVisibility(View.GONE);
+            chevron.animate().rotation(0f).setDuration(200).start();
+        } else {
+            // Expand
+            content.setVisibility(View.VISIBLE);
+            chevron.animate().rotation(180f).setDuration(200).start();
+        }
+    }
+
+    /**
+     * Update position selection text based on selected positions
+     */
+    private void updatePositionSelectionText(TextView textView) {
+        if (selectedPositions.isEmpty()) {
+            textView.setText("All");
+        } else if (selectedPositions.size() == 1) {
+            textView.setText(selectedPositions.get(0));
+        } else {
+            textView.setText(selectedPositions.size() + " selected");
+        }
+    }
+
+    /**
+     * Update position category selection text based on selected categories
+     */
+    private void updatePositionCategorySelectionText(TextView textView) {
+        if (selectedPositionCategories.isEmpty()) {
+            textView.setText("All");
+        } else if (selectedPositionCategories.size() == 1) {
+            textView.setText(selectedPositionCategories.get(0));
+        } else {
+            textView.setText(selectedPositionCategories.size() + " selected");
+        }
+    }
+
+    /**
      * Apply filters and sorting to all players
      */
     private void applyFiltersAndSort() {
@@ -648,23 +728,26 @@ public class FirstTeamListActivity extends AppCompatActivity {
         // Start with all years player list
         List<FirstTeamPlayer> filteredList = new ArrayList<>(allYearsPlayerList);
         
-        // Apply position filter
-        if (!currentPositionFilter.equals("all")) {
+        // Apply position filter (multiple selections)
+        if (!selectedPositions.isEmpty()) {
             List<FirstTeamPlayer> temp = new ArrayList<>();
             for (FirstTeamPlayer player : filteredList) {
-                if (player.getPosition() != null && player.getPosition().equals(currentPositionFilter)) {
+                if (player.getPosition() != null && selectedPositions.contains(player.getPosition())) {
                     temp.add(player);
                 }
             }
             filteredList = temp;
         }
         
-        // Apply position category filter
-        if (!currentPositionCategoryFilter.equals("all")) {
+        // Apply position category filter (multiple selections)
+        if (!selectedPositionCategories.isEmpty()) {
             List<FirstTeamPlayer> temp = new ArrayList<>();
             for (FirstTeamPlayer player : filteredList) {
-                if (player.getPosition() != null && getPositionCategory(player.getPosition()).equals(currentPositionCategoryFilter)) {
-                    temp.add(player);
+                if (player.getPosition() != null) {
+                    String playerCategory = getPositionCategory(player.getPosition());
+                    if (selectedPositionCategories.contains(playerCategory)) {
+                        temp.add(player);
+                    }
                 }
             }
             filteredList = temp;
@@ -832,8 +915,8 @@ public class FirstTeamListActivity extends AppCompatActivity {
         if (isFilterMode) {
             isFilterMode = false;
             currentSortOption = "none";
-            currentPositionFilter = "all";
-            currentPositionCategoryFilter = "all";
+            selectedPositions.clear();
+            selectedPositionCategories.clear();
         }
         
         // Ensure currentYear is initialized
@@ -1014,23 +1097,26 @@ public class FirstTeamListActivity extends AppCompatActivity {
             // If filters are active, start with all years and apply filters first
             baseList = new ArrayList<>(allYearsPlayerList);
             
-            // Apply position filter
-            if (!currentPositionFilter.equals("all")) {
+            // Apply position filter (multiple selections)
+            if (!selectedPositions.isEmpty()) {
                 List<FirstTeamPlayer> temp = new ArrayList<>();
                 for (FirstTeamPlayer player : baseList) {
-                    if (player.getPosition() != null && player.getPosition().equals(currentPositionFilter)) {
+                    if (player.getPosition() != null && selectedPositions.contains(player.getPosition())) {
                         temp.add(player);
                     }
                 }
                 baseList = temp;
             }
             
-            // Apply position category filter
-            if (!currentPositionCategoryFilter.equals("all")) {
+            // Apply position category filter (multiple selections)
+            if (!selectedPositionCategories.isEmpty()) {
                 List<FirstTeamPlayer> temp = new ArrayList<>();
                 for (FirstTeamPlayer player : baseList) {
-                    if (player.getPosition() != null && getPositionCategory(player.getPosition()).equals(currentPositionCategoryFilter)) {
-                        temp.add(player);
+                    if (player.getPosition() != null) {
+                        String playerCategory = getPositionCategory(player.getPosition());
+                        if (selectedPositionCategories.contains(playerCategory)) {
+                            temp.add(player);
+                        }
                     }
                 }
                 baseList = temp;
