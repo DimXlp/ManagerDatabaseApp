@@ -1038,14 +1038,18 @@ public class ShortlistedPlayerRecAdapter extends RecyclerView.Adapter<Shortliste
                                                                     notifyItemChanged(position);
                                                                 }
                                                                 
-                                                                if (createDialog != null && createDialog.isShowing()) {
-                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
-                                                                    createDialog.dismiss();
-                                                                }
                                                                 Toast.makeText(context, "Player updated!", Toast.LENGTH_SHORT).show();
                                                             } catch (Exception e) {
                                                                 Log.e(LOG_TAG, "Error in onSuccess callback", e);
                                                                 Toast.makeText(context, "Player updated but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                                            } finally {
+                                                                // Always reset button state and dismiss dialog
+                                                                editPlayerButton.setText("EDIT PLAYER");
+                                                                editPlayerButton.setEnabled(true);
+                                                                if (createDialog != null && createDialog.isShowing()) {
+                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
+                                                                    createDialog.dismiss();
+                                                                }
                                                             }
                                                         }
                                                     })

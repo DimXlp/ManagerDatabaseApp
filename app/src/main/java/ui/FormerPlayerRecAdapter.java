@@ -581,14 +581,18 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                                     notifyItemChanged(position);
                                                                 }
                                                                 
-                                                                if (editDialog != null && editDialog.isShowing()) {
-                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
-                                                                    editDialog.dismiss();
-                                                                }
                                                                 Toast.makeText(context, "Player updated!", Toast.LENGTH_SHORT).show();
                                                             } catch (Exception e) {
                                                                 Log.e(LOG_TAG, "Error in onSuccess callback", e);
                                                                 Toast.makeText(context, "Player updated but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                                            } finally {
+                                                                // Always reset button state and dismiss dialog
+                                                                editPlayerButton.setText("EDIT PLAYER");
+                                                                editPlayerButton.setEnabled(true);
+                                                                if (editDialog != null && editDialog.isShowing()) {
+                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
+                                                                    editDialog.dismiss();
+                                                                }
                                                             }
                                                         }
                                                     })
@@ -784,14 +788,18 @@ public class FormerPlayerRecAdapter extends RecyclerView.Adapter<FormerPlayerRec
                                                                     notifyItemChanged(position);
                                                                 }
                                                                 
-                                                                if (editDialog != null && editDialog.isShowing()) {
-                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
-                                                                    editDialog.dismiss();
-                                                                }
                                                                 Toast.makeText(context, "Player updated!", Toast.LENGTH_SHORT).show();
                                                             } catch (Exception e) {
                                                                 Log.e(LOG_TAG, "Error in onSuccess callback", e);
                                                                 Toast.makeText(context, "Player updated but error occurred: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                                            } finally {
+                                                                // Always reset button state and dismiss dialog
+                                                                editPlayerButton.setText("EDIT PLAYER");
+                                                                editPlayerButton.setEnabled(true);
+                                                                if (editDialog != null && editDialog.isShowing()) {
+                                                                    Log.d(LOG_TAG, "Dismissing edit dialog.");
+                                                                    editDialog.dismiss();
+                                                                }
                                                             }
                                                         }
                                                     })
