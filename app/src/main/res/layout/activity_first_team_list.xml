@@ -47,6 +47,19 @@
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp" />
 
+                <!-- Filter Icon at absolute far right edge - ALWAYS VISIBLE -->
+                <ImageButton
+                    android:id="@+id/filter_icon_button"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@android:drawable/ic_menu_sort_by_size"
+                    android:backgroundTint="@color/colorAccent"
+                    android:contentDescription="Filter and Sort"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp" />
+
                 <!-- Year Navigation Container - Centered -->
                 <LinearLayout
                     android:id="@+id/year_navigation_container"
@@ -101,13 +114,14 @@
                         android:backgroundTint="@color/colorAccent" />
                 </LinearLayout>
 
-                <!-- Sliding Search Bar (overlays year selector, initially hidden) -->
+                <!-- Sliding Search Bar (overlays year selector, stops before filter icon) -->
                 <LinearLayout
                     android:id="@+id/search_bar_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="12dp"
                     android:paddingStart="54dp"
+                    android:paddingEnd="96dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:visibility="gone"
@@ -115,9 +129,8 @@
 
                     <EditText
                         android:id="@+id/search_bar_ftp"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:hint="Search players by name..."
                         android:padding="12dp"
                         android:background="@drawable/flat_background_rounded"
@@ -128,17 +141,22 @@
                         android:maxLines="1"
                         android:imeOptions="actionSearch"
                         android:autofillHints="name" />
-
-                    <!-- Close/Cancel button -->
-                    <ImageButton
-                        android:id="@+id/close_search_button"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:background="@android:drawable/ic_menu_close_clear_cancel"
-                        android:backgroundTint="@color/colorAccent"
-                        android:contentDescription="Close search"
-                        android:layout_marginStart="8dp" />
                 </LinearLayout>
+
+                <!-- Close/Cancel button - positioned between search bar and filter icon -->
+                <ImageButton
+                    android:id="@+id/close_search_button"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@android:drawable/ic_menu_close_clear_cancel"
+                    android:backgroundTint="@color/colorAccent"
+                    android:contentDescription="Close search"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_marginEnd="54dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:visibility="gone"
+                    android:alpha="0" />
             </FrameLayout>
 
             <View
