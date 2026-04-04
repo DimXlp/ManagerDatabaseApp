@@ -88,6 +88,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
     private List<FirstTeamPlayer> playerList;
     private List<FirstTeamPlayer> fullPlayerList; // Store all players for filtering (current year)
     private List<FirstTeamPlayer> allYearsPlayerList; // Store all players across all years
+    private boolean isLoadingAllPlayers = false; // Flag to prevent multiple simultaneous loads
     private RecyclerView recyclerView;
     private FirstTeamPlayerRecAdapter firstTeamPlayerRecAdapter;
 
@@ -985,25 +986,40 @@ public class FirstTeamListActivity extends AppCompatActivity {
      * Load all players across all years from Firestore
      */
     private void loadAllPlayers(Runnable onComplete) {
+        // Always clear to prevent duplicates
         allYearsPlayerList.clear();
+        
+        Log.d(LOG_TAG, "Loading all players from Firestore...");
         
         collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
+                        // Use a temporary list to avoid any potential concurrent modification
+                        List<FirstTeamPlayer> tempList = new ArrayList<>();
+                        
                         for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                             FirstTeamPlayer player = doc.toObject(FirstTeamPlayer.class);
-                            allYearsPlayerList.add(player);
+                            if (player != null) {
+                                tempList.add(player);
+                            }
                         }
+                        
                         // Sort by time added
-                        Collections.sort(allYearsPlayerList, new Comparator<FirstTeamPlayer>() {
+                        Collections.sort(tempList, new Comparator<FirstTeamPlayer>() {
                             @Override
                             public int compare(FirstTeamPlayer o1, FirstTeamPlayer o2) {
                                 return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                             }
                         });
-                        Log.d(LOG_TAG, "Loaded " + allYearsPlayerList.size() + " players across all years");
+                        
+                        // Now add all to the main list at once
+                        allYearsPlayerList.addAll(tempList);
+                        
+                        Log.d(LOG_TAG, "Loaded " + allYearsPlayerList.size() + " unique players across all years");
+                    } else {
+                        Log.d(LOG_TAG, "No players found in Firestore");
                     }
                     
                     if (onComplete != null) {
@@ -1074,10 +1090,13 @@ public class FirstTeamListActivity extends AppCompatActivity {
 
     /**
      * Filter players with both search and filters applied
-     * If filter mode is active, search within filtered results
-     * Otherwise, search across all years
+     * Searches across all years for this manager's first team players
+     * If filters are active, applies filters first then searches
      */
     private void filterPlayersWithSearchAndFilters(String query) {
+        Log.d(LOG_TAG, "filterPlayersWithSearchAndFilters called with query: " + query);
+        Log.d(LOG_TAG, "allYearsPlayerList size: " + allYearsPlayerList.size());
+        
         playerList.clear();
         
         if (query == null || query.trim().isEmpty()) {
@@ -1090,13 +1109,13 @@ public class FirstTeamListActivity extends AppCompatActivity {
             return;
         }
         
-        // Start with the appropriate base list
-        List<FirstTeamPlayer> baseList;
+        // Start with all years for this manager's first team
+        List<FirstTeamPlayer> baseList = new ArrayList<>(allYearsPlayerList);
+
+        Log.d(LOG_TAG, "Base list size before filters: " + baseList.size());
         
+        // Apply filters if in filter mode
         if (isFilterMode) {
-            // If filters are active, start with all years and apply filters first
-            baseList = new ArrayList<>(allYearsPlayerList);
-            
             // Apply position filter (multiple selections)
             if (!selectedPositions.isEmpty()) {
                 List<FirstTeamPlayer> temp = new ArrayList<>();
@@ -1106,6 +1125,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
                     }
                 }
                 baseList = temp;
+                Log.d(LOG_TAG, "After position filter: " + baseList.size());
             }
             
             // Apply position category filter (multiple selections)
@@ -1120,13 +1140,11 @@ public class FirstTeamListActivity extends AppCompatActivity {
                     }
                 }
                 baseList = temp;
+                Log.d(LOG_TAG, "After category filter: " + baseList.size());
             }
-        } else {
-            // No filters, search all years
-            baseList = new ArrayList<>(allYearsPlayerList);
         }
         
-        // Now apply search query to the base list
+        // Now apply search query to the base list (across all years within context)
         String searchQuery = query.toLowerCase().trim();
         for (FirstTeamPlayer player : baseList) {
             boolean matches = false;
@@ -1150,9 +1168,12 @@ public class FirstTeamListActivity extends AppCompatActivity {
             }
             
             if (matches) {
+                Log.d(LOG_TAG, "Match found: " + player.getFullName() + " (Year: " + player.getYearSigned() + ", ID: " + player.getId() + ")");
                 playerList.add(player);
             }
         }
+        
+        Log.d(LOG_TAG, "Total matches found: " + playerList.size());
         
         // Apply sorting if in filter mode
         if (isFilterMode && !currentSortOption.equals("none")) {
@@ -1195,7 +1216,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
             yearPlayerCount.setText(playerList.size() + " players");
         }
         
-        Log.d(LOG_TAG, "Filtered " + playerList.size() + " players with search and filters");
+        Log.d(LOG_TAG, "Filtered " + playerList.size() + " players with search across all years" + (isFilterMode ? " and filters" : ""));
     }
 
     /**
@@ -1619,5 +1640,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
         super.onResume();
 
         playerList.clear();
+        allYearsPlayerList.clear(); // Clear cached all-years list to ensure deleted players don't appear in search
+        isLoadingAllPlayers = false; // Reset loading flag
     }
 }
