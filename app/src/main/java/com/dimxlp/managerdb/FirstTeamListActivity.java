@@ -434,8 +434,8 @@ public class FirstTeamListActivity extends AppCompatActivity {
                     closeSearchButton.setVisibility(View.GONE);
                 });
         
-        // Animate year navigation sliding back from right (only if not in filter mode)
-        if (!isFilterMode) {
+        // Only animate year navigation if it was actually hidden (translationX != 0)
+        if (!isFilterMode && yearNavigationContainer.getTranslationX() != 0f) {
             yearNavigationContainer.animate()
                     .translationX(0f)
                     .alpha(1f)
@@ -443,8 +443,15 @@ public class FirstTeamListActivity extends AppCompatActivity {
         }
         
         // Restore year-based view (only if not in filter mode)
+        // If fullPlayerList is empty (e.g., user clicked search before data loaded),
+        // refresh the data instead of showing an empty list
         if (!isFilterMode) {
-            filterPlayersByYear();
+            if (fullPlayerList.isEmpty() && currentYear != null) {
+                Log.d(LOG_TAG, "fullPlayerList is empty, refreshing data for current year");
+                listPlayers(0);
+            } else {
+                filterPlayersByYear();
+            }
         }
         
         Log.d(LOG_TAG, "Search bar hidden - icons stay in place");

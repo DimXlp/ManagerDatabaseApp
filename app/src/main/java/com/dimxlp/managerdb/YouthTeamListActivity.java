@@ -12,13 +12,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -57,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import enumeration.PositionEnum;
 import model.FirstTeamPlayer;
 import model.Manager;
 import model.YouthTeamPlayer;
@@ -72,6 +78,9 @@ public class YouthTeamListActivity extends AppCompatActivity {
     private NavigationView navView;
 
     private List<YouthTeamPlayer> playerList;
+    private List<YouthTeamPlayer> fullPlayerList; // Store all players for filtering (current year)
+    private List<YouthTeamPlayer> allYearsPlayerList; // Store all players across all years
+    private boolean isLoadingAllPlayers = false; // Flag to prevent multiple simultaneous loads
     private RecyclerView recyclerView;
     private YouthTeamPlayerRecAdapter youthTeamPlayerRecAdapter;
 
@@ -80,6 +89,19 @@ public class YouthTeamListActivity extends AppCompatActivity {
     private TextView yearText;
     private TextView yearPlayerCount;
     private Button addPlayerButton;
+    private EditText searchBar;
+    private LinearLayout yearNavigationContainer;
+    private LinearLayout searchBarContainer;
+    private ImageButton searchIconButton;
+    private ImageButton closeSearchButton;
+    private ImageButton filterIconButton;
+    private boolean isSearchMode = false;
+    private boolean isFilterMode = false;
+    
+    // Filter state
+    private String currentSortOption = "none";
+    private List<String> selectedPositions = new ArrayList<>(); // Multiple positions can be selected
+    private List<String> selectedPositionCategories = new ArrayList<>(); // Multiple categories can be selected
 
     private AlertDialog.Builder builder;
     private BottomSheetDialog dialog;
@@ -169,6 +191,11 @@ public class YouthTeamListActivity extends AppCompatActivity {
         prevYearButton = findViewById(R.id.prev_year_button_ytp);
         nextYearButton = findViewById(R.id.next_year_button_ytp);
 
+        yearNavigationContainer = findViewById(R.id.year_navigation_container);
+        searchBarContainer = findViewById(R.id.search_bar_container);
+        searchIconButton = findViewById(R.id.search_icon_button);
+        closeSearchButton = findViewById(R.id.close_search_button);
+        filterIconButton = findViewById(R.id.filter_icon_button);
         LinearLayout yearPickerLayout = findViewById(R.id.year_picker_container_ytp);
         yearText = findViewById(R.id.year_text_ytp);
         yearPlayerCount = findViewById(R.id.year_player_count_ytp);
@@ -219,6 +246,54 @@ public class YouthTeamListActivity extends AppCompatActivity {
         // nativeAdViewBottom = findViewById(R.id.native_ad_view_bottom);
         // loadNativeAd("ca-app-pub-3940256099942544/2247696110", nativeAdViewBottom);
 
+        // Initialize search bar
+        searchBar = findViewById(R.id.search_bar_ytp);
+        
+        // Search icon click - show search bar with slide animation
+        searchIconButton.setOnClickListener(v -> showSearchBar());
+        
+        // Filter icon click - show filter bottom sheet
+        filterIconButton.setOnClickListener(v -> showFilterDialog());
+        
+        // Close search button click - hide search bar with slide animation
+        closeSearchButton.setOnClickListener(v -> hideSearchBar());
+        
+        // Search bar text watcher
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString().trim();
+                
+                if (query.isEmpty()) {
+                    // Restore filtered or year-based view depending on filter mode
+                    if (isFilterMode) {
+                        applyFiltersAndSort();
+                    } else {
+                        filterPlayersByYear();
+                    }
+                } else {
+                    // Load all players if not already loaded (and not currently loading)
+                    if (allYearsPlayerList.isEmpty() && !isLoadingAllPlayers) {
+                        loadAllPlayers(() -> filterPlayersWithSearchAndFilters(query));
+                    } else if (!isLoadingAllPlayers) {
+                        filterPlayersWithSearchAndFilters(query);
+                    } else {
+                        Log.d(LOG_TAG, "Already loading players, skipping duplicate search request");
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Not needed
+            }
+        });
+
         View.OnClickListener prevYearListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -251,6 +326,8 @@ public class YouthTeamListActivity extends AppCompatActivity {
         nextYearButton.setOnClickListener(nextYearListener);
 
         playerList = new ArrayList<>();
+        fullPlayerList = new ArrayList<>();
+        allYearsPlayerList = new ArrayList<>();
         recyclerView = findViewById(R.id.rec_view_ytp);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -258,6 +335,507 @@ public class YouthTeamListActivity extends AppCompatActivity {
         // Initialize adapter once here
         youthTeamPlayerRecAdapter = new YouthTeamPlayerRecAdapter(this, playerList, managerId, team, currentYear != null ? currentYear : "", 0);
         recyclerView.setAdapter(youthTeamPlayerRecAdapter);
+    }
+
+    /**
+     * Show search bar with animation
+     * - Search icon STAYS in place
+     * - Search bar fades in
+     * - Year selector slides to the right
+     * - Filter icon STAYS in place
+     * - Close button appears next to filter icon
+     */
+    private void showSearchBar() {
+        if (isSearchMode) return;
+        
+        isSearchMode = true;
+        
+        // Make search container visible
+        searchBarContainer.setVisibility(View.VISIBLE);
+        searchBarContainer.setAlpha(0f);
+        
+        // Make close button visible
+        closeSearchButton.setVisibility(View.VISIBLE);
+        closeSearchButton.setAlpha(0f);
+        
+        // Animate year navigation sliding to the right
+        yearNavigationContainer.animate()
+                .translationX(yearNavigationContainer.getWidth())
+                .alpha(0f)
+                .setDuration(300);
+        
+        // Animate search bar fading in
+        searchBarContainer.animate()
+                .alpha(1f)
+                .setDuration(300)
+                .withEndAction(() -> {
+                    // Focus on search bar and show keyboard
+                    searchBar.requestFocus();
+                    searchBar.postDelayed(() -> {
+                        android.view.inputmethod.InputMethodManager imm = 
+                            (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                        if (imm != null) {
+                            imm.showSoftInput(searchBar, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+                        }
+                    }, 100);
+                });
+        
+        // Animate close button fading in
+        closeSearchButton.animate()
+                .alpha(1f)
+                .setDuration(300);
+        
+        Log.d(LOG_TAG, "Search bar shown - search and filter icons stay in place");
+    }
+
+    /**
+     * Hide search bar with animation
+     * - Search bar fades out
+     * - Close button fades out
+     * - Year selector slides back from the right
+     * - Search and filter icons remain in place
+     */
+    private void hideSearchBar() {
+        if (!isSearchMode) return;
+        
+        isSearchMode = false;
+        
+        // Clear search text
+        searchBar.setText("");
+        
+        // Hide keyboard
+        android.view.inputmethod.InputMethodManager imm = 
+            (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+        }
+        
+        // Animate search bar fading out
+        searchBarContainer.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction(() -> {
+                    searchBarContainer.setVisibility(View.GONE);
+                });
+        
+        // Animate close button fading out
+        closeSearchButton.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction(() -> {
+                    closeSearchButton.setVisibility(View.GONE);
+                });
+        
+        // Only animate year navigation if it was actually hidden (translationX != 0)
+        if (!isFilterMode && yearNavigationContainer.getTranslationX() != 0f) {
+            yearNavigationContainer.animate()
+                    .translationX(0f)
+                    .alpha(1f)
+                    .setDuration(300);
+        }
+        
+        // Restore year-based view (only if not in filter mode)
+        // If fullPlayerList is empty (e.g., user clicked search before data loaded),
+        // refresh the data instead of showing an empty list
+        if (!isFilterMode) {
+            if (fullPlayerList.isEmpty() && currentYear != null) {
+                Log.d(LOG_TAG, "fullPlayerList is empty, refreshing data for current year");
+                listPlayers(0);
+            } else {
+                filterPlayersByYear();
+            }
+        }
+        
+        Log.d(LOG_TAG, "Search bar hidden - icons stay in place");
+    }
+
+    /**
+     * Show filter bottom sheet dialog with expandable sections
+     */
+    private void showFilterDialog() {
+        BottomSheetDialog filterDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+        View view = getLayoutInflater().inflate(R.layout.filter_bottom_sheet, null);
+        filterDialog.setContentView(view);
+
+        // Get views from the bottom sheet
+        LinearLayout sortByHeader = view.findViewById(R.id.sort_by_header);
+        LinearLayout sortByContent = view.findViewById(R.id.sort_by_content);
+        ImageView sortByChevron = view.findViewById(R.id.sort_by_chevron);
+        TextView sortBySelection = view.findViewById(R.id.sort_by_selection);
+        
+        LinearLayout positionFilterHeader = view.findViewById(R.id.position_filter_header);
+        LinearLayout positionFilterContent = view.findViewById(R.id.position_filter_content);
+        ImageView positionFilterChevron = view.findViewById(R.id.position_filter_chevron);
+        TextView positionFilterSelection = view.findViewById(R.id.position_filter_selection);
+        
+        LinearLayout positionCategoryHeader = view.findViewById(R.id.position_category_header);
+        LinearLayout positionCategoryContent = view.findViewById(R.id.position_category_content);
+        ImageView positionCategoryChevron = view.findViewById(R.id.position_category_chevron);
+        TextView positionCategorySelection = view.findViewById(R.id.position_category_selection);
+        
+        android.widget.RadioGroup sortRadioGroup = view.findViewById(R.id.sort_radio_group);
+        android.widget.RadioButton sortNone = view.findViewById(R.id.sort_none);
+        android.widget.RadioButton sortName = view.findViewById(R.id.sort_name);
+        android.widget.RadioButton sortPosition = view.findViewById(R.id.sort_position);
+        android.widget.RadioButton sortOverallAsc = view.findViewById(R.id.sort_overall_asc);
+        android.widget.RadioButton sortOverallDesc = view.findViewById(R.id.sort_overall_desc);
+        
+        Button clearFiltersButton = view.findViewById(R.id.clear_filters_button);
+        Button applyFiltersButton = view.findViewById(R.id.apply_filters_button);
+        
+        // Handle dialog dismissal - keep year navigation hidden if filters active
+        filterDialog.setOnDismissListener(dialog -> {
+            if (isFilterMode) {
+                yearNavigationContainer.setVisibility(View.INVISIBLE);
+                yearNavigationContainer.setAlpha(0f);
+                yearNavigationContainer.setTranslationX(yearNavigationContainer.getWidth());
+            }
+        });
+
+        // Set current sort selection
+        switch (currentSortOption) {
+            case "name":
+                sortName.setChecked(true);
+                sortBySelection.setText("Name");
+                break;
+            case "position":
+                sortPosition.setChecked(true);
+                sortBySelection.setText("Position");
+                break;
+            case "overall_asc":
+                sortOverallAsc.setChecked(true);
+                sortBySelection.setText("Overall ↑");
+                break;
+            case "overall_desc":
+                sortOverallDesc.setChecked(true);
+                sortBySelection.setText("Overall ↓");
+                break;
+            default:
+                sortNone.setChecked(true);
+                sortBySelection.setText("None");
+                break;
+        }
+
+        // Update sort selection text when radio buttons change
+        sortRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.sort_name) {
+                sortBySelection.setText("Name");
+            } else if (checkedId == R.id.sort_position) {
+                sortBySelection.setText("Position");
+            } else if (checkedId == R.id.sort_overall_asc) {
+                sortBySelection.setText("Overall ↑");
+            } else if (checkedId == R.id.sort_overall_desc) {
+                sortBySelection.setText("Overall ↓");
+            } else {
+                sortBySelection.setText("None");
+            }
+        });
+
+        // Populate position checkboxes dynamically
+        String[] positions = this.getResources().getStringArray(R.array.position_array);
+        for (String position : positions) {
+            CheckBox checkBox = new CheckBox(this);
+            checkBox.setText(position);
+            checkBox.setTextColor(getResources().getColor(android.R.color.black));
+            checkBox.setChecked(selectedPositions.contains(position));
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    if (!selectedPositions.contains(position)) {
+                        selectedPositions.add(position);
+                    }
+                } else {
+                    selectedPositions.remove(position);
+                }
+                updatePositionSelectionText(positionFilterSelection);
+            });
+            positionFilterContent.addView(checkBox);
+        }
+
+        // Populate position category checkboxes dynamically
+        String[] categories = new String[]{
+                "Goalkeepers",
+                "Center Backs",
+                "Right Backs",
+                "Left Backs",
+                "Center Defensive Mids",
+                "Center Midfielders",
+                "Center Attacking Mids",
+                "Right Wingers",
+                "Left Wingers",
+                "Strikers"
+        };
+        
+        for (String category : categories) {
+            CheckBox checkBox = new CheckBox(this);
+            checkBox.setText(category);
+            checkBox.setTextColor(getResources().getColor(android.R.color.black));
+            checkBox.setChecked(selectedPositionCategories.contains(category));
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    if (!selectedPositionCategories.contains(category)) {
+                        selectedPositionCategories.add(category);
+                    }
+                } else {
+                    selectedPositionCategories.remove(category);
+                }
+                updatePositionCategorySelectionText(positionCategorySelection);
+            });
+            positionCategoryContent.addView(checkBox);
+        }
+
+        // Update selection texts
+        updatePositionSelectionText(positionFilterSelection);
+        updatePositionCategorySelectionText(positionCategorySelection);
+
+        // Sort By Header Click - Toggle expand/collapse with chevron animation
+        sortByHeader.setOnClickListener(v -> {
+            toggleSection(sortByContent, sortByChevron);
+        });
+
+        // Position Filter Header Click - Toggle expand/collapse with chevron animation
+        positionFilterHeader.setOnClickListener(v -> {
+            toggleSection(positionFilterContent, positionFilterChevron);
+        });
+
+        // Position Category Header Click - Toggle expand/collapse with chevron animation
+        positionCategoryHeader.setOnClickListener(v -> {
+            toggleSection(positionCategoryContent, positionCategoryChevron);
+        });
+
+        // Clear filters button
+        clearFiltersButton.setOnClickListener(v -> {
+            currentSortOption = "none";
+            selectedPositions.clear();
+            selectedPositionCategories.clear();
+            isFilterMode = false;
+            
+            filterDialog.dismiss();
+            
+            // Show year navigation with animation
+            yearNavigationContainer.setVisibility(View.VISIBLE);
+            yearNavigationContainer.animate()
+                    .translationX(0f)
+                    .alpha(1f)
+                    .setDuration(300);
+            
+            filterPlayersByYear();
+        });
+
+        // Apply filters button
+        applyFiltersButton.setOnClickListener(v -> {
+            // Get selected sort option
+            int selectedId = sortRadioGroup.getCheckedRadioButtonId();
+            if (selectedId == R.id.sort_name) {
+                currentSortOption = "name";
+            } else if (selectedId == R.id.sort_position) {
+                currentSortOption = "position";
+            } else if (selectedId == R.id.sort_overall_asc) {
+                currentSortOption = "overall_asc";
+            } else if (selectedId == R.id.sort_overall_desc) {
+                currentSortOption = "overall_desc";
+            } else {
+                currentSortOption = "none";
+            }
+
+            // Check if any filters/sorts are active
+            boolean hasActiveFilters = !currentSortOption.equals("none") || 
+                                       !selectedPositions.isEmpty() || 
+                                       !selectedPositionCategories.isEmpty();
+            
+            boolean wasFilterMode = isFilterMode;
+            isFilterMode = hasActiveFilters;
+            
+            filterDialog.dismiss();
+            
+            if (isFilterMode) {
+                // Hide year navigation when filters are active (only animate if not already hidden)
+                if (!wasFilterMode) {
+                    yearNavigationContainer.animate()
+                            .translationX(yearNavigationContainer.getWidth())
+                            .alpha(0f)
+                            .setDuration(300);
+                }
+                
+                // Load all players if not already loaded (and not currently loading), then apply filters
+                if (allYearsPlayerList.isEmpty() && !isLoadingAllPlayers) {
+                    loadAllPlayers(() -> applyFiltersAndSort());
+                } else if (!isLoadingAllPlayers) {
+                    applyFiltersAndSort();
+                } else {
+                    Log.d(LOG_TAG, "Already loading players, will apply filters when load completes");
+                }
+            } else {
+                // Show year navigation and restore year-based view (only animate if it was hidden)
+                if (wasFilterMode) {
+                    yearNavigationContainer.setVisibility(View.VISIBLE);
+                    yearNavigationContainer.animate()
+                            .translationX(0f)
+                            .alpha(1f)
+                            .setDuration(300);
+                }
+                filterPlayersByYear();
+            }
+        });
+
+        filterDialog.show();
+    }
+
+    /**
+     * Toggle section visibility with animated chevron rotation
+     */
+    private void toggleSection(LinearLayout content, ImageView chevron) {
+        if (content.getVisibility() == View.VISIBLE) {
+            // Collapse
+            content.setVisibility(View.GONE);
+            chevron.animate().rotation(0f).setDuration(200).start();
+        } else {
+            // Expand
+            content.setVisibility(View.VISIBLE);
+            chevron.animate().rotation(180f).setDuration(200).start();
+        }
+    }
+
+    /**
+     * Update position selection text based on selected positions
+     */
+    private void updatePositionSelectionText(TextView textView) {
+        if (selectedPositions.isEmpty()) {
+            textView.setText("All");
+        } else if (selectedPositions.size() == 1) {
+            textView.setText(selectedPositions.get(0));
+        } else {
+            textView.setText(selectedPositions.size() + " selected");
+        }
+    }
+
+    /**
+     * Update position category selection text based on selected categories
+     */
+    private void updatePositionCategorySelectionText(TextView textView) {
+        if (selectedPositionCategories.isEmpty()) {
+            textView.setText("All");
+        } else if (selectedPositionCategories.size() == 1) {
+            textView.setText(selectedPositionCategories.get(0));
+        } else {
+            textView.setText(selectedPositionCategories.size() + " selected");
+        }
+    }
+
+    /**
+     * Apply filters and sorting to all players
+     */
+    private void applyFiltersAndSort() {
+        playerList.clear();
+        
+        // Start with all years player list
+        List<YouthTeamPlayer> filteredList = new ArrayList<>(allYearsPlayerList);
+        
+        // Apply position filter (multiple selections)
+        if (!selectedPositions.isEmpty()) {
+            List<YouthTeamPlayer> temp = new ArrayList<>();
+            for (YouthTeamPlayer player : filteredList) {
+                if (player.getPosition() != null && selectedPositions.contains(player.getPosition())) {
+                    temp.add(player);
+                }
+            }
+            filteredList = temp;
+        }
+        
+        // Apply position category filter (multiple selections)
+        if (!selectedPositionCategories.isEmpty()) {
+            List<YouthTeamPlayer> temp = new ArrayList<>();
+            for (YouthTeamPlayer player : filteredList) {
+                if (player.getPosition() != null) {
+                    String playerCategory = getPositionCategory(player.getPosition());
+                    if (selectedPositionCategories.contains(playerCategory)) {
+                        temp.add(player);
+                    }
+                }
+            }
+            filteredList = temp;
+        }
+        
+        // Apply sorting
+        switch (currentSortOption) {
+            case "name":
+                Collections.sort(filteredList, (p1, p2) -> {
+                    String name1 = p1.getLastName() != null ? p1.getLastName() : "";
+                    String name2 = p2.getLastName() != null ? p2.getLastName() : "";
+                    return name1.compareToIgnoreCase(name2);
+                });
+                break;
+            case "position":
+                // Sort by position using the same order as position_array
+                String[] positionOrder = getResources().getStringArray(R.array.position_array);
+                Collections.sort(filteredList, (p1, p2) -> {
+                    String pos1 = p1.getPosition() != null ? p1.getPosition() : "";
+                    String pos2 = p2.getPosition() != null ? p2.getPosition() : "";
+                    
+                    int index1 = getPositionIndex(pos1, positionOrder);
+                    int index2 = getPositionIndex(pos2, positionOrder);
+                    
+                    return Integer.compare(index1, index2);
+                });
+                break;
+            case "overall_asc":
+                Collections.sort(filteredList, (p1, p2) -> Integer.compare(p1.getOverall(), p2.getOverall()));
+                break;
+            case "overall_desc":
+                Collections.sort(filteredList, (p1, p2) -> Integer.compare(p2.getOverall(), p1.getOverall()));
+                break;
+            default:
+                // Keep default order (by time added)
+                break;
+        }
+        
+        playerList.addAll(filteredList);
+        
+        // Update adapter
+        if (youthTeamPlayerRecAdapter != null) {
+            youthTeamPlayerRecAdapter.notifyDataSetChanged();
+        }
+        
+        // Update player count
+        if (yearPlayerCount != null) {
+            yearPlayerCount.setText(playerList.size() + " players");
+        }
+        
+        Log.d(LOG_TAG, "Applied filters and sort. " + playerList.size() + " players found.");
+    }
+
+    /**
+     * Get position category from position initials (e.g., "LB" -> "Left Backs")
+     */
+    private String getPositionCategory(String positionInitials) {
+        if (positionInitials == null || positionInitials.isEmpty()) {
+            return "Unknown";
+        }
+        
+        for (PositionEnum pos : PositionEnum.values()) {
+            if (pos.getInitials().equals(positionInitials)) {
+                return pos.getCategory();
+            }
+        }
+        
+        return "Unknown";
+    }
+
+    /**
+     * Get position index from position array for sorting
+     * Returns a large number if position not found (will be sorted to end)
+     */
+    private int getPositionIndex(String position, String[] positionOrder) {
+        if (position == null || position.isEmpty()) {
+            return Integer.MAX_VALUE; // Unknown positions go to the end
+        }
+        
+        for (int i = 0; i < positionOrder.length; i++) {
+            if (positionOrder[i].equals(position)) {
+                return i;
+            }
+        }
+        
+        return Integer.MAX_VALUE; // Position not in array goes to the end
     }
 
     // private void loadNativeAd(String adUnitId, NativeAdView nativeAdView) {
@@ -345,7 +923,20 @@ public class YouthTeamListActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "Listing players for year: " + currentYear + ", buttonInt: " + buttonInt);
 
         playerList.clear();
-        Log.d(LOG_TAG, "Player list cleared.");
+        fullPlayerList.clear();
+
+        // Close search mode when navigating years
+        if (isSearchMode) {
+            hideSearchBar();
+        }
+        
+        // Reset filter mode when navigating years
+        if (isFilterMode) {
+            isFilterMode = false;
+            currentSortOption = "none";
+            selectedPositions.clear();
+            selectedPositionCategories.clear();
+        }
 
         collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -360,17 +951,21 @@ public class YouthTeamListActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 YouthTeamPlayer player = doc.toObject(YouthTeamPlayer.class);
                                 if (player.getYearScouted().equals(currentYear)) {
-                                    playerList.add(player);
+                                    fullPlayerList.add(player);
                                     Log.d(LOG_TAG, "Player added to list: " + player.getFullName());
                                 }
                             }
-                            Collections.sort(playerList, new Comparator<YouthTeamPlayer>() {
+                            Collections.sort(fullPlayerList, new Comparator<YouthTeamPlayer>() {
                                 @Override
                                 public int compare(YouthTeamPlayer o1, YouthTeamPlayer o2) {
                                     return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                 }
                             });
                             Log.d(LOG_TAG, "Player list sorted by time added.");
+
+                            // Always show all players for the current year when listPlayers is called
+                            // (search bar is cleared when navigating years)
+                            playerList.addAll(fullPlayerList);
 
                             yearText.setText(currentYear);
                             
@@ -401,6 +996,218 @@ public class YouthTeamListActivity extends AppCompatActivity {
                         onComplete.run();
                     }
                 });
+    }
+
+    /**
+     * Load all players across all years from Firestore
+     */
+    private void loadAllPlayers(Runnable onComplete) {
+        // Prevent multiple simultaneous loads
+        if (isLoadingAllPlayers) {
+            Log.d(LOG_TAG, "Already loading players, skipping duplicate load request");
+            return;
+        }
+        
+        isLoadingAllPlayers = true;
+        
+        // Always clear to prevent duplicates
+        allYearsPlayerList.clear();
+        
+        Log.d(LOG_TAG, "Loading all players from Firestore...");
+        
+        collectionReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                .whereEqualTo("managerId", managerId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Use a temporary list to avoid any potential concurrent modification
+                        List<YouthTeamPlayer> tempList = new ArrayList<>();
+                        
+                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            YouthTeamPlayer player = doc.toObject(YouthTeamPlayer.class);
+                            if (player != null) {
+                                tempList.add(player);
+                            }
+                        }
+                        
+                        // Sort by time added
+                        Collections.sort(tempList, new Comparator<YouthTeamPlayer>() {
+                            @Override
+                            public int compare(YouthTeamPlayer o1, YouthTeamPlayer o2) {
+                                return o1.getTimeAdded().compareTo(o2.getTimeAdded());
+                            }
+                        });
+                        
+                        // Now add all to the main list at once
+                        allYearsPlayerList.addAll(tempList);
+                        
+                        Log.d(LOG_TAG, "Loaded " + allYearsPlayerList.size() + " unique players across all years");
+                    } else {
+                        Log.d(LOG_TAG, "No players found in Firestore");
+                    }
+                    
+                    isLoadingAllPlayers = false; // Reset flag on success
+                    
+                    if (onComplete != null) {
+                        onComplete.run();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(LOG_TAG, "Error loading all players from Firestore.", e);
+                    isLoadingAllPlayers = false; // Reset flag on failure
+                    if (onComplete != null) {
+                        onComplete.run();
+                    }
+                });
+    }
+
+    /**
+     * Filter players with both search and filters applied
+     * Searches across all years for this manager's youth team players
+     * If filters are active, applies filters first then searches
+     */
+    private void filterPlayersWithSearchAndFilters(String query) {
+        Log.d(LOG_TAG, "filterPlayersWithSearchAndFilters called with query: " + query);
+        Log.d(LOG_TAG, "allYearsPlayerList size: " + allYearsPlayerList.size());
+        
+        playerList.clear();
+        
+        if (query == null || query.trim().isEmpty()) {
+            // If search is empty, restore filtered or year-based view
+            if (isFilterMode) {
+                applyFiltersAndSort();
+            } else {
+                filterPlayersByYear();
+            }
+            return;
+        }
+        
+        // Start with all years for this manager's youth team
+        List<YouthTeamPlayer> baseList = new ArrayList<>(allYearsPlayerList);
+
+        Log.d(LOG_TAG, "Base list size before filters: " + baseList.size());
+        
+        // Apply filters if in filter mode
+        if (isFilterMode) {
+            // Apply position filter (multiple selections)
+            if (!selectedPositions.isEmpty()) {
+                List<YouthTeamPlayer> temp = new ArrayList<>();
+                for (YouthTeamPlayer player : baseList) {
+                    if (player.getPosition() != null && selectedPositions.contains(player.getPosition())) {
+                        temp.add(player);
+                    }
+                }
+                baseList = temp;
+                Log.d(LOG_TAG, "After position filter: " + baseList.size());
+            }
+            
+            // Apply position category filter (multiple selections)
+            if (!selectedPositionCategories.isEmpty()) {
+                List<YouthTeamPlayer> temp = new ArrayList<>();
+                for (YouthTeamPlayer player : baseList) {
+                    if (player.getPosition() != null) {
+                        String playerCategory = getPositionCategory(player.getPosition());
+                        if (selectedPositionCategories.contains(playerCategory)) {
+                            temp.add(player);
+                        }
+                    }
+                }
+                baseList = temp;
+                Log.d(LOG_TAG, "After category filter: " + baseList.size());
+            }
+        }
+        
+        // Now apply search query to the base list (across all years within context)
+        String searchQuery = query.toLowerCase().trim();
+        for (YouthTeamPlayer player : baseList) {
+            boolean matches = false;
+            
+            // Search in first name
+            if (player.getFirstName() != null && 
+                player.getFirstName().toLowerCase().contains(searchQuery)) {
+                matches = true;
+            }
+            
+            // Search in last name
+            if (!matches && player.getLastName() != null && 
+                player.getLastName().toLowerCase().contains(searchQuery)) {
+                matches = true;
+            }
+            
+            // Search in full name
+            if (!matches && player.getFullName() != null && 
+                player.getFullName().toLowerCase().contains(searchQuery)) {
+                matches = true;
+            }
+            
+            if (matches) {
+                Log.d(LOG_TAG, "Match found: " + player.getFullName() + " (Year: " + player.getYearScouted() + ", ID: " + player.getId() + ")");
+                playerList.add(player);
+            }
+        }
+        
+        Log.d(LOG_TAG, "Total matches found: " + playerList.size());
+        
+        // Apply sorting if in filter mode
+        if (isFilterMode && !currentSortOption.equals("none")) {
+            switch (currentSortOption) {
+                case "name":
+                    Collections.sort(playerList, (p1, p2) -> {
+                        String name1 = p1.getLastName() != null ? p1.getLastName() : "";
+                        String name2 = p2.getLastName() != null ? p2.getLastName() : "";
+                        return name1.compareToIgnoreCase(name2);
+                    });
+                    break;
+                case "position":
+                    String[] positionOrder = getResources().getStringArray(R.array.position_array);
+                    Collections.sort(playerList, (p1, p2) -> {
+                        String pos1 = p1.getPosition() != null ? p1.getPosition() : "";
+                        String pos2 = p2.getPosition() != null ? p2.getPosition() : "";
+                        
+                        int index1 = getPositionIndex(pos1, positionOrder);
+                        int index2 = getPositionIndex(pos2, positionOrder);
+                        
+                        return Integer.compare(index1, index2);
+                    });
+                    break;
+                case "overall_asc":
+                    Collections.sort(playerList, (p1, p2) -> Integer.compare(p1.getOverall(), p2.getOverall()));
+                    break;
+                case "overall_desc":
+                    Collections.sort(playerList, (p1, p2) -> Integer.compare(p2.getOverall(), p1.getOverall()));
+                    break;
+            }
+        }
+        
+        // Update adapter
+        if (youthTeamPlayerRecAdapter != null) {
+            youthTeamPlayerRecAdapter.notifyDataSetChanged();
+        }
+        
+        // Update player count
+        if (yearPlayerCount != null) {
+            yearPlayerCount.setText(playerList.size() + " players");
+        }
+        
+        Log.d(LOG_TAG, "Filtered " + playerList.size() + " players with search across all years" + (isFilterMode ? " and filters" : ""));
+    }
+
+    /**
+     * Filter players by current year (restore year-based view)
+     */
+    private void filterPlayersByYear() {
+        playerList.clear();
+        playerList.addAll(fullPlayerList);
+        
+        // Update adapter
+        if (youthTeamPlayerRecAdapter != null) {
+            youthTeamPlayerRecAdapter.notifyDataSetChanged();
+        }
+        
+        // Update player count
+        if (yearPlayerCount != null) {
+            yearPlayerCount.setText(playerList.size() + " players");
+        }
     }
 
     private void createPopupDialog() {
@@ -898,6 +1705,8 @@ public class YouthTeamListActivity extends AppCompatActivity {
         super.onResume();
         Log.d(LOG_TAG, "onResume called: Clearing player list.");
         playerList.clear();
+        allYearsPlayerList.clear(); // Clear cached all-years list to ensure deleted players don't appear in search
+        isLoadingAllPlayers = false; // Reset loading flag
     }
 
     @Override
