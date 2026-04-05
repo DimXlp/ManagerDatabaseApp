@@ -11,11 +11,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 // import com.google.android.gms.ads.AdLoader;
@@ -27,6 +35,7 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,9 +48,12 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
+import enumeration.PositionEnum;
 import model.Manager;
 import model.Transfer;
 import ui.TransferDealsRecAdapter;
@@ -69,15 +81,33 @@ public class TransferDealsActivity extends AppCompatActivity {
     private Button prevButton;
     private Button nextButton;
     private LinearLayout transferTypeContainer;
+    private LinearLayout navigationContainer;
     private TextView transferType;
     private TextView transferCount;
     private boolean ftPlayersExist;
     private boolean ytPlayersExist;
     private List<Transfer> transferList;
+    private List<Transfer> fullTransferList; // Store all transfers for filtering
+    private List<Transfer> allArrivedTransfers; // Store all arrived transfers
+    private List<Transfer> allLeftTransfers; // Store all left transfers
     private int maxId;
     private boolean shPlayersExist;
     private long managerId;
     private String team;
+
+    private EditText searchBar;
+    private LinearLayout searchBarContainer;
+    private ImageButton searchIconButton;
+    private ImageButton closeSearchButton;
+    private ImageButton filterIconButton;
+    private boolean isSearchMode = false;
+    private boolean isFilterMode = false;
+    
+    // Filter state
+    private String currentSortOption = "none";
+    private List<String> selectedPositions = new ArrayList<>();
+    private List<String> selectedPositionCategories = new ArrayList<>();
+    private String currentTransferType = "Arrived"; // Track current transfer type
 
     private TextView managerNameHeader;
     private TextView teamHeader;
@@ -154,10 +184,60 @@ public class TransferDealsActivity extends AppCompatActivity {
         teamHeader = headerLayout.findViewById(R.id.team_name_header);
 
         transferList = new ArrayList<>();
+        fullTransferList = new ArrayList<>();
+        allArrivedTransfers = new ArrayList<>();
+        allLeftTransfers = new ArrayList<>();
 
         recyclerView = findViewById(R.id.rec_view_trf);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Initialize search and filter UI components
+        searchIconButton = findViewById(R.id.search_icon_button_trf);
+        filterIconButton = findViewById(R.id.filter_icon_button_trf);
+        closeSearchButton = findViewById(R.id.close_search_button_trf);
+        navigationContainer = findViewById(R.id.navigation_container_trf);
+        searchBarContainer = findViewById(R.id.search_bar_container_trf);
+        searchBar = findViewById(R.id.search_bar_trf);
+        
+        // Search icon click - show search bar with animation
+        searchIconButton.setOnClickListener(v -> showSearchBar());
+        
+        // Filter icon click - show filter bottom sheet
+        filterIconButton.setOnClickListener(v -> showFilterDialog());
+        
+        // Close search button click - hide search bar with animation
+        closeSearchButton.setOnClickListener(v -> hideSearchBar());
+        
+        // Search bar text watcher
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString().trim();
+                
+                if (query.isEmpty()) {
+                    // Restore filtered or full view depending on filter mode
+                    if (isFilterMode) {
+                        applyFiltersAndSort();
+                    } else {
+                        restoreCurrentTypeList();
+                    }
+                } else {
+                    // Search across ALL transfers (both arrived and left)
+                    filterTransfersWithSearchAndFilters(query);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Not needed
+            }
+        });
 
         // Initialize Mobile Ads SDK
         // MobileAds.initialize(this, initializationStatus -> Log.d(LOG_TAG, "Mobile Ads SDK initialized."));
@@ -255,85 +335,41 @@ public class TransferDealsActivity extends AppCompatActivity {
     private void listPlayersLeft(final int buttonInt) {
         Log.d(LOG_TAG, "Listing players who left. ButtonInt: " + buttonInt);
 
+        currentTransferType = "Left";
         transferList.clear();
         Log.d(LOG_TAG, "Transfer list cleared.");
 
-        transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
-                .whereEqualTo("managerId", managerId)
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            Log.d(LOG_TAG, "Transfers fetched from Firestore for players who left.");
-                            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                                Transfer transfer = doc.toObject(Transfer.class);
-                                if (team.equals(transfer.getFormerTeam())) {
-                                    transferList.add(transfer);
-                                    Log.d(LOG_TAG, "Player added to list: " + transfer.getFullName());
-                                }
-                            }
-                            Collections.sort(transferList, new Comparator<Transfer>() {
-                                @Override
-                                public int compare(Transfer o1, Transfer o2) {
-                                    return o1.getTimeAdded().compareTo(o2.getTimeAdded());
-                                }
-                            });
-                            Log.d(LOG_TAG, "Transfer list sorted by time added.");
-
-                            transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, team, buttonInt);
-                            recyclerView.setAdapter(transferDealsRecAdapter);
-                            transferDealsRecAdapter.notifyDataSetChanged();
-                            transferCount.setText(transferList.size() + " transfer(s)");
-                        } else {
-                            transferCount.setText(transferList.size() + " transfer(s)");
-                            Log.w(LOG_TAG, "No players found who left.");
-                        }
-                    }
-                })
-                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching players who left from Firestore.", e));
+        // Use already-loaded allLeftTransfers instead of fetching again
+        transferList.addAll(allLeftTransfers);
+        fullTransferList.clear();
+        fullTransferList.addAll(allLeftTransfers);
+        
+        transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, team, buttonInt);
+        recyclerView.setAdapter(transferDealsRecAdapter);
+        transferDealsRecAdapter.notifyDataSetChanged();
+        transferCount.setText(transferList.size() + " transfer(s)");
+        
+        Log.d(LOG_TAG, "Displayed " + transferList.size() + " players who left.");
     }
 
     private void listPlayersArrived(final int buttonInt) {
         Log.d(LOG_TAG, "Listing players who arrived. ButtonInt: " + buttonInt);
 
+        currentTransferType = "Arrived";
         transferList.clear();
         Log.d(LOG_TAG, "Transfer list cleared.");
 
-        transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
-                .whereEqualTo("managerId", managerId)
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            Log.d(LOG_TAG, "Transfers fetched from Firestore for players who arrived.");
-                            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                                Transfer transfer = doc.toObject(Transfer.class);
-                                if (team.equals(transfer.getCurrentTeam())) {
-                                    transferList.add(transfer);
-                                    Log.d(LOG_TAG, "Player added to list: " + transfer.getFullName());
-                                }
-                            }
-                            Collections.sort(transferList, new Comparator<Transfer>() {
-                                @Override
-                                public int compare(Transfer o1, Transfer o2) {
-                                    return o1.getTimeAdded().compareTo(o2.getTimeAdded());
-                                }
-                            });
-                            Log.d(LOG_TAG, "Transfer list sorted by time added.");
-
-                            transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, team, buttonInt);
-                            recyclerView.setAdapter(transferDealsRecAdapter);
-                            transferDealsRecAdapter.notifyDataSetChanged();
-                            transferCount.setText(transferList.size() + " transfer(s)");
-                        } else {
-                            transferCount.setText(transferList.size() + " transfer(s)");
-                            Log.w(LOG_TAG, "No players found who arrived.");
-                        }
-                    }
-                })
-                .addOnFailureListener(e -> Log.e(LOG_TAG, "Error fetching players who arrived from Firestore.", e));
+        // Use already-loaded allArrivedTransfers instead of fetching again
+        transferList.addAll(allArrivedTransfers);
+        fullTransferList.clear();
+        fullTransferList.addAll(allArrivedTransfers);
+        
+        transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, team, buttonInt);
+        recyclerView.setAdapter(transferDealsRecAdapter);
+        transferDealsRecAdapter.notifyDataSetChanged();
+        transferCount.setText(transferList.size() + " transfer(s)");
+        
+        Log.d(LOG_TAG, "Displayed " + transferList.size() + " players who arrived.");
     }
 
     private void setUpDrawerContent(NavigationView navView) {
@@ -576,7 +612,10 @@ public class TransferDealsActivity extends AppCompatActivity {
 
     private void fetchPlayersArrived(String managerTeam) {
         Log.d(LOG_TAG, "Filtering arrivals for team: " + managerTeam);
+        currentTransferType = "Arrived";
         transferList.clear();
+        allArrivedTransfers.clear();
+        allLeftTransfers.clear(); // Also clear left transfers to prepare for loading
 
         transfersColRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
@@ -585,22 +624,45 @@ public class TransferDealsActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            // Load ALL transfers and separate them into arrived and left
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 Transfer transfer = doc.toObject(Transfer.class);
+                                
+                                // Add to arrived list if current team matches
                                 if (managerTeam.equals(transfer.getCurrentTeam())) {
-                                    transferList.add(transfer);
+                                    allArrivedTransfers.add(transfer);
+                                }
+                                
+                                // Add to left list if former team matches
+                                if (managerTeam.equals(transfer.getFormerTeam())) {
+                                    allLeftTransfers.add(transfer);
                                 }
                             }
-                            Log.d(LOG_TAG, "Players who arrived fetched: " + transferList.size());
+                            Log.d(LOG_TAG, "Players who arrived fetched: " + allArrivedTransfers.size());
+                            Log.d(LOG_TAG, "Players who left fetched: " + allLeftTransfers.size());
 
-                            Collections.sort(transferList, new Comparator<Transfer>() {
+                            // Sort arrived transfers
+                            Collections.sort(allArrivedTransfers, new Comparator<Transfer>() {
                                 @Override
                                 public int compare(Transfer o1, Transfer o2) {
                                     return o1.getTimeAdded().compareTo(o2.getTimeAdded());
                                 }
                             });
+                            
+                            // Sort left transfers
+                            Collections.sort(allLeftTransfers, new Comparator<Transfer>() {
+                                @Override
+                                public int compare(Transfer o1, Transfer o2) {
+                                    return o1.getTimeAdded().compareTo(o2.getTimeAdded());
+                                }
+                            });
+                            
                             Log.d(LOG_TAG, "Transfers sorted by time added.");
 
+                            transferList.addAll(allArrivedTransfers);
+                            fullTransferList.clear();
+                            fullTransferList.addAll(allArrivedTransfers);
+                            
                             transferType.setText("Arrived");
                             transferDealsRecAdapter = new TransferDealsRecAdapter(TransferDealsActivity.this, transferList, managerId, managerTeam, 0);
                             recyclerView.setAdapter(transferDealsRecAdapter);
@@ -624,6 +686,700 @@ public class TransferDealsActivity extends AppCompatActivity {
             }
         }
         Log.d(LOG_TAG, "Max transfer ID determined: " + maxId);
+    }
+
+    /**
+     * Show search bar with animation
+     */
+    private void showSearchBar() {
+        if (isSearchMode) return;
+        
+        isSearchMode = true;
+        
+        // Make search container visible
+        searchBarContainer.setVisibility(View.VISIBLE);
+        searchBarContainer.setAlpha(0f);
+        
+        // Make close button visible
+        closeSearchButton.setVisibility(View.VISIBLE);
+        closeSearchButton.setAlpha(0f);
+        
+        // Animate navigation sliding to the right
+        navigationContainer.animate()
+                .translationX(navigationContainer.getWidth())
+                .alpha(0f)
+                .setDuration(300);
+        
+        // Animate search bar fading in
+        searchBarContainer.animate()
+                .alpha(1f)
+                .setDuration(300)
+                .withEndAction(() -> {
+                    // Focus on search bar and show keyboard
+                    searchBar.requestFocus();
+                    searchBar.postDelayed(() -> {
+                        android.view.inputmethod.InputMethodManager imm = 
+                            (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                        if (imm != null) {
+                            imm.showSoftInput(searchBar, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+                        }
+                    }, 100);
+                });
+        
+        // Animate close button fading in
+        closeSearchButton.animate()
+                .alpha(1f)
+                .setDuration(300);
+        
+        Log.d(LOG_TAG, "Search bar shown");
+    }
+
+    /**
+     * Hide search bar with animation
+     */
+    private void hideSearchBar() {
+        if (!isSearchMode) return;
+        
+        isSearchMode = false;
+        
+        // Clear search text
+        searchBar.setText("");
+        
+        // Hide keyboard
+        android.view.inputmethod.InputMethodManager imm = 
+            (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+        }
+        
+        // Animate search bar fading out
+        searchBarContainer.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction(() -> {
+                    searchBarContainer.setVisibility(View.GONE);
+                });
+        
+        // Animate close button fading out
+        closeSearchButton.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction(() -> {
+                    closeSearchButton.setVisibility(View.GONE);
+                });
+        
+        // Animate navigation sliding back if not in filter mode
+        if (!isFilterMode && navigationContainer.getTranslationX() != 0f) {
+            navigationContainer.animate()
+                    .translationX(0f)
+                    .alpha(1f)
+                    .setDuration(300);
+        }
+        
+        // Restore view
+        if (!isFilterMode) {
+            restoreCurrentTypeList();
+        }
+        
+        Log.d(LOG_TAG, "Search bar hidden");
+    }
+
+    /**
+     * Show filter bottom sheet dialog
+     */
+    private void showFilterDialog() {
+        BottomSheetDialog filterDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+        View view = getLayoutInflater().inflate(R.layout.filter_bottom_sheet, null);
+        filterDialog.setContentView(view);
+
+        // Get views from the bottom sheet
+        LinearLayout sortByHeader = view.findViewById(R.id.sort_by_header);
+        LinearLayout sortByContent = view.findViewById(R.id.sort_by_content);
+        ImageView sortByChevron = view.findViewById(R.id.sort_by_chevron);
+        TextView sortBySelection = view.findViewById(R.id.sort_by_selection);
+        
+        LinearLayout positionFilterHeader = view.findViewById(R.id.position_filter_header);
+        LinearLayout positionFilterContent = view.findViewById(R.id.position_filter_content);
+        ImageView positionFilterChevron = view.findViewById(R.id.position_filter_chevron);
+        TextView positionFilterSelection = view.findViewById(R.id.position_filter_selection);
+        
+        LinearLayout positionCategoryHeader = view.findViewById(R.id.position_category_header);
+        LinearLayout positionCategoryContent = view.findViewById(R.id.position_category_content);
+        ImageView positionCategoryChevron = view.findViewById(R.id.position_category_chevron);
+        TextView positionCategorySelection = view.findViewById(R.id.position_category_selection);
+        
+        RadioGroup sortRadioGroup = view.findViewById(R.id.sort_radio_group);
+        RadioButton sortNone = view.findViewById(R.id.sort_none);
+        RadioButton sortName = view.findViewById(R.id.sort_name);
+        RadioButton sortPosition = view.findViewById(R.id.sort_position);
+        RadioButton sortOverallAsc = view.findViewById(R.id.sort_overall_asc);
+        RadioButton sortOverallDesc = view.findViewById(R.id.sort_overall_desc);
+        
+        Button clearFiltersButton = view.findViewById(R.id.clear_filters_button);
+        Button applyFiltersButton = view.findViewById(R.id.apply_filters_button);
+        
+        // Handle dialog dismissal - keep navigation hidden if filters active
+        filterDialog.setOnDismissListener(dialog -> {
+            if (isFilterMode) {
+                navigationContainer.setVisibility(View.INVISIBLE);
+                navigationContainer.setAlpha(0f);
+                navigationContainer.setTranslationX(navigationContainer.getWidth());
+            }
+        });
+
+        // Set current sort selection
+        switch (currentSortOption) {
+            case "name":
+                sortName.setChecked(true);
+                sortBySelection.setText("Name");
+                break;
+            case "position":
+                sortPosition.setChecked(true);
+                sortBySelection.setText("Position");
+                break;
+            case "overall_asc":
+                sortOverallAsc.setChecked(true);
+                sortBySelection.setText("Overall ↑");
+                break;
+            case "overall_desc":
+                sortOverallDesc.setChecked(true);
+                sortBySelection.setText("Overall ↓");
+                break;
+            default:
+                sortNone.setChecked(true);
+                sortBySelection.setText("None");
+                break;
+        }
+
+        // Update sort selection text when radio buttons change
+        sortRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.sort_name) {
+                sortBySelection.setText("Name");
+            } else if (checkedId == R.id.sort_position) {
+                sortBySelection.setText("Position");
+            } else if (checkedId == R.id.sort_overall_asc) {
+                sortBySelection.setText("Overall ↑");
+            } else if (checkedId == R.id.sort_overall_desc) {
+                sortBySelection.setText("Overall ↓");
+            } else {
+                sortBySelection.setText("None");
+            }
+        });
+
+        // Populate position checkboxes dynamically
+        String[] positions = getResources().getStringArray(R.array.position_array);
+        for (String position : positions) {
+            CheckBox checkBox = new CheckBox(this);
+            checkBox.setText(position);
+            checkBox.setTextColor(getResources().getColor(android.R.color.black));
+            checkBox.setChecked(selectedPositions.contains(position));
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    if (!selectedPositions.contains(position)) {
+                        selectedPositions.add(position);
+                    }
+                } else {
+                    selectedPositions.remove(position);
+                }
+                updatePositionSelectionText(positionFilterSelection);
+            });
+            positionFilterContent.addView(checkBox);
+        }
+
+        // Populate position category checkboxes dynamically
+        String[] categories = new String[]{
+                "Goalkeepers",
+                "Center Backs",
+                "Right Backs",
+                "Left Backs",
+                "Center Defensive Mids",
+                "Center Midfielders",
+                "Center Attacking Mids",
+                "Right Wingers",
+                "Left Wingers",
+                "Strikers"
+        };
+        
+        for (String category : categories) {
+            CheckBox checkBox = new CheckBox(this);
+            checkBox.setText(category);
+            checkBox.setTextColor(getResources().getColor(android.R.color.black));
+            checkBox.setChecked(selectedPositionCategories.contains(category));
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    if (!selectedPositionCategories.contains(category)) {
+                        selectedPositionCategories.add(category);
+                    }
+                } else {
+                    selectedPositionCategories.remove(category);
+                }
+                updatePositionCategorySelectionText(positionCategorySelection);
+            });
+            positionCategoryContent.addView(checkBox);
+        }
+
+        // Update selection texts
+        updatePositionSelectionText(positionFilterSelection);
+        updatePositionCategorySelectionText(positionCategorySelection);
+
+        // Sort By Header Click - Toggle expand/collapse
+        sortByHeader.setOnClickListener(v -> toggleSection(sortByContent, sortByChevron));
+
+        // Position Filter Header Click - Toggle expand/collapse
+        positionFilterHeader.setOnClickListener(v -> toggleSection(positionFilterContent, positionFilterChevron));
+
+        // Position Category Header Click - Toggle expand/collapse
+        positionCategoryHeader.setOnClickListener(v -> toggleSection(positionCategoryContent, positionCategoryChevron));
+
+        // Clear filters button
+        clearFiltersButton.setOnClickListener(v -> {
+            currentSortOption = "none";
+            selectedPositions.clear();
+            selectedPositionCategories.clear();
+            isFilterMode = false;
+            
+            filterDialog.dismiss();
+            
+            // Show navigation with animation
+            navigationContainer.setVisibility(View.VISIBLE);
+            navigationContainer.animate()
+                    .translationX(0f)
+                    .alpha(1f)
+                    .setDuration(300);
+            
+            restoreCurrentTypeList();
+        });
+
+        // Apply filters button
+        applyFiltersButton.setOnClickListener(v -> {
+            // Get selected sort option
+            int selectedId = sortRadioGroup.getCheckedRadioButtonId();
+            if (selectedId == R.id.sort_name) {
+                currentSortOption = "name";
+            } else if (selectedId == R.id.sort_position) {
+                currentSortOption = "position";
+            } else if (selectedId == R.id.sort_overall_asc) {
+                currentSortOption = "overall_asc";
+            } else if (selectedId == R.id.sort_overall_desc) {
+                currentSortOption = "overall_desc";
+            } else {
+                currentSortOption = "none";
+            }
+
+            // Check if any filters/sorts are active
+            boolean hasActiveFilters = !currentSortOption.equals("none") || 
+                                       !selectedPositions.isEmpty() || 
+                                       !selectedPositionCategories.isEmpty();
+            
+            boolean wasFilterMode = isFilterMode;
+            isFilterMode = hasActiveFilters;
+            
+            filterDialog.dismiss();
+            
+            if (isFilterMode) {
+                // Hide navigation when filters are active
+                if (!wasFilterMode) {
+                    navigationContainer.animate()
+                            .translationX(navigationContainer.getWidth())
+                            .alpha(0f)
+                            .setDuration(300);
+                }
+                
+                applyFiltersAndSort();
+            } else {
+                // Show navigation and restore view
+                if (wasFilterMode) {
+                    navigationContainer.setVisibility(View.VISIBLE);
+                    navigationContainer.animate()
+                            .translationX(0f)
+                            .alpha(1f)
+                            .setDuration(300);
+                }
+                restoreCurrentTypeList();
+            }
+        });
+
+        filterDialog.show();
+    }
+
+    /**
+     * Toggle section visibility with animated chevron rotation
+     */
+    private void toggleSection(LinearLayout content, ImageView chevron) {
+        if (content.getVisibility() == View.VISIBLE) {
+            // Collapse
+            content.setVisibility(View.GONE);
+            chevron.animate().rotation(0f).setDuration(200).start();
+        } else {
+            // Expand
+            content.setVisibility(View.VISIBLE);
+            chevron.animate().rotation(180f).setDuration(200).start();
+        }
+    }
+
+    /**
+     * Update position selection text based on selected positions
+     */
+    private void updatePositionSelectionText(TextView textView) {
+        if (selectedPositions.isEmpty()) {
+            textView.setText("All");
+        } else if (selectedPositions.size() == 1) {
+            textView.setText(selectedPositions.get(0));
+        } else {
+            textView.setText(selectedPositions.size() + " selected");
+        }
+    }
+
+    /**
+     * Update position category selection text based on selected categories
+     */
+    private void updatePositionCategorySelectionText(TextView textView) {
+        if (selectedPositionCategories.isEmpty()) {
+            textView.setText("All");
+        } else if (selectedPositionCategories.size() == 1) {
+            textView.setText(selectedPositionCategories.get(0));
+        } else {
+            textView.setText(selectedPositionCategories.size() + " selected");
+        }
+    }
+
+    /**
+     * Apply filters and sorting to transfers
+     * Filters work across ALL transfers (both arrived and left), similar to search
+     */
+    private void applyFiltersAndSort() {
+        transferList.clear();
+        
+        // Start with ALL transfers (both arrived and left), using deduplication
+        Set<Integer> seenIds = new HashSet<>();
+        List<Transfer> allTransfers = new ArrayList<>();
+        
+        // Add arrived transfers
+        for (Transfer transfer : allArrivedTransfers) {
+            if (transfer.getId() > 0 && !seenIds.contains(transfer.getId())) {
+                allTransfers.add(transfer);
+                seenIds.add(transfer.getId());
+            } else if (transfer.getId() == 0) {
+                allTransfers.add(transfer);
+            }
+        }
+        
+        // Add left transfers (avoiding duplicates)
+        for (Transfer transfer : allLeftTransfers) {
+            if (transfer.getId() > 0 && !seenIds.contains(transfer.getId())) {
+                allTransfers.add(transfer);
+                seenIds.add(transfer.getId());
+            } else if (transfer.getId() == 0) {
+                boolean isDuplicate = false;
+                for (Transfer existing : allTransfers) {
+                    if (existing.getId() == 0 && 
+                        Objects.equals(existing.getFullName(), transfer.getFullName()) &&
+                        Objects.equals(existing.getTimeAdded(), transfer.getTimeAdded())) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+                if (!isDuplicate) {
+                    allTransfers.add(transfer);
+                }
+            }
+        }
+        
+        Log.d(LOG_TAG, "Filtering across all transfers. Total before filters: " + allTransfers.size());
+        
+        List<Transfer> filteredList = new ArrayList<>(allTransfers);
+        
+        // Apply position filter (multiple selections)
+        if (!selectedPositions.isEmpty()) {
+            List<Transfer> temp = new ArrayList<>();
+            for (Transfer transfer : filteredList) {
+                if (transfer.getPosition() != null && selectedPositions.contains(transfer.getPosition())) {
+                    temp.add(transfer);
+                }
+            }
+            filteredList = temp;
+        }
+        
+        // Apply position category filter (multiple selections)
+        if (!selectedPositionCategories.isEmpty()) {
+            List<Transfer> temp = new ArrayList<>();
+            for (Transfer transfer : filteredList) {
+                if (transfer.getPosition() != null) {
+                    String playerCategory = getPositionCategory(transfer.getPosition());
+                    if (selectedPositionCategories.contains(playerCategory)) {
+                        temp.add(transfer);
+                    }
+                }
+            }
+            filteredList = temp;
+        }
+        
+        // Apply sorting
+        switch (currentSortOption) {
+            case "name":
+                Collections.sort(filteredList, (t1, t2) -> {
+                    String name1 = t1.getLastName() != null ? t1.getLastName() : "";
+                    String name2 = t2.getLastName() != null ? t2.getLastName() : "";
+                    return name1.compareToIgnoreCase(name2);
+                });
+                break;
+            case "position":
+                // Sort by position using the same order as position_array
+                String[] positionOrder = getResources().getStringArray(R.array.position_array);
+                Collections.sort(filteredList, (t1, t2) -> {
+                    String pos1 = t1.getPosition() != null ? t1.getPosition() : "";
+                    String pos2 = t2.getPosition() != null ? t2.getPosition() : "";
+                    
+                    int index1 = getPositionIndex(pos1, positionOrder);
+                    int index2 = getPositionIndex(pos2, positionOrder);
+                    
+                    return Integer.compare(index1, index2);
+                });
+                break;
+            case "overall_asc":
+                Collections.sort(filteredList, (t1, t2) -> Integer.compare(t1.getOverall(), t2.getOverall()));
+                break;
+            case "overall_desc":
+                Collections.sort(filteredList, (t1, t2) -> Integer.compare(t2.getOverall(), t1.getOverall()));
+                break;
+            default:
+                // Keep default order (by time added)
+                break;
+        }
+        
+        transferList.addAll(filteredList);
+        
+        // Update adapter
+        if (transferDealsRecAdapter != null) {
+            transferDealsRecAdapter.notifyDataSetChanged();
+        }
+        
+        // Update transfer count
+        transferCount.setText(transferList.size() + " transfer(s)");
+        
+        Log.d(LOG_TAG, "Applied filters and sort across ALL transfers. " + transferList.size() + " transfers found.");
+    }
+
+    /**
+     * Filter transfers with both search and filters applied
+     * Searches across ALL transfers (both arrived and left)
+     */
+    private void filterTransfersWithSearchAndFilters(String query) {
+        Log.d(LOG_TAG, "filterTransfersWithSearchAndFilters called with query: " + query);
+        
+        transferList.clear();
+        
+        if (query == null || query.trim().isEmpty()) {
+            // If search is empty, restore filtered or current type view
+            if (isFilterMode) {
+                applyFiltersAndSort();
+            } else {
+                restoreCurrentTypeList();
+            }
+            return;
+        }
+        
+        // Search across BOTH arrived AND left transfers (all transfers)
+        // Use a Set to avoid duplicates in case a transfer appears in both lists
+        Set<Integer> seenIds = new HashSet<>();
+        List<Transfer> allTransfers = new ArrayList<>();
+        
+        // Add arrived transfers
+        for (Transfer transfer : allArrivedTransfers) {
+            if (transfer.getId() > 0 && !seenIds.contains(transfer.getId())) {
+                allTransfers.add(transfer);
+                seenIds.add(transfer.getId());
+            } else if (transfer.getId() == 0) {
+                // If no ID, add anyway (shouldn't happen but handle gracefully)
+                allTransfers.add(transfer);
+            }
+        }
+        
+        // Add left transfers (avoiding duplicates)
+        for (Transfer transfer : allLeftTransfers) {
+            if (transfer.getId() > 0 && !seenIds.contains(transfer.getId())) {
+                allTransfers.add(transfer);
+                seenIds.add(transfer.getId());
+            } else if (transfer.getId() == 0) {
+                // If no ID, check if it's the same transfer by comparing other fields
+                boolean isDuplicate = false;
+                for (Transfer existing : allTransfers) {
+                    if (existing.getId() == 0 && 
+                        Objects.equals(existing.getFullName(), transfer.getFullName()) &&
+                        Objects.equals(existing.getTimeAdded(), transfer.getTimeAdded())) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+                if (!isDuplicate) {
+                    allTransfers.add(transfer);
+                }
+            }
+        }
+        
+        Log.d(LOG_TAG, "Combined transfer list size (after deduplication): " + allTransfers.size());
+        
+        List<Transfer> baseList = new ArrayList<>(allTransfers);
+        
+        // Apply filters if in filter mode
+        if (isFilterMode) {
+            // Apply position filter (multiple selections)
+            if (!selectedPositions.isEmpty()) {
+                List<Transfer> temp = new ArrayList<>();
+                for (Transfer transfer : baseList) {
+                    if (transfer.getPosition() != null && selectedPositions.contains(transfer.getPosition())) {
+                        temp.add(transfer);
+                    }
+                }
+                baseList = temp;
+            }
+            
+            // Apply position category filter (multiple selections)
+            if (!selectedPositionCategories.isEmpty()) {
+                List<Transfer> temp = new ArrayList<>();
+                for (Transfer transfer : baseList) {
+                    if (transfer.getPosition() != null) {
+                        String playerCategory = getPositionCategory(transfer.getPosition());
+                        if (selectedPositionCategories.contains(playerCategory)) {
+                            temp.add(transfer);
+                        }
+                    }
+                }
+                baseList = temp;
+            }
+        }
+        
+        // Now apply search query to the base list
+        String searchQuery = query.toLowerCase().trim();
+        for (Transfer transfer : baseList) {
+            boolean matches = false;
+            
+            // Search in first name
+            if (transfer.getFirstName() != null && 
+                transfer.getFirstName().toLowerCase().contains(searchQuery)) {
+                matches = true;
+            }
+            
+            // Search in last name
+            if (!matches && transfer.getLastName() != null && 
+                transfer.getLastName().toLowerCase().contains(searchQuery)) {
+                matches = true;
+            }
+            
+            // Search in full name
+            if (!matches && transfer.getFullName() != null && 
+                transfer.getFullName().toLowerCase().contains(searchQuery)) {
+                matches = true;
+            }
+            
+            // Search in current team
+            if (!matches && transfer.getCurrentTeam() != null && 
+                transfer.getCurrentTeam().toLowerCase().contains(searchQuery)) {
+                matches = true;
+            }
+            
+            // Search in former team
+            if (!matches && transfer.getFormerTeam() != null && 
+                transfer.getFormerTeam().toLowerCase().contains(searchQuery)) {
+                matches = true;
+            }
+            
+            if (matches) {
+                transferList.add(transfer);
+            }
+        }
+        
+        // Apply sorting if in filter mode
+        if (isFilterMode && !currentSortOption.equals("none")) {
+            switch (currentSortOption) {
+                case "name":
+                    Collections.sort(transferList, (t1, t2) -> {
+                        String name1 = t1.getLastName() != null ? t1.getLastName() : "";
+                        String name2 = t2.getLastName() != null ? t2.getLastName() : "";
+                        return name1.compareToIgnoreCase(name2);
+                    });
+                    break;
+                case "position":
+                    String[] positionOrder = getResources().getStringArray(R.array.position_array);
+                    Collections.sort(transferList, (t1, t2) -> {
+                        String pos1 = t1.getPosition() != null ? t1.getPosition() : "";
+                        String pos2 = t2.getPosition() != null ? t2.getPosition() : "";
+                        
+                        int index1 = getPositionIndex(pos1, positionOrder);
+                        int index2 = getPositionIndex(pos2, positionOrder);
+                        
+                        return Integer.compare(index1, index2);
+                    });
+                    break;
+                case "overall_asc":
+                    Collections.sort(transferList, (t1, t2) -> Integer.compare(t1.getOverall(), t2.getOverall()));
+                    break;
+                case "overall_desc":
+                    Collections.sort(transferList, (t1, t2) -> Integer.compare(t2.getOverall(), t1.getOverall()));
+                    break;
+            }
+        }
+        
+        // Update adapter
+        if (transferDealsRecAdapter != null) {
+            transferDealsRecAdapter.notifyDataSetChanged();
+        }
+        
+        // Update transfer count
+        transferCount.setText(transferList.size() + " transfer(s)");
+        
+        Log.d(LOG_TAG, "Search found " + transferList.size() + " transfers for query: " + query);
+    }
+
+    /**
+     * Restore current type list (Arrived or Left)
+     */
+    private void restoreCurrentTypeList() {
+        transferList.clear();
+        transferList.addAll(fullTransferList);
+        
+        if (transferDealsRecAdapter != null) {
+            transferDealsRecAdapter.notifyDataSetChanged();
+        }
+        
+        transferCount.setText(transferList.size() + " transfer(s)");
+        
+        Log.d(LOG_TAG, "Restored current type list (" + currentTransferType + "). " + transferList.size() + " transfers.");
+    }
+
+    /**
+     * Get position category from position initials (e.g., "LB" -> "Left Backs")
+     */
+    private String getPositionCategory(String positionInitials) {
+        if (positionInitials == null || positionInitials.isEmpty()) {
+            return "Unknown";
+        }
+        
+        for (PositionEnum pos : PositionEnum.values()) {
+            if (pos.getInitials().equals(positionInitials)) {
+                return pos.getCategory();
+            }
+        }
+        
+        return "Unknown";
+    }
+
+    /**
+     * Get position index from position array for sorting
+     * Returns a large number if position not found (will be sorted to end)
+     */
+    private int getPositionIndex(String position, String[] positionOrder) {
+        if (position == null || position.isEmpty()) {
+            return Integer.MAX_VALUE;
+        }
+        
+        for (int i = 0; i < positionOrder.length; i++) {
+            if (positionOrder[i].equals(position)) {
+                return i;
+            }
+        }
+        
+        return Integer.MAX_VALUE;
     }
 
     @Override
