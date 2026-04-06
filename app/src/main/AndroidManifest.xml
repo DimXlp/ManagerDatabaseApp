@@ -88,6 +88,11 @@
             android:label="@string/title_activity_profile"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".DashboardActivity"
+            android:exported="false"
+            android:label="Dashboard"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ManageTeamActivity"
             android:exported="false"/>
         <activity

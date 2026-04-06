@@ -412,7 +412,7 @@ public class FirstTeamActivity extends AppCompatActivity {
     private void selectDrawerItem(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.dr_home:
-                Intent homeIntent = new Intent(FirstTeamActivity.this, ManageTeamActivity.class);
+                Intent homeIntent = new Intent(FirstTeamActivity.this, DashboardActivity.class);
                 homeIntent.putExtra("managerId", managerId);
                 homeIntent.putExtra("team", team);
                 startActivity(homeIntent);

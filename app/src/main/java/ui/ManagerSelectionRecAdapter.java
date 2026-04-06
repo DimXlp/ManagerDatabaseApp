@@ -17,7 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.dimxlp.managerdb.FirstTeamListActivity;
-import com.dimxlp.managerdb.ManageTeamActivity;
+import com.dimxlp.managerdb.DashboardActivity;
 import com.dimxlp.managerdb.R;
 import com.dimxlp.managerdb.SelectManagerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -89,7 +89,7 @@ public class ManagerSelectionRecAdapter extends RecyclerView.Adapter<ManagerSele
                 @Override
                 public void onClick(View v) {
                     Log.d(LOG_TAG, "Manager clicked at position: " + managerList.get(getAdapterPosition()).getFullName());
-                    Intent intent = new Intent(context, ManageTeamActivity.class);
+                    Intent intent = new Intent(context, DashboardActivity.class);
                     intent.putExtra("managerId", managerList.get(getAdapterPosition()).getId());
                     intent.putExtra("team", managerList.get(getAdapterPosition()).getTeam());
                     context.startActivity(intent);

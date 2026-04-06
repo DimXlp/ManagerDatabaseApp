@@ -263,7 +263,7 @@ public class LoanedOutPlayersActivity extends AppCompatActivity {
     private void selectDrawerItem(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.dr_home:
-                Intent homeIntent = new Intent(LoanedOutPlayersActivity.this, ManageTeamActivity.class);
+                Intent homeIntent = new Intent(LoanedOutPlayersActivity.this, DashboardActivity.class);
                 homeIntent.putExtra("managerId", managerId);
                 homeIntent.putExtra("team", team);
                 startActivity(homeIntent);
