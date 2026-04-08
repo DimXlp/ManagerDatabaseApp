@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.dimxlp.managerdb.R;
 
-import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,10 +39,15 @@ public class DashboardTransferAdapter extends RecyclerView.Adapter<DashboardTran
         
         holder.playerName.setText(transfer.getFullName().toUpperCase());
         
+        // Format transfer details with arrow (from → to)
         String transferDetails = "";
         if ("Transfer In".equalsIgnoreCase(transfer.getType())) {
             transferDetails = transfer.getFormerTeam() + " → " + transfer.getCurrentTeam();
         } else if ("Transfer Out".equalsIgnoreCase(transfer.getType())) {
+            transferDetails = transfer.getFormerTeam() + " → " + transfer.getCurrentTeam();
+        } else if ("Loan".equalsIgnoreCase(transfer.getType())) {
+            transferDetails = transfer.getFormerTeam() + " → " + transfer.getCurrentTeam() + " (Loan)";
+        } else if ("Free Transfer".equalsIgnoreCase(transfer.getType())) {
             transferDetails = transfer.getFormerTeam() + " → " + transfer.getCurrentTeam();
         } else {
             transferDetails = transfer.getType();
@@ -52,19 +56,38 @@ public class DashboardTransferAdapter extends RecyclerView.Adapter<DashboardTran
         
         // Format transfer fee
         if (transfer.getTransferFee() > 0) {
-            NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.getDefault());
-            formatter.setMaximumFractionDigits(1);
-            String fee = "€" + (transfer.getTransferFee() / 1_000_000.0) + "M";
+            double feeInMillions = transfer.getTransferFee() / 1_000_000.0;
+            String fee;
+            if (feeInMillions >= 1) {
+                fee = String.format(Locale.getDefault(), "€%.1fM", feeInMillions);
+            } else {
+                // Show in thousands for smaller fees
+                double feeInThousands = transfer.getTransferFee() / 1_000.0;
+                fee = String.format(Locale.getDefault(), "€%.0fK", feeInThousands);
+            }
             holder.transferFee.setText(fee);
         } else if ("Free Transfer".equalsIgnoreCase(transfer.getType())) {
             holder.transferFee.setText("FREE");
         } else if ("Loan".equalsIgnoreCase(transfer.getType())) {
             holder.transferFee.setText("LOAN");
         } else {
-            holder.transferFee.setText("€0");
+            holder.transferFee.setText("—");
         }
         
-        holder.transferType.setText(transfer.getType().toUpperCase());
+        // Format status message (more descriptive than just transfer type)
+        String status = "";
+        if ("Transfer In".equalsIgnoreCase(transfer.getType())) {
+            status = "AGREEMENT FINALIZED";
+        } else if ("Transfer Out".equalsIgnoreCase(transfer.getType())) {
+            status = "TRANSFER COMPLETED";
+        } else if ("Loan".equalsIgnoreCase(transfer.getType())) {
+            status = "LOAN DEAL ACTIVE";
+        } else if ("Free Transfer".equalsIgnoreCase(transfer.getType())) {
+            status = "FREE AGENT SIGNING";
+        } else {
+            status = transfer.getType().toUpperCase();
+        }
+        holder.transferType.setText(status);
     }
 
     @Override

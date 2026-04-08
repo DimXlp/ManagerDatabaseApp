@@ -437,6 +437,9 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void fetchRecentTransfers() {
+        Log.d(LOG_TAG, "Fetching recent transfers for managerId: " + managerId + ", userId: " + UserApi.getInstance().getUserId());
+
+        // First try with ordering by timeAdded
         transfersCollectionRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
                 .whereEqualTo("managerId", managerId)
                 .orderBy("timeAdded", Query.Direction.DESCENDING)
@@ -450,12 +453,13 @@ public class DashboardActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc : task.getResult()) {
                                 Transfer transfer = doc.toObject(Transfer.class);
                                 transfers.add(transfer);
+                                Log.d(LOG_TAG, "Transfer found: " + transfer.getFullName());
                             }
-                            
+
                             if (transfers.isEmpty()) {
-                                recentTransfersRecycler.setVisibility(View.GONE);
-                                noTransfersText.setVisibility(View.VISIBLE);
-                                Log.d(LOG_TAG, "No recent transfers found.");
+                                Log.d(LOG_TAG, "No recent transfers found with timeAdded ordering. Trying without ordering...");
+                                // Try without ordering if no results with ordering
+                                fetchRecentTransfersWithoutOrdering();
                             } else {
                                 recentTransfersRecycler.setVisibility(View.VISIBLE);
                                 noTransfersText.setVisibility(View.GONE);
@@ -464,9 +468,52 @@ public class DashboardActivity extends AppCompatActivity {
                                 Log.d(LOG_TAG, "Recent transfers loaded: " + transfers.size());
                             }
                         } else {
+                            Log.e(LOG_TAG, "Error fetching recent transfers with ordering.", task.getException());
+                            if (task.getException() != null) {
+                                Log.e(LOG_TAG, "Exception message: " + task.getException().getMessage());
+                            }
+                            // Try without ordering if query fails (might be missing index)
+                            fetchRecentTransfersWithoutOrdering();
+                        }
+                    }
+                });
+    }
+
+    private void fetchRecentTransfersWithoutOrdering() {
+        Log.d(LOG_TAG, "Fetching transfers without timeAdded ordering...");
+        transfersCollectionRef.whereEqualTo("userId", UserApi.getInstance().getUserId())
+                .whereEqualTo("managerId", managerId)
+                .limit(3)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            List<Transfer> transfers = new ArrayList<>();
+                            for (QueryDocumentSnapshot doc : task.getResult()) {
+                                Transfer transfer = doc.toObject(Transfer.class);
+                                transfers.add(transfer);
+                                Log.d(LOG_TAG, "Transfer found (no ordering): " + transfer.getFullName());
+                            }
+                            
+                            if (transfers.isEmpty()) {
+                                recentTransfersRecycler.setVisibility(View.GONE);
+                                noTransfersText.setVisibility(View.VISIBLE);
+                                Log.d(LOG_TAG, "No transfers found at all for this manager.");
+                            } else {
+                                recentTransfersRecycler.setVisibility(View.VISIBLE);
+                                noTransfersText.setVisibility(View.GONE);
+                                transferAdapter = new DashboardTransferAdapter(DashboardActivity.this, transfers);
+                                recentTransfersRecycler.setAdapter(transferAdapter);
+                                Log.d(LOG_TAG, "Recent transfers loaded (without ordering): " + transfers.size());
+                            }
+                        } else {
                             recentTransfersRecycler.setVisibility(View.GONE);
                             noTransfersText.setVisibility(View.VISIBLE);
-                            Log.e(LOG_TAG, "Error fetching recent transfers.", task.getException());
+                            Log.e(LOG_TAG, "Error fetching transfers without ordering.", task.getException());
+                            if (task.getException() != null) {
+                                Log.e(LOG_TAG, "Exception message: " + task.getException().getMessage());
+                            }
                         }
                     }
                 });

@@ -5,44 +5,54 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    app:cardBackgroundColor="@color/colorPrimaryDark"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="1dp">
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="#1A1F1F20"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:strokeColor="#0DFFFFFF"
+    app:strokeWidth="1dp">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/player_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="@color/white"
                 android:fontFamily="@font/chivo"
+                android:letterSpacing="0.02"
                 tools:text="FLORIAN WIRTZ"/>
+
             <TextView
                 android:id="@+id/transfer_details"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:textColor="@color/lighterGray"
+                android:textSize="11sp"
+                android:textColor="#C8C6C5"
                 android:fontFamily="@font/chivo"
                 android:layout_marginTop="4dp"
                 tools:text="Leverkusen → Real Madrid"/>
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="end">
+
             <TextView
                 android:id="@+id/transfer_fee"
                 android:layout_width="wrap_content"
@@ -52,15 +62,17 @@
                 android:textColor="@color/colorAccent"
                 android:fontFamily="@font/chivo"
                 tools:text="€115.0M"/>
+
             <TextView
                 android:id="@+id/transfer_type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10sp"
-                android:textColor="@color/lighterGray"
+                android:textSize="9sp"
+                android:textColor="#71706F"
                 android:fontFamily="@font/chivo"
+                android:letterSpacing="0.1"
                 android:layout_marginTop="2dp"
-                tools:text="TRANSFER IN"/>
+                tools:text="AGREEMENT FINALIZED"/>
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>
