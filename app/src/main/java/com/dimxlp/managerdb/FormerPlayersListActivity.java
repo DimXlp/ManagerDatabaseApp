@@ -1088,6 +1088,12 @@ public class FormerPlayersListActivity extends AppCompatActivity {
                                 formerPlayerRecAdapter.notifyDataSetChanged();
                             }
                             teamPlayerCount.setText(ftPlayerList.size() + " players");
+
+                            // Scroll to top when team changes
+                            if (recyclerView != null) {
+                                recyclerView.scrollToPosition(0);
+                            }
+
                             Log.d(LOG_TAG, "Former First Team players listed successfully.");
                         } else {
                             teamPlayerCount.setText(ftPlayerList.size() + " players");

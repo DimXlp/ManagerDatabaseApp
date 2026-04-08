@@ -1425,6 +1425,12 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                                 shortlistedPlayerRecAdapter.notifyDataSetChanged();
                             }
                             positionPlayerCount.setText(playerList.size() + " player(s)");
+
+                            // Scroll to top when position changes
+                            if (recyclerView != null) {
+                                recyclerView.scrollToPosition(0);
+                            }
+
                             Log.d(LOG_TAG, "RecyclerView updated with shortlisted players.");
                             
                             // Call completion callback if provided

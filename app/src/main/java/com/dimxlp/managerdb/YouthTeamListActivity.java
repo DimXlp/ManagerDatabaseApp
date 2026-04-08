@@ -976,6 +976,11 @@ public class YouthTeamListActivity extends AppCompatActivity {
                             }
                             yearPlayerCount.setText(playerList.size() + " players");
                             
+                            // Scroll to top when year changes
+                            if (recyclerView != null) {
+                                recyclerView.scrollToPosition(0);
+                            }
+
                             // Call completion callback if provided
                             if (onComplete != null) {
                                 onComplete.run();

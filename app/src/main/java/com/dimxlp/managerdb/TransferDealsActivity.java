@@ -369,6 +369,11 @@ public class TransferDealsActivity extends AppCompatActivity {
         transferDealsRecAdapter.notifyDataSetChanged();
         transferCount.setText(transferList.size() + " transfer(s)");
         
+        // Scroll to top when transfer type changes
+        if (recyclerView != null) {
+            recyclerView.scrollToPosition(0);
+        }
+
         Log.d(LOG_TAG, "Displayed " + transferList.size() + " players who arrived.");
     }
 
