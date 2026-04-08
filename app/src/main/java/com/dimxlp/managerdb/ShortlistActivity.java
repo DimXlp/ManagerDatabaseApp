@@ -61,6 +61,7 @@ import util.ValueFormatter;
 public class ShortlistActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "RAFI|Shortlist";
+    private static final long CREATE_PLAYER_TIMEOUT_MS = 20000L;
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private NavigationView navView;
@@ -106,6 +107,9 @@ public class ShortlistActivity extends AppCompatActivity {
     // private NativeAdView nativeAdViewTop, nativeAdViewBottom;
 
     private BottomSheetDialog createDialog;
+    private final Handler createPlayerTimeoutHandler = new Handler(Looper.getMainLooper());
+    private Runnable createPlayerTimeoutRunnable;
+    private boolean isCreatePlayerRequestInFlight = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -299,6 +303,10 @@ public class ShortlistActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(LOG_TAG, "Create player button clicked.");
+                if (isCreatePlayerRequestInFlight) {
+                    Log.w(LOG_TAG, "Create ignored: request already in flight.");
+                    return;
+                }
                 if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
                         !positionPicker.getText().toString().isEmpty() &&
@@ -326,6 +334,10 @@ public class ShortlistActivity extends AppCompatActivity {
         if (createDialog == null || !createDialog.isShowing()) {
             Log.e(LOG_TAG, "Dialog is null or not showing when createPlayer called!");
             Toast.makeText(this, "Dialog error. Please try again.", Toast.LENGTH_SHORT).show();
+            if (createButton != null) {
+                createButton.setText("CREATE PLAYER");
+                createButton.setEnabled(true);
+            }
             return;
         }
 
@@ -380,72 +392,21 @@ public class ShortlistActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "Player object created: " + player);
         Log.d(LOG_TAG, "Player data - UserId: " + player.getUserId() + ", ManagerId: " + player.getManagerId());
         Log.d(LOG_TAG, "Starting Firestore add operation to collection: ShortlistedPlayers");
-
-        // Set up a timeout to detect if operation hangs
-        final Handler timeoutHandler = new Handler(Looper.getMainLooper());
-        final boolean[] operationCompleted = {false};
         final long startTime = System.currentTimeMillis();
-        
-        Runnable timeoutRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (!operationCompleted[0]) {
-                    long elapsed = System.currentTimeMillis() - startTime;
-                    Log.e(LOG_TAG, "Firestore operation timed out after " + elapsed + "ms");
-                    Log.e(LOG_TAG, "This suggests a network or Firestore connection issue");
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(ShortlistActivity.this, 
-                                "Operation timed out. Please check your internet connection.", 
-                                Toast.LENGTH_LONG).show();
-                            createButton.setText("CREATE PLAYER");
-                            createButton.setEnabled(true);
-                            if (createDialog != null && createDialog.isShowing()) {
-                                createDialog.dismiss();
-                            }
-                        }
-                    });
-                }
-            }
-        };
-        timeoutHandler.postDelayed(timeoutRunnable, 10000); // 10 second timeout
+
+        isCreatePlayerRequestInFlight = true;
+        startCreatePlayerTimeout();
 
         Log.d(LOG_TAG, "Adding player to Firestore...");
-        Task<DocumentReference> addTask = shortlistColRef.add(player);
-        
-        // Add complete listener that fires regardless of success/failure
-        addTask.addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentReference> task) {
-                long elapsed = System.currentTimeMillis() - startTime;
-                Log.i(LOG_TAG, "COMPLETE CALLBACK FIRED after " + elapsed + "ms");
-                Log.i(LOG_TAG, "Task successful: " + task.isSuccessful());
-                
-                if (!operationCompleted[0]) {
-                    operationCompleted[0] = true;
-                    timeoutHandler.removeCallbacks(timeoutRunnable);
-                    
-                    if (task.isSuccessful()) {
-                        Log.i(LOG_TAG, "Player queued/added to Firestore successfully");
-                    } else {
-                        Log.e(LOG_TAG, "Task failed: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"));
-                    }
-                }
-            }
-        });
-        
-        addTask
+        shortlistColRef.add(player)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         long elapsed = System.currentTimeMillis() - startTime;
                         Log.i(LOG_TAG, "SUCCESS CALLBACK FIRED after " + elapsed + "ms");
                         Log.i(LOG_TAG, "Player successfully added to Firestore: " + documentReference.getId());
-                        
-                        operationCompleted[0] = true;
-                        timeoutHandler.removeCallbacks(timeoutRunnable);
-                        
+                        completeCreatePlayerRequest();
+
                         Log.d(LOG_TAG, "Running success UI updates");
                         
                         // Dismiss dialog immediately
@@ -511,10 +472,8 @@ public class ShortlistActivity extends AppCompatActivity {
                         Log.e(LOG_TAG, "FAILURE CALLBACK FIRED after " + elapsed + "ms");
                         Log.e(LOG_TAG, "Error creating player: " + e.getClass().getName() + " - " + e.getMessage());
                         e.printStackTrace();
-                        
-                        operationCompleted[0] = true;
-                        timeoutHandler.removeCallbacks(timeoutRunnable);
-                        
+                        completeCreatePlayerRequest();
+
                         Log.d(LOG_TAG, "Running failure UI updates");
                         if (createDialog != null && createDialog.isShowing()) {
                             createDialog.dismiss();
@@ -524,6 +483,42 @@ public class ShortlistActivity extends AppCompatActivity {
                         Toast.makeText(ShortlistActivity.this, "Failed to create player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    private void startCreatePlayerTimeout() {
+        cancelCreatePlayerTimeout();
+        createPlayerTimeoutRunnable = () -> {
+            if (!isCreatePlayerRequestInFlight) {
+                return;
+            }
+            isCreatePlayerRequestInFlight = false;
+            Log.e(LOG_TAG, "Create player request timed out after " + CREATE_PLAYER_TIMEOUT_MS + "ms.");
+
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
+
+            if (createButton != null) {
+                createButton.setText("CREATE PLAYER");
+                createButton.setEnabled(true);
+            }
+            Toast.makeText(ShortlistActivity.this,
+                    "Save is taking too long. Please check your connection and try again.",
+                    Toast.LENGTH_LONG).show();
+        };
+        createPlayerTimeoutHandler.postDelayed(createPlayerTimeoutRunnable, CREATE_PLAYER_TIMEOUT_MS);
+    }
+
+    private void cancelCreatePlayerTimeout() {
+        if (createPlayerTimeoutRunnable != null) {
+            createPlayerTimeoutHandler.removeCallbacks(createPlayerTimeoutRunnable);
+            createPlayerTimeoutRunnable = null;
+        }
+    }
+
+    private void completeCreatePlayerRequest() {
+        isCreatePlayerRequestInFlight = false;
+        cancelCreatePlayerTimeout();
     }
 
     private void setUpDrawerContent(NavigationView navView) {
@@ -709,6 +704,7 @@ public class ShortlistActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         Log.d(LOG_TAG, "onDestroy called: Cleaning up resources.");
+        cancelCreatePlayerTimeout();
 
         // if (nativeAdTop != null) {
         //     nativeAdTop.destroy();

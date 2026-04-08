@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -75,6 +77,7 @@ import util.ValueFormatter;
 public class ShortlistPlayersActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "RAFI|ShortlistPlayers";
+    private static final long CREATE_PLAYER_TIMEOUT_MS = 20000L;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -152,6 +155,9 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
     // private NativeAdView nativeAdViewBottom;
 
     private BottomSheetDialog createDialog;
+    private final Handler createPlayerTimeoutHandler = new Handler(Looper.getMainLooper());
+    private Runnable createPlayerTimeoutRunnable;
+    private boolean isCreatePlayerRequestInFlight = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -1206,6 +1212,10 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(LOG_TAG, "Create player button clicked.");
+                if (isCreatePlayerRequestInFlight) {
+                    Log.w(LOG_TAG, "Create ignored: request already in flight.");
+                    return;
+                }
                 if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
                         !positionPicker.getText().toString().isEmpty() &&
@@ -1280,10 +1290,14 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
         player.setTimeAdded(new Timestamp(new Date()));
         Log.d(LOG_TAG, "Player object created: " + player);
 
+        isCreatePlayerRequestInFlight = true;
+        startCreatePlayerTimeout();
+
         shPlayersColRef.add(player)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        completeCreatePlayerRequest();
                         Log.i(LOG_TAG, "Player successfully added to Firestore: " + documentReference.getId());
                         try {
                             if (createDialog != null && createDialog.isShowing()) {
@@ -1319,6 +1333,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        completeCreatePlayerRequest();
                         Log.e(LOG_TAG, "Error creating player", e);
                         if (createDialog != null && createDialog.isShowing()) {
                             createDialog.dismiss();
@@ -1328,6 +1343,42 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                         Toast.makeText(ShortlistPlayersActivity.this, "Failed to create player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    private void startCreatePlayerTimeout() {
+        cancelCreatePlayerTimeout();
+        createPlayerTimeoutRunnable = () -> {
+            if (!isCreatePlayerRequestInFlight) {
+                return;
+            }
+            isCreatePlayerRequestInFlight = false;
+            Log.e(LOG_TAG, "Create player request timed out after " + CREATE_PLAYER_TIMEOUT_MS + "ms.");
+
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
+
+            if (createButton != null) {
+                createButton.setEnabled(true);
+                createButton.setText("CREATE PLAYER");
+            }
+            Toast.makeText(ShortlistPlayersActivity.this,
+                    "Save is taking too long. Please check your connection and try again.",
+                    Toast.LENGTH_LONG).show();
+        };
+        createPlayerTimeoutHandler.postDelayed(createPlayerTimeoutRunnable, CREATE_PLAYER_TIMEOUT_MS);
+    }
+
+    private void cancelCreatePlayerTimeout() {
+        if (createPlayerTimeoutRunnable != null) {
+            createPlayerTimeoutHandler.removeCallbacks(createPlayerTimeoutRunnable);
+            createPlayerTimeoutRunnable = null;
+        }
+    }
+
+    private void completeCreatePlayerRequest() {
+        isCreatePlayerRequestInFlight = false;
+        cancelCreatePlayerTimeout();
     }
 
     public void refreshPlayerList() {
@@ -2102,6 +2153,7 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        cancelCreatePlayerTimeout();
         // Cleanup voice manager
         if (voiceManager != null) {
             voiceManager.cleanup();

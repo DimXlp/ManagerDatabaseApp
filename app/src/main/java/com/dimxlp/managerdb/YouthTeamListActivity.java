@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -73,6 +75,7 @@ import util.UserApi;
 public class YouthTeamListActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "RAFI|YouthTeamList";
+    private static final long CREATE_PLAYER_TIMEOUT_MS = 20000L;
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private NavigationView navView;
@@ -137,6 +140,9 @@ public class YouthTeamListActivity extends AppCompatActivity {
     private String barYear;
     // private NativeAd nativeAdBottom;
     // private NativeAdView nativeAdViewBottom;
+    private final Handler createPlayerTimeoutHandler = new Handler(Looper.getMainLooper());
+    private Runnable createPlayerTimeoutRunnable;
+    private boolean isCreatePlayerRequestInFlight = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -1265,6 +1271,10 @@ public class YouthTeamListActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(LOG_TAG, "Create player button clicked.");
+                if (isCreatePlayerRequestInFlight) {
+                    Log.w(LOG_TAG, "Create ignored: request already in flight.");
+                    return;
+                }
                 if (!lastName.getText().toString().isEmpty() &&
                         !nationality.getText().toString().isEmpty() &&
                         !positionPicker.getText().toString().isEmpty() &&
@@ -1338,10 +1348,14 @@ public class YouthTeamListActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "YouthTeamPlayer object created: " + player);
         Log.d(LOG_TAG, "Initiating Firestore add operation...");
 
+        isCreatePlayerRequestInFlight = true;
+        startCreatePlayerTimeout();
+
         collectionReference.add(player)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        completeCreatePlayerRequest();
                         Log.i(LOG_TAG, "***SUCCESS CALLBACK INVOKED*** Player successfully added to Firestore: Document ID = " + documentReference.getId());
                         Log.d(LOG_TAG, "Activity state: isFinishing=" + isFinishing() + ", isDestroyed=" + isDestroyed());
                         Log.d(LOG_TAG, "Dialog state: " + (dialog != null ? "exists" : "null") + ", showing: " + (dialog != null && dialog.isShowing()));
@@ -1392,6 +1406,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        completeCreatePlayerRequest();
                         Log.e(LOG_TAG, "***FAILURE CALLBACK INVOKED*** Error creating player", e);
                         Log.e(LOG_TAG, "Failure exception type: " + e.getClass().getName());
                         Log.e(LOG_TAG, "Failure exception message: " + e.getMessage());
@@ -1416,6 +1431,42 @@ public class YouthTeamListActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void startCreatePlayerTimeout() {
+        cancelCreatePlayerTimeout();
+        createPlayerTimeoutRunnable = () -> {
+            if (!isCreatePlayerRequestInFlight) {
+                return;
+            }
+            isCreatePlayerRequestInFlight = false;
+            Log.e(LOG_TAG, "Create player request timed out after " + CREATE_PLAYER_TIMEOUT_MS + "ms.");
+
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
+
+            if (createPlayerButton != null) {
+                createPlayerButton.setEnabled(true);
+                createPlayerButton.setText("CREATE PLAYER");
+            }
+            Toast.makeText(YouthTeamListActivity.this,
+                    "Save is taking too long. Please check your connection and try again.",
+                    Toast.LENGTH_LONG).show();
+        };
+        createPlayerTimeoutHandler.postDelayed(createPlayerTimeoutRunnable, CREATE_PLAYER_TIMEOUT_MS);
+    }
+
+    private void cancelCreatePlayerTimeout() {
+        if (createPlayerTimeoutRunnable != null) {
+            createPlayerTimeoutHandler.removeCallbacks(createPlayerTimeoutRunnable);
+            createPlayerTimeoutRunnable = null;
+        }
+    }
+
+    private void completeCreatePlayerRequest() {
+        isCreatePlayerRequestInFlight = false;
+        cancelCreatePlayerTimeout();
     }
 
     private void setUpDrawerContent(NavigationView navView) {
@@ -1717,6 +1768,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         // if (nativeAdBottom != null) nativeAdBottom.destroy();
+        cancelCreatePlayerTimeout();
         Log.i(LOG_TAG, "YouthTeamListActivity destroyed.");
         super.onDestroy();
     }

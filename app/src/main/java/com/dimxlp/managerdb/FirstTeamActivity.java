@@ -9,6 +9,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -58,6 +60,7 @@ import util.UserApi;
 public class FirstTeamActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "RAFI|FirstTeam";
+    private static final long CREATE_PLAYER_TIMEOUT_MS = 20000L;
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private NavigationView navView;
@@ -103,6 +106,9 @@ public class FirstTeamActivity extends AppCompatActivity {
     // private NativeAdView nativeAdViewTop, nativeAdViewBottom;
 
     private BottomSheetDialog createDialog;
+    private final Handler createPlayerTimeoutHandler = new Handler(Looper.getMainLooper());
+    private Runnable createPlayerTimeoutRunnable;
+    private boolean isCreatePlayerRequestInFlight = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -287,6 +293,10 @@ public class FirstTeamActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(LOG_TAG, "Create player button clicked in popup dialog.");
+                if (isCreatePlayerRequestInFlight) {
+                    Log.w(LOG_TAG, "Create ignored: request already in flight.");
+                    return;
+                }
                 if (!lastName.getText().toString().isEmpty() &&
                     !nationality.getText().toString().isEmpty() &&
                     !positionPicker.getText().toString().isEmpty() &&
@@ -362,10 +372,14 @@ public class FirstTeamActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "Player object created: " + player);
         playerId++;
 
+        isCreatePlayerRequestInFlight = true;
+        startCreatePlayerTimeout();
+
         collectionReference.add(player)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        completeCreatePlayerRequest();
                         Log.i(LOG_TAG, "Player successfully added to Firestore. Document ID: " + documentReference.getId());
                         try {
                             if (createDialog != null && createDialog.isShowing()) {
@@ -387,6 +401,7 @@ public class FirstTeamActivity extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        completeCreatePlayerRequest();
                         Log.e(LOG_TAG, "Error creating player", e);
                         if (createDialog != null && createDialog.isShowing()) {
                             createDialog.dismiss();
@@ -396,6 +411,42 @@ public class FirstTeamActivity extends AppCompatActivity {
                         Toast.makeText(FirstTeamActivity.this, "Failed to create player: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    private void startCreatePlayerTimeout() {
+        cancelCreatePlayerTimeout();
+        createPlayerTimeoutRunnable = () -> {
+            if (!isCreatePlayerRequestInFlight) {
+                return;
+            }
+            isCreatePlayerRequestInFlight = false;
+            Log.e(LOG_TAG, "Create player request timed out after " + CREATE_PLAYER_TIMEOUT_MS + "ms.");
+
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
+
+            if (createPlayerButton != null) {
+                createPlayerButton.setEnabled(true);
+                createPlayerButton.setText("CREATE PLAYER");
+            }
+            Toast.makeText(FirstTeamActivity.this,
+                    "Save is taking too long. Please check your connection and try again.",
+                    Toast.LENGTH_LONG).show();
+        };
+        createPlayerTimeoutHandler.postDelayed(createPlayerTimeoutRunnable, CREATE_PLAYER_TIMEOUT_MS);
+    }
+
+    private void cancelCreatePlayerTimeout() {
+        if (createPlayerTimeoutRunnable != null) {
+            createPlayerTimeoutHandler.removeCallbacks(createPlayerTimeoutRunnable);
+            createPlayerTimeoutRunnable = null;
+        }
+    }
+
+    private void completeCreatePlayerRequest() {
+        isCreatePlayerRequestInFlight = false;
+        cancelCreatePlayerTimeout();
     }
 
 
@@ -578,6 +629,7 @@ public class FirstTeamActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        cancelCreatePlayerTimeout();
         // if (nativeAdTop != null) {
         //     nativeAdTop.destroy();
         // }
