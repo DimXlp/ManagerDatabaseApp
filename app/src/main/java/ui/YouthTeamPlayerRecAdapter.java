@@ -244,12 +244,16 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
         }
 
         private void clickDeletePlayerButton() {
+            int pos = getAdapterPosition();
+            if (pos == RecyclerView.NO_POSITION) return;
+            final YouthTeamPlayer playerToDelete = playerList.get(pos);
+
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
-                            deletePlayer(playerList.get(getAdapterPosition()));
+                            deletePlayer(playerToDelete);
                             break;
 
                         case DialogInterface.BUTTON_NEGATIVE:
@@ -265,6 +269,11 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
         }
 
         private void clickPromotePlayerButton() {
+            // Capture player reference now, before any async dialogs or RecyclerView changes
+            int pos = getAdapterPosition();
+            if (pos == RecyclerView.NO_POSITION) return;
+            final YouthTeamPlayer playerToPromote = playerList.get(pos);
+
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -294,7 +303,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                     if (!yearSigned.getText().toString().isEmpty()) {
                                         // Disable to prevent duplicate taps
                                         saveButton.setEnabled(false);
-                                        promotePlayer(playerList.get(getAdapterPosition()));
+                                        promotePlayer(playerToPromote);
                                     } else {
                                         Toast.makeText(context, "Field required", Toast.LENGTH_LONG).show();
                                     }
@@ -315,6 +324,10 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
         }
 
         private void clickDepartPlayerButton() {
+            int pos = getAdapterPosition();
+            if (pos == RecyclerView.NO_POSITION) return;
+            final YouthTeamPlayer playerToDepart = playerList.get(pos);
+
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -344,7 +357,7 @@ public class YouthTeamPlayerRecAdapter extends RecyclerView.Adapter<YouthTeamPla
                                     if (!yearLeft.getText().toString().isEmpty()) {
                                         // Disable to prevent duplicate taps
                                         saveButton.setEnabled(false);
-                                        letPlayerLeave(playerList.get(getAdapterPosition()));
+                                        letPlayerLeave(playerToDepart);
                                     } else {
                                         Toast.makeText(context, "Field required", Toast.LENGTH_LONG).show();
                                     }
