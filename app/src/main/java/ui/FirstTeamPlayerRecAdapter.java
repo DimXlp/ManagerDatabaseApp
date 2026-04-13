@@ -955,51 +955,49 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 fmPlayer.setFirstTeamId(player.getId());
                                                 Log.d(LOG_TAG, "FormerPlayer object created: " + fmPlayer.getFullName());
 
-                                                fmPlayersReference.add(fmPlayer)
-                                                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                                            @Override
-                                                            public void onSuccess(DocumentReference documentReference) {
-                                                                Log.d(LOG_TAG, "Player added to FormerPlayer collection: " + fmPlayer.getFullName());
-                                                                Toast.makeText(context, "Player transferred!", Toast.LENGTH_LONG)
-                                                                        .show();
-                                                            }
-                                                        })
-                                                        .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding player to FormerPlayer collection.", e));
-                                                if (hasExchangePlayer) {
-                                                    addExchangePlayer(newTransfer);
-                                                } else {
-                                                    transfersReference.add(newTransfer)
-                                                            .addOnSuccessListener(docRef2 -> Log.d(LOG_TAG, "Transfer added to Firestore: " + newTransfer.getFullName()))
-                                                            .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding transfer to Firestore.", e));
+                                                 // Remove the player from the list immediately (optimistic update)
+                                                 int playerIndex = playerList.indexOf(player);
+                                                 if (playerIndex != RecyclerView.NO_ID && playerIndex >= 0) {
+                                                     playerList.remove(playerIndex);
+                                                     notifyItemRemoved(playerIndex);
+                                                     Log.d(LOG_TAG, "Player removed from adapter list at index: " + playerIndex);
+                                                 }
 
-                                                    ftPlayersReference.whereEqualTo("userId", UserApi.getInstance().getUserId())
-                                                            .whereEqualTo("managerId", managerId)
-                                                            .get()
-                                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                                    if (task.isSuccessful()) {
-                                                                        departDialog.dismiss();
-                                                                        if (!task.getResult().isEmpty()) {
-                                                                            Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + task.getResult().size());
-                                                                            // Refresh list instead of restarting activity
-                                                                            if (context instanceof FirstTeamListActivity) {
-                                                                                ((FirstTeamListActivity) context).refreshPlayerList();
-                                                                            }
-                                                                        } else {
-                                                                            Log.d(LOG_TAG, "No players left in First Team. Navigating to FirstTeamActivity.");
-                                                                            Intent intent = new Intent(context, FirstTeamActivity.class);
-                                                                            intent.putExtra("managerId", managerId);
-                                                                            intent.putExtra("team", team);
-                                                                            context.startActivity(intent);
-                                                                            ((Activity) context).finish();
-                                                                        }
-                                                                    } else {
-                                                                        Log.e(LOG_TAG, "Error refreshing First Team list.", task.getException());
-                                                                    }
-                                                                }
-                                                            });
-                                                }
+                                                 fmPlayersReference.add(fmPlayer)
+                                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                             @Override
+                                                             public void onSuccess(DocumentReference documentReference) {
+                                                                 Log.d(LOG_TAG, "Player added to FormerPlayer collection: " + fmPlayer.getFullName());
+                                                                 Toast.makeText(context, "Player transferred!", Toast.LENGTH_LONG)
+                                                                         .show();
+                                                             }
+                                                         })
+                                                         .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding player to FormerPlayer collection.", e));
+                                                 if (hasExchangePlayer) {
+                                                     departDialog.dismiss();
+                                                     addExchangePlayer(newTransfer);
+                                                 } else {
+                                                     transfersReference.add(newTransfer)
+                                                             .addOnSuccessListener(docRef2 -> Log.d(LOG_TAG, "Transfer added to Firestore: " + newTransfer.getFullName()))
+                                                             .addOnFailureListener(e -> Log.e(LOG_TAG, "Error adding transfer to Firestore.", e));
+
+                                                     departDialog.dismiss();
+                                                     if (context instanceof FirstTeamListActivity) {
+                                                         FirstTeamListActivity activity = (FirstTeamListActivity) context;
+                                                         activity.refreshPlayerList(() -> {
+                                                             if (playerList.isEmpty()) {
+                                                                 Log.d(LOG_TAG, "No players left in First Team after refresh. Navigating to FirstTeamActivity.");
+                                                                 Intent intent = new Intent(context, FirstTeamActivity.class);
+                                                                 intent.putExtra("managerId", managerId);
+                                                                 intent.putExtra("team", team);
+                                                                 context.startActivity(intent);
+                                                                 ((Activity) context).finish();
+                                                             } else {
+                                                                 Log.d(LOG_TAG, "First Team list refreshed. Remaining players: " + playerList.size());
+                                                             }
+                                                         });
+                                                     }
+                                                 }
 
                                             }
                                         })

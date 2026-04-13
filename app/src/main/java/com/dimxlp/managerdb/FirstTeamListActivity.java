@@ -909,6 +909,8 @@ public class FirstTeamListActivity extends AppCompatActivity {
 
     public void refreshPlayerList(Runnable onComplete) {
         Log.d(LOG_TAG, "refreshPlayerList called");
+        // Clear allYearsPlayerList cache so departed players don't appear in search/filter
+        allYearsPlayerList.clear();
         listPlayers(0, onComplete);
     }
 
