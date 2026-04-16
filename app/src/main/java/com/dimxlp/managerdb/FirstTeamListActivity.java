@@ -153,6 +153,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
     private final Handler createPlayerTimeoutHandler = new Handler(Looper.getMainLooper());
     private Runnable createPlayerTimeoutRunnable;
     private boolean isCreatePlayerRequestInFlight = false;
+    private TextWatcher searchTextWatcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -317,7 +318,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
         closeSearchButton.setOnClickListener(v -> hideSearchBar());
         
         // Search bar text watcher
-        searchBar.addTextChangedListener(new TextWatcher() {
+        searchTextWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 // Not needed
@@ -335,10 +336,10 @@ public class FirstTeamListActivity extends AppCompatActivity {
                         filterPlayersByYear();
                     }
                 } else {
-                    // Load all players if not already loaded
-                    if (allYearsPlayerList.isEmpty()) {
+                    // Load all players if not already loaded or loading
+                    if (!isLoadingAllPlayers && allYearsPlayerList.isEmpty()) {
                         loadAllPlayers(() -> filterPlayersWithSearchAndFilters(query));
-                    } else {
+                    } else if (!isLoadingAllPlayers) {
                         filterPlayersWithSearchAndFilters(query);
                     }
                 }
@@ -348,7 +349,8 @@ public class FirstTeamListActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 // Not needed
             }
-        });
+        };
+        searchBar.addTextChangedListener(searchTextWatcher);
     }
 
     /**
@@ -403,6 +405,53 @@ public class FirstTeamListActivity extends AppCompatActivity {
     }
 
     /**
+     * Resets the search UI without triggering a data reload.
+     * Safe to call from within listPlayers() – does NOT call listPlayers() itself.
+     */
+    private void resetSearchUiOnly() {
+        if (!isSearchMode) return;
+
+        isSearchMode = false;
+
+        // Remove watcher before clearing text to prevent spurious callbacks
+        if (searchTextWatcher != null) {
+            searchBar.removeTextChangedListener(searchTextWatcher);
+        }
+        searchBar.setText("");
+        if (searchTextWatcher != null) {
+            searchBar.addTextChangedListener(searchTextWatcher);
+        }
+
+        // Hide keyboard
+        android.view.inputmethod.InputMethodManager imm =
+            (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+        }
+
+        // Animate search bar out
+        searchBarContainer.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction(() -> searchBarContainer.setVisibility(View.GONE));
+
+        closeSearchButton.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction(() -> closeSearchButton.setVisibility(View.GONE));
+
+        // Restore year navigation if needed
+        if (!isFilterMode && yearNavigationContainer.getTranslationX() != 0f) {
+            yearNavigationContainer.animate()
+                    .translationX(0f)
+                    .alpha(1f)
+                    .setDuration(300);
+        }
+
+        Log.d(LOG_TAG, "Search UI reset (no data reload) – icons stay in place");
+    }
+
+    /**
      * Hide search bar with animation
      * - Search bar fades out
      * - Close button fades out
@@ -414,9 +463,15 @@ public class FirstTeamListActivity extends AppCompatActivity {
         
         isSearchMode = false;
         
-        // Clear search text
+        // Remove watcher before clearing text to prevent spurious callbacks
+        if (searchTextWatcher != null) {
+            searchBar.removeTextChangedListener(searchTextWatcher);
+        }
         searchBar.setText("");
-        
+        if (searchTextWatcher != null) {
+            searchBar.addTextChangedListener(searchTextWatcher);
+        }
+
         // Hide keyboard
         android.view.inputmethod.InputMethodManager imm = 
             (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
@@ -922,9 +977,9 @@ public class FirstTeamListActivity extends AppCompatActivity {
         playerList.clear();
         fullPlayerList.clear();
 
-        // Close search mode when navigating years
+        // Close search mode when navigating years (UI only – data will be reloaded below)
         if (isSearchMode) {
-            hideSearchBar();
+            resetSearchUiOnly();
         }
         
         // Reset filter mode when navigating years
@@ -1006,7 +1061,12 @@ public class FirstTeamListActivity extends AppCompatActivity {
      * Load all players across all years from Firestore
      */
     private void loadAllPlayers(Runnable onComplete) {
-        // Always clear to prevent duplicates
+        // Prevent multiple simultaneous loads which would cause duplicates
+        if (isLoadingAllPlayers) {
+            Log.d(LOG_TAG, "loadAllPlayers: already in flight, skipping duplicate call");
+            return;
+        }
+        isLoadingAllPlayers = true;
         allYearsPlayerList.clear();
         
         Log.d(LOG_TAG, "Loading all players from Firestore...");
@@ -1042,12 +1102,14 @@ public class FirstTeamListActivity extends AppCompatActivity {
                         Log.d(LOG_TAG, "No players found in Firestore");
                     }
                     
+                    isLoadingAllPlayers = false;
                     if (onComplete != null) {
                         onComplete.run();
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(LOG_TAG, "Error loading all players from Firestore.", e);
+                    isLoadingAllPlayers = false;
                     if (onComplete != null) {
                         onComplete.run();
                     }
@@ -1708,7 +1770,7 @@ public class FirstTeamListActivity extends AppCompatActivity {
 
         playerList.clear();
         allYearsPlayerList.clear(); // Clear cached all-years list to ensure deleted players don't appear in search
-        isLoadingAllPlayers = false; // Reset loading flag
+        isLoadingAllPlayers = false; // Reset loading flag so search works fresh after returning
     }
 
     @Override
