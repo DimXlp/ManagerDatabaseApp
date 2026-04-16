@@ -1406,7 +1406,9 @@ public class YouthTeamListActivity extends AppCompatActivity {
                             Log.d(LOG_TAG, "Updating currentYear to: " + yScoutedPlayer);
                             // Update currentYear to the created player's year before refreshing
                             currentYear = yScoutedPlayer;
-                            
+                            // Update maxId so the next player created in the same session gets a unique ID
+                            maxId = player.getId();
+
                             Log.d(LOG_TAG, "Showing success toast...");
                             // Show success message
                             Toast.makeText(YouthTeamListActivity.this, "Player created successfully!", Toast.LENGTH_SHORT).show();

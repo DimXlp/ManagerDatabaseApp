@@ -1399,6 +1399,8 @@ public class FirstTeamListActivity extends AppCompatActivity {
                         try {
                             // Update currentYear to the created player's year before refreshing
                             currentYear = ySignedPlayer;
+                            // Update maxId so the next player created in the same session gets a unique ID
+                            maxId = player.getId();
                             // Show success message
                             Toast.makeText(FirstTeamListActivity.this, "Player created successfully!", Toast.LENGTH_SHORT).show();
                             // Trigger refresh and dismiss dialog after completion

@@ -1304,7 +1304,9 @@ public class ShortlistPlayersActivity extends AppCompatActivity {
                                 Log.d(LOG_TAG, "Dismissing create dialog.");
                                 createDialog.dismiss();
                             }
-                            
+                            // Update maxId so the next player created in the same session gets a unique ID
+                            maxId = player.getId();
+
                             // Jump to the newly created player's position category
                             String newPlayerPositionCategory = getPositionCategory(positionPlayer);
                             barPosition = newPlayerPositionCategory;
