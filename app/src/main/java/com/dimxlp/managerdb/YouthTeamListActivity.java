@@ -143,6 +143,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
     private final Handler createPlayerTimeoutHandler = new Handler(Looper.getMainLooper());
     private Runnable createPlayerTimeoutRunnable;
     private boolean isCreatePlayerRequestInFlight = false;
+    private TextWatcher searchTextWatcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -265,7 +266,7 @@ public class YouthTeamListActivity extends AppCompatActivity {
         closeSearchButton.setOnClickListener(v -> hideSearchBar());
         
         // Search bar text watcher
-        searchBar.addTextChangedListener(new TextWatcher() {
+        searchTextWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 // Not needed
@@ -298,7 +299,8 @@ public class YouthTeamListActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 // Not needed
             }
-        });
+        };
+        searchBar.addTextChangedListener(searchTextWatcher);
 
         View.OnClickListener prevYearListener = new View.OnClickListener() {
             @Override
@@ -395,7 +397,43 @@ public class YouthTeamListActivity extends AppCompatActivity {
     }
 
     /**
-     * Hide search bar with animation
+     * Resets search bar UI state without triggering any data reload.
+     * Use this when a data reload is already in progress (e.g. inside listPlayers)
+     * to avoid recursive/duplicate Firestore queries.
+     */
+    private void resetSearchUiOnly() {
+        if (!isSearchMode) return;
+
+        isSearchMode = false;
+
+        // Hide keyboard
+        android.view.inputmethod.InputMethodManager imm =
+            (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+        }
+
+        // Remove text watcher temporarily to avoid triggering search logic
+        searchBar.removeTextChangedListener(searchTextWatcher);
+        searchBar.setText("");
+        searchBar.addTextChangedListener(searchTextWatcher);
+
+        // Hide search bar and close button instantly (no animation needed, data is reloading)
+        searchBarContainer.setVisibility(View.GONE);
+        searchBarContainer.setAlpha(0f);
+        closeSearchButton.setVisibility(View.GONE);
+        closeSearchButton.setAlpha(0f);
+
+        // Restore year navigation
+        if (!isFilterMode) {
+            yearNavigationContainer.setTranslationX(0f);
+            yearNavigationContainer.setAlpha(1f);
+        }
+
+        Log.d(LOG_TAG, "Search UI reset (no data reload triggered).");
+    }
+
+    /**
      * - Search bar fades out
      * - Close button fades out
      * - Year selector slides back from the right
@@ -931,9 +969,9 @@ public class YouthTeamListActivity extends AppCompatActivity {
         playerList.clear();
         fullPlayerList.clear();
 
-        // Close search mode when navigating years
+        // Close search mode when navigating years - use UI-only reset to avoid recursive listPlayers() call
         if (isSearchMode) {
-            hideSearchBar();
+            resetSearchUiOnly();
         }
         
         // Reset filter mode when navigating years
