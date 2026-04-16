@@ -955,13 +955,6 @@ public class FirstTeamPlayerRecAdapter extends RecyclerView.Adapter<FirstTeamPla
                                                 fmPlayer.setFirstTeamId(player.getId());
                                                 Log.d(LOG_TAG, "FormerPlayer object created: " + fmPlayer.getFullName());
 
-                                                 // Remove the player from the list immediately (optimistic update)
-                                                 int playerIndex = playerList.indexOf(player);
-                                                 if (playerIndex != RecyclerView.NO_ID && playerIndex >= 0) {
-                                                     playerList.remove(playerIndex);
-                                                     notifyItemRemoved(playerIndex);
-                                                     Log.d(LOG_TAG, "Player removed from adapter list at index: " + playerIndex);
-                                                 }
 
                                                  fmPlayersReference.add(fmPlayer)
                                                          .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
